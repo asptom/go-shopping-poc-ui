@@ -1,59 +1,12 @@
-# GoShoppingPocUi
+# Go-Shopping-Poc-Ui
+This project is the UI companion to the backend infrastructure and services being created in [go-shopping-poc](https://github.com/asptom/go-shopping-poc) (look in the develop branch for the latest)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.7.
+This is a proof-of-concept/learning project intended to implement something with the latest version of Angular that exercises the backend services being created with Go.
 
-## Development server
+This project will also be a test bed for using AI and AI Agents to help generate and evaluate code.
 
-To start a local development server, run:
+## Background
 
-```bash
-ng serve
-```
+I previously built the back-end services in Java/Quarkus, but will be re-developing/improving them in Go in order to learn Go and try different techniques.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The UI that interfaced with those Java/Quarkus services was written in Angular v13.2 and interfaced with the services primarily using REST but also leveraged a Websocket for some communication.
