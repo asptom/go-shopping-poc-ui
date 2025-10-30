@@ -1,0 +1,49 @@
+<div class="profile-container">
+  <div class="container">
+    <h1>Your Account</h1>
+
+    @if (!isAuthenticated()) {
+      <div class="not-authenticated">
+        <h2>Please sign in to view your account</h2>
+        <p>You need to be logged in to access your profile information.</p>
+      </div>
+    } @else {
+      <div class="profile-content">
+        <div class="profile-section">
+          <h2>Profile Information</h2>
+          <div class="user-info">
+            @if (userData(); as user) {
+              <div class="info-grid">
+                @for (key of getUserDataKeys(); track key) {
+                  <div class="info-item">
+                    <label class="info-label">{{ key | titlecase }}:</label>
+                    <div class="info-value">
+                      @if (isArray(user[key])) {
+                        <ul class="array-list">
+                          @for (item of user[key]; track item) {
+                            <li>{{ item }}</li>
+                          }
+                        </ul>
+                      } @else {
+                        {{ user[key] || 'Not provided' }}
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="profile-section">
+          <h2>Account Actions</h2>
+          <div class="actions">
+            <button class="action-button secondary" type="button">Edit Profile</button>
+            <button class="action-button secondary" type="button">Change Password</button>
+            <button class="action-button danger" type="button">Delete Account</button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

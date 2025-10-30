@@ -2,7 +2,11 @@
 <div class="top-nav">
   <div class="container">
     <div class="top-nav-left">
-      <a href="#" class="nav-link">Hello, sign in</a>
+      @if (isAuthenticated()) {
+        <span class="nav-link">Hello, {{ userFirstName() }}</span>
+      } @else {
+        <a href="#" class="nav-link" (click)="onLogin(); $event.preventDefault()">Hello, sign in</a>
+      }
       <a href="#" class="nav-link">Account & Lists</a>
       <a href="#" class="nav-link">Returns & Orders</a>
     </div>
@@ -45,12 +49,20 @@
     <!-- Right side actions -->
     <div class="header-actions">
       <div class="account-menu">
-        <span class="account-greeting">Hello, User</span>
-        <div class="account-links">
-          <a href="#" class="account-link">Your Account</a>
-          <a href="#" class="account-link">Your Orders</a>
-          <a href="#" class="account-link">Sign Out</a>
-        </div>
+        @if (isAuthenticated()) {
+          <span class="account-greeting">Hello, {{ userFirstName() }}</span>
+          <div class="account-links">
+            <a href="/profile" class="account-link">Your Account</a>
+            <a href="#" class="account-link">Your Orders</a>
+            <a href="#" class="account-link" (click)="onLogout(); $event.preventDefault()">Sign Out</a>
+          </div>
+        } @else {
+          <span class="account-greeting">Hello, sign in</span>
+          <div class="account-links">
+            <a href="#" class="account-link" (click)="onLogin(); $event.preventDefault()">Sign in</a>
+            <a href="#" class="account-link">New customer? Start here</a>
+          </div>
+        }
       </div>
 
       <div class="cart">
