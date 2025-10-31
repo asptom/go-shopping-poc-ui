@@ -9,40 +9,97 @@
       </div>
     } @else {
       <div class="profile-content">
-        <div class="profile-section">
-          <h2>Profile Information</h2>
-          <div class="user-info">
-            @if (userData(); as user) {
-              <div class="info-grid">
-                @for (key of getUserDataKeys(); track key) {
-                  <div class="info-item">
-                    <label class="info-label">{{ key | titlecase }}:</label>
-                    <div class="info-value">
-                      @if (isArray(user[key])) {
-                        <ul class="array-list">
-                          @for (item of user[key]; track item) {
-                            <li>{{ item }}</li>
-                          }
-                        </ul>
-                      } @else {
-                        {{ user[key] || 'Not provided' }}
-                      }
-                    </div>
-                  </div>
-                }
+        @if (loading()) {
+          <div class="loading-section">
+            <p>Loading customer data...</p>
+          </div>
+        } @else if (error()) {
+          <div class="error-section">
+            <p>{{ error() }}</p>
+            <button (click)="loadCustomer(userData()?.email || '')">Retry</button>
+          </div>
+        } @else if (customer(); as cust) {
+          <div class="profile-section">
+            <h2>Profile Information</h2>
+            <form (ngSubmit)="saveProfile()" #profileForm="ngForm">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="firstName">First Name:</label>
+                  <input id="firstName" name="firstName" [(ngModel)]="cust.first_name" required>
+                </div>
+                <div class="form-group">
+                  <label for="lastName">Last Name:</label>
+                  <input id="lastName" name="lastName" [(ngModel)]="cust.last_name" required>
+                </div>
+                <div class="form-group">
+                  <label for="phone">Phone:</label>
+                  <input id="phone" name="phone" [(ngModel)]="cust.phone">
+                </div>
+                <div class="form-group">
+                  <label for="email">Email:</label>
+                  <input id="email" name="email" [(ngModel)]="cust.email" readonly>
+                </div>
               </div>
-            }
+              <button type="submit" class="save-button" [disabled]="!profileForm.valid || loading()">Save Profile</button>
+            </form>
           </div>
-        </div>
 
-        <div class="profile-section">
-          <h2>Account Actions</h2>
-          <div class="actions">
-            <button class="action-button secondary" type="button">Edit Profile</button>
-            <button class="action-button secondary" type="button">Change Password</button>
-            <button class="action-button danger" type="button">Delete Account</button>
+          <div class="profile-section">
+            <h2>Addresses</h2>
+            @if (cust.addresses && cust.addresses.length > 0) {
+              @for (address of cust.addresses; track address) {
+                <div class="address-item">
+                  <div class="address-details">
+                    <p><strong>{{ address.first_name }} {{ address.last_name }}</strong></p>
+                    <p>{{ address.address_1 }} @if (address.address_2) { {{ address.address_2 }} }</p>
+                    <p>{{ address.city }}, {{ address.state }} {{ address.zip }}</p>
+                    <p><em>{{ address.address_type }} @if (address.is_default) { (Default) }</em></p>
+                  </div>
+                  <div class="address-actions">
+                    <button class="action-button secondary">Edit</button>
+                    <button class="action-button danger">Delete</button>
+                    @if (!address.is_default) {
+                      <button class="action-button">Set as Default</button>
+                    }
+                  </div>
+                </div>
+              }
+            } @else {
+              <p>No addresses saved yet.</p>
+            }
+            <button class="add-button">Add Address</button>
           </div>
-        </div>
+
+          <div class="profile-section">
+            <h2>Credit Cards</h2>
+            @if (cust.credit_cards && cust.credit_cards.length > 0) {
+              @for (card of cust.credit_cards; track card) {
+                <div class="card-item">
+                  <div class="card-details">
+                    <p><strong>{{ card.card_holder_name }}</strong></p>
+                    <p>{{ maskCardNumber(card.card_number) }}</p>
+                    <p>Expires: {{ card.card_expires }}</p>
+                    <p><em>{{ card.card_type }} @if (card.is_default) { (Default) }</em></p>
+                  </div>
+                  <div class="card-actions">
+                    <button class="action-button secondary">Edit</button>
+                    <button class="action-button danger">Delete</button>
+                    @if (!card.is_default) {
+                      <button class="action-button">Set as Default</button>
+                    }
+                  </div>
+                </div>
+              }
+            } @else {
+              <p>No credit cards saved yet.</p>
+            }
+            <button class="add-button">Add Credit Card</button>
+          </div>
+        } @else {
+          <div class="no-data">
+            <p>Unable to load customer data.</p>
+          </div>
+        }
       </div>
     }
   </div>

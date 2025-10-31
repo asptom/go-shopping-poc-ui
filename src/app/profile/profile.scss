@@ -97,6 +97,182 @@
     }
   }
 
+  .loading-section, .error-section, .no-data {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    p {
+      color: #565959;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      background: #007185;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+
+      &:hover {
+        background: #005a6c;
+      }
+    }
+  }
+
+  .form-grid {
+    display: grid;
+    gap: 1rem;
+
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-weight: 600;
+      color: #0f1111;
+    }
+
+    input {
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+
+      &:focus {
+        outline: none;
+        border-color: #007185;
+        box-shadow: 0 0 0 2px rgba(0, 113, 133, 0.2);
+      }
+
+      &[readonly] {
+        background: #f5f5f5;
+        color: #565959;
+      }
+    }
+  }
+
+  .save-button {
+    padding: 0.75rem 1.5rem;
+    background: #007185;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 1rem;
+
+    &:hover:not(:disabled) {
+      background: #005a6c;
+    }
+
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  }
+
+  .address-item, .card-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background: #fafafa;
+
+    @media (min-width: 768px) {
+      align-items: center;
+    }
+
+    .address-details, .card-details {
+      flex: 1;
+
+      p {
+        margin: 0.25rem 0;
+        color: #0f1111;
+
+        &:last-child {
+          color: #565959;
+          font-style: italic;
+        }
+      }
+    }
+
+    .address-actions, .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-left: 1rem;
+
+      @media (min-width: 768px) {
+        flex-direction: row;
+        margin-left: 2rem;
+      }
+
+      .action-button {
+        padding: 0.5rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: white;
+        color: #0f1111;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: #f7f7f7;
+          border-color: #888;
+        }
+
+        &.secondary {
+          border-color: #007185;
+          color: #007185;
+
+          &:hover {
+            background: #f0f7f9;
+          }
+        }
+
+        &.danger {
+          border-color: #d32f2f;
+          color: #d32f2f;
+
+          &:hover {
+            background: #ffebee;
+          }
+        }
+      }
+    }
+  }
+
+  .add-button {
+    padding: 0.75rem 1.5rem;
+    background: #007185;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 1rem;
+
+    &:hover {
+      background: #005a6c;
+    }
+  }
+
   .actions {
     display: flex;
     flex-direction: column;
