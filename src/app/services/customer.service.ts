@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Customer } from '../models/customer';
+import { Customer, Address, CreditCard } from '../models/customer';
 
 @Injectable({
   providedIn: 'root'
@@ -29,16 +29,45 @@ export class CustomerService {
     );
   }
 
-  // Placeholder for future update methods
-  // updateCustomer(customer: Customer): Observable<Customer> {
-  //   return this.http.put<Customer>(`${this.apiUrl}/${customer.customer_id}`, customer);
-  // }
+  updateCustomer(customer: Customer): Observable<Customer> {
+    return this.http.put<Customer>(this.apiUrl, customer).pipe(
+      catchError((error: HttpErrorResponse) => throwError(() => error))
+    );
+  }
 
-  // updateAddress(customerId: string, address: Address): Observable<Customer> {
-  //   // Implementation for updating specific address
-  // }
+  addAddress(customerId: string, address: Address): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${customerId}/addresses`, address).pipe(
+      catchError((error: HttpErrorResponse) => throwError(() => error))
+    );
+  }
 
-  // updateCreditCard(customerId: string, card: CreditCard): Observable<Customer> {
-  //   // Implementation for updating specific credit card
-  // }
+  updateAddress(addressId: string, address: Address): Observable<Address> {
+    return this.http.put<Address>(`${this.apiUrl}/addresses/${addressId}`, address).pipe(
+      catchError((error: HttpErrorResponse) => throwError(() => error))
+    );
+  }
+
+  deleteAddress(addressId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/addresses/${addressId}`).pipe(
+      catchError((error: HttpErrorResponse) => throwError(() => error))
+    );
+  }
+
+  addCreditCard(customerId: string, card: CreditCard): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${customerId}/credit-cards`, card).pipe(
+      catchError((error: HttpErrorResponse) => throwError(() => error))
+    );
+  }
+
+  updateCreditCard(cardId: string, card: CreditCard): Observable<CreditCard> {
+    return this.http.put<CreditCard>(`${this.apiUrl}/credit-cards/${cardId}`, card).pipe(
+      catchError((error: HttpErrorResponse) => throwError(() => error))
+    );
+  }
+
+  deleteCreditCard(cardId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/credit-cards/${cardId}`).pipe(
+      catchError((error: HttpErrorResponse) => throwError(() => error))
+    );
+  }
 }

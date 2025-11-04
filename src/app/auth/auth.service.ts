@@ -126,11 +126,23 @@ export class AuthService {
 
   logout(): void {
     console.log('Logout called');
-    // Clear persisted state
-    localStorage.removeItem(this.STORAGE_KEY);
-    this._isAuthenticated.set(false);
-    this._userData.set(null);
-    this.oidcSecurityService.logoff();
+    this.getIdToken().subscribe(idToken => {
+      if (idToken) {
+        const logoutUrl = `https://keycloak.local/realms/pocstore-realm/protocol/openid-connect/logout?id_token_hint=${idToken}&post_logout_redirect_uri=${encodeURIComponent(window.location.origin)}`;
+        // Clear local state
+        localStorage.removeItem(this.STORAGE_KEY);
+        this._isAuthenticated.set(false);
+        this._userData.set(null);
+        // Redirect to server logout
+        window.location.href = logoutUrl;
+      } else {
+        // Fallback to client logout
+        localStorage.removeItem(this.STORAGE_KEY);
+        this._isAuthenticated.set(false);
+        this._userData.set(null);
+        this.oidcSecurityService.logoff();
+      }
+    });
   }
 
   getAccessToken(): Observable<string> {

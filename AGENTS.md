@@ -2,7 +2,7 @@
 
 ## Recent Development Summary
 
-**Date**: October 31, 2025
+**Date**: November 4, 2025
 
 **Completed Tasks**:
 - ✅ Analyzed codebase and created initial AGENTS.md with build/test commands and code style guidelines
@@ -36,6 +36,51 @@
    - Added responsive styling and error handling for loading states and API failures
    - Resolved angular.json configuration issues for Angular 20 compatibility
    - Configured CORS handling for development (backend CORS configuration required for production)
+ - ✅ Implemented complete customer profile update functionality:
+   - Added PUT endpoint integration for full customer updates
+   - Implemented address CRUD operations (add, update, delete, set default)
+   - Implemented credit card CRUD operations with secure handling
+   - Created reusable modal component for add/edit forms
+   - Added comprehensive form validation (card numbers, expiration dates, ZIP codes)
+   - Implemented input sanitization and security measures
+   - Added success/error messaging and loading states
+   - Built inline editing capabilities for addresses and credit cards
+   - Enhanced UI with responsive design and improved user experience
+ - ✅ Updated to individual ID-based operations:
+   - Modified backend to expose individual IDs for addresses and credit cards
+   - Updated service methods to use new REST endpoints with individual IDs
+   - Changed from bulk operations to individual CRUD operations
+   - Improved API design following RESTful principles
+   - Enhanced performance with smaller payloads and better caching
+   - Better concurrency handling and error management
+ - ✅ Fixed new user registration flow:
+   - Automatically create customer record in backend when new Keycloak user is detected
+   - Prevent address/credit card addition failures for new users
+   - Improved user onboarding experience with seamless profile creation
+ - ✅ Fixed modal form submission and API response handling:
+   - Resolved signal-based form compatibility issues with ngModel
+   - Modified service methods to return void for add operations to handle null responses
+   - Implemented customer data reloading after successful adds to ensure UI updates
+   - Added success messages for profile saves and operations
+ - ✅ Enhanced header dropdown functionality:
+   - Made account dropdowns clickable to toggle open/closed for better mobile accessibility
+   - Added stopPropagation to prevent event bubbling issues
+   - Configured "New customer? Start here" to redirect to Keycloak login page for registration
+   - Increased modal sizes for better field visibility without scrolling
+ - ✅ Implemented server-side logout:
+   - Modified logout method to redirect to Keycloak logout endpoint with id_token_hint
+   - Ensured user sessions are properly terminated in Keycloak upon logout
+
+**API Endpoints** (Updated for Individual ID Operations):
+- **Customer**: `GET /customers/{email}`, `POST /customers`, `PUT /customers`
+- **Addresses**:
+  - `POST /customers/{customerId}/addresses` - Add address
+  - `PUT /customers/addresses/{addressId}` - Update address
+  - `DELETE /customers/addresses/{addressId}` - Delete address
+- **Credit Cards**:
+  - `POST /customers/{customerId}/credit-cards` - Add credit card
+  - `PUT /customers/credit-cards/{cardId}` - Update credit card
+  - `DELETE /customers/credit-cards/{cardId}` - Delete credit card
 
 **Key Architecture Decisions**:
 - Standalone components throughout (Angular 20 default)
@@ -47,6 +92,7 @@
 - Layout-first routing approach for consistent header/footer across all pages
 - OIDC-first authentication with comprehensive token validation and error handling
 - Persistent authentication state management to prevent navigation logout issues
+- Individual ID-based CRUD operations for better RESTful API design
 
 ## Commands
 - **Build**: `ng build` or `npm run build`

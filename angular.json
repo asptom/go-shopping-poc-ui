@@ -56,18 +56,24 @@
             }
           }
         },
-            "serve": {
-              "builder": "@angular/build:dev-server",
-              "options": {
-                "buildTarget": "go-shopping-poc-ui:build"
-              },
-              "configurations": {
-                "production": {
-                  "buildTarget": "go-shopping-poc-ui:build:production"
-                },
-                "development": {
-                  "buildTarget": "go-shopping-poc-ui:build:development"
-                }
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "buildTarget": "go-shopping-poc-ui:build"
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "go-shopping-poc-ui:build:production"
+            },
+            "development": {
+              "buildTarget": "go-shopping-poc-ui:build:development"
+            }
+          }
+        }
+      }
+    }
+  }
+}
               }
             },
             "development": {

@@ -2,11 +2,17 @@
 <div class="top-nav">
   <div class="container">
     <div class="top-nav-left">
-      @if (isAuthenticated()) {
-        <span class="nav-link">Hello, {{ userFirstName() }}</span>
-      } @else {
-        <a href="#" class="nav-link" (click)="onLogin(); $event.preventDefault()">Hello, sign in</a>
-      }
+      <div class="account-menu">
+        @if (isAuthenticated()) {
+          <span class="nav-link">Hello, {{ userFirstName() }}</span>
+        } @else {
+          <span class="nav-link" (click)="toggleAccountDropdown(); $event.stopPropagation()">Hello, sign in</span>
+          <div class="account-links" [class.show]="accountDropdownOpen()">
+            <a href="#" class="account-link" (click)="onLogin(); $event.preventDefault(); $event.stopPropagation()">Sign in</a>
+            <a href="javascript:void(0)" class="account-link" (click)="onRegister(); $event.stopPropagation()">New customer? Start here</a>
+          </div>
+        }
+      </div>
       <a href="#" class="nav-link">Account & Lists</a>
       <a href="#" class="nav-link">Returns & Orders</a>
     </div>
@@ -57,10 +63,10 @@
             <a href="#" class="account-link" (click)="onLogout(); $event.preventDefault()">Sign Out</a>
           </div>
         } @else {
-          <span class="account-greeting">Hello, sign in</span>
-          <div class="account-links">
-            <a href="#" class="account-link" (click)="onLogin(); $event.preventDefault()">Sign in</a>
-            <a href="#" class="account-link">New customer? Start here</a>
+          <span class="account-greeting" (click)="toggleAccountDropdown(); $event.stopPropagation()">Hello, sign in</span>
+          <div class="account-links" [class.show]="accountDropdownOpen()">
+            <a href="#" class="account-link" (click)="onLogin(); $event.preventDefault(); $event.stopPropagation()">Sign in</a>
+            <a href="javascript:void(0)" class="account-link" (click)="onRegister(); $event.stopPropagation()">New customer? Start here</a>
           </div>
         }
       </div>

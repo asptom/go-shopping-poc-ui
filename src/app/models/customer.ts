@@ -11,6 +11,7 @@ export interface Customer {
 }
 
 export interface Address {
+  address_id?: string;
   address_type: string;
   first_name: string;
   last_name: string;
@@ -23,6 +24,7 @@ export interface Address {
 }
 
 export interface CreditCard {
+  card_id?: string;
   card_type: string;
   card_number: string;
   card_holder_name: string;
