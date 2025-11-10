@@ -1,0 +1,263 @@
+<div class="profile-container">
+  <div class="container">
+    <h1>Your Account</h1>
+
+    @if (!isAuthenticated()) {
+      <div class="not-authenticated">
+        <h2>Please sign in to view your account</h2>
+        <p>You need to be logged in to access your profile information.</p>
+      </div>
+    } @else {
+      <div class="profile-content">
+        @if (loading()) {
+          <div class="loading-section">
+            <p>Loading customer data...</p>
+          </div>
+        } @else if (error()) {
+          <div class="error-section">
+            <p>{{ error() }}</p>
+            <button (click)="clearError()">Retry</button>
+          </div>
+        } @else if (customer(); as cust) {
+          <!-- Profile Information Section -->
+          <div class="profile-section">
+            <h2>Profile Information</h2>
+            <form [formGroup]="customerForm" (ngSubmit)="saveProfile()">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="firstName">First Name:</label>
+                  <input id="firstName" formControlName="first_name" />
+                  @if (getErrorMessage('first_name')) {
+                    <small class="error">{{ getErrorMessage('first_name') }}</small>
+                  }
+                </div>
+                <div class="form-group">
+                  <label for="lastName">Last Name:</label>
+                  <input id="lastName" formControlName="last_name" />
+                  @if (getErrorMessage('last_name')) {
+                    <small class="error">{{ getErrorMessage('last_name') }}</small>
+                  }
+                </div>
+                <div class="form-group">
+                  <label for="phone">Phone:</label>
+                  <input id="phone" formControlName="phone" />
+                  @if (getErrorMessage('phone')) {
+                    <small class="error">{{ getErrorMessage('phone') }}</small>
+                  }
+                </div>
+                <div class="form-group">
+                  <label for="email">Email:</label>
+                  <input id="email" formControlName="email" readonly />
+                </div>
+              </div>
+              <div class="form-actions">
+                @if (!editingProfile()) {
+                  <button type="button" class="edit-button" (click)="editingProfile.set(true)">Edit Profile</button>
+                } @else {
+                  <button type="submit" class="save-button" [disabled]="customerForm.invalid">Save Profile</button>
+                  <button type="button" class="cancel-button" (click)="editingProfile.set(false)">Cancel</button>
+                }
+              </div>
+            </form>
+          </div>
+
+          <!-- Addresses Section -->
+          <div class="addresses-section">
+            <h2>Addresses</h2>
+            <div class="section-actions">
+              <button class="add-button" (click)="openAddressModal()">Add Address</button>
+            </div>
+            
+            @for (address of addresses(); track address.address_id) {
+              <div class="address-card">
+                <div class="address-info">
+                  <h3>{{ address.address_type }}</h3>
+                  <p>{{ address.first_name }} {{ address.last_name }}</p>
+                  <p>{{ address.address_1 }}</p>
+                  @if (address.address_2) {
+                    <p>{{ address.address_2 }}</p>
+                  }
+                  <p>{{ address.city }}, {{ address.state }} {{ address.zip }}</p>
+                  @if (address.is_default) {
+                    <span class="default-badge">Default</span>
+                  }
+                </div>
+                <div class="address-actions">
+                  <button class="edit-button" (click)="openAddressModal(address.address_id!)">Edit</button>
+                  <button class="delete-button" (click)="deleteAddress(address.address_id!)">Delete</button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Credit Cards Section -->
+          <div class="cards-section">
+            <h2>Credit Cards</h2>
+            <div class="section-actions">
+              <button class="add-button" (click)="openCreditCardModal()">Add Credit Card</button>
+            </div>
+            
+            @for (card of creditCards(); track card.card_id) {
+              <div class="card-card">
+                <div class="card-info">
+                  <h3>{{ card.card_type }}</h3>
+                  <p>{{ maskCardNumber(card.card_number) }}</p>
+                  <p>{{ card.card_holder_name }}</p>
+                  <p>Expires: {{ card.card_expires }}</p>
+                  @if (card.is_default) {
+                    <span class="default-badge">Default</span>
+                  }
+                </div>
+                <div class="card-actions">
+                  <button class="edit-button" (click)="openCreditCardModal(card.card_id!)">Edit</button>
+                  <button class="delete-button" (click)="deleteCreditCard(card.card_id!)">Delete</button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+ <!-- Address Modal -->
+<app-modal 
+  [isOpen]="addressModalOpen()" 
+  [title]="getAddressModalTitle()" 
+  (close)="closeAddressModal()">
+  <form [formGroup]="addressForm" (ngSubmit)="saveAddress()">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="addressType">Address Type:</label>
+        <select id="addressType" formControlName="address_type">
+          <option value="shipping">Shipping</option>
+          <option value="billing">Billing</option>
+        </select>
+        @if (getAddressErrorMessage('address_type')) {
+          <small class="error">{{ getAddressErrorMessage('address_type') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label for="addressFirstName">First Name:</label>
+        <input id="addressFirstName" formControlName="first_name" />
+        @if (getAddressErrorMessage('first_name')) {
+          <small class="error">{{ getAddressErrorMessage('first_name') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label for="addressLastName">Last Name:</label>
+        <input id="addressLastName" formControlName="last_name" />
+        @if (getAddressErrorMessage('last_name')) {
+          <small class="error">{{ getAddressErrorMessage('last_name') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label for="address1">Address Line 1:</label>
+        <input id="address1" formControlName="address_1" />
+        @if (getAddressErrorMessage('address_1')) {
+          <small class="error">{{ getAddressErrorMessage('address_1') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label for="address2">Address Line 2:</label>
+        <input id="address2" formControlName="address_2" />
+        @if (getAddressErrorMessage('address_2')) {
+          <small class="error">{{ getAddressErrorMessage('address_2') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label for="city">City:</label>
+        <input id="city" formControlName="city" />
+        @if (getAddressErrorMessage('city')) {
+          <small class="error">{{ getAddressErrorMessage('city') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label for="state">State:</label>
+        <input id="state" formControlName="state" />
+        @if (getAddressErrorMessage('state')) {
+          <small class="error">{{ getAddressErrorMessage('state') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label for="zip">ZIP Code:</label>
+        <input id="zip" formControlName="zip" />
+        @if (getAddressErrorMessage('zip')) {
+          <small class="error">{{ getAddressErrorMessage('zip') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" formControlName="is_default" />
+          Set as default address
+        </label>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="save-button" [disabled]="addressForm.invalid">{{ editingAddressId() ? 'Update Address' : 'Add Address' }}</button>
+      <button type="button" class="cancel-button" (click)="closeAddressModal()">Cancel</button>
+    </div>
+  </form>
+</app-modal>
+
+<!-- Credit Card Modal -->
+<app-modal 
+  [isOpen]="creditCardModalOpen()" 
+  [title]="getCreditCardModalTitle()" 
+  (close)="closeCreditCardModal()">
+  <form [formGroup]="creditCardForm" (ngSubmit)="saveCreditCard()">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="cardType">Card Type:</label>
+        <select id="cardType" formControlName="card_type">
+          <option value="visa">Visa</option>
+          <option value="mastercard">Mastercard</option>
+          <option value="amex">American Express</option>
+          <option value="discover">Discover</option>
+        </select>
+        @if (getCardErrorMessage('card_type')) {
+          <small class="error">{{ getCardErrorMessage('card_type') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label for="cardNumber">Card Number:</label>
+        <input id="cardNumber" formControlName="card_number" />
+        @if (getCardErrorMessage('card_number')) {
+          <small class="error">{{ getCardErrorMessage('card_number') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label for="cardHolderName">Cardholder Name:</label>
+        <input id="cardHolderName" formControlName="card_holder_name" />
+        @if (getCardErrorMessage('card_holder_name')) {
+          <small class="error">{{ getCardErrorMessage('card_holder_name') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label for="cardExpires">Expiration Date (MM/YY):</label>
+        <input id="cardExpires" formControlName="card_expires" placeholder="MM/YY" />
+        @if (getCardErrorMessage('card_expires')) {
+          <small class="error">{{ getCardErrorMessage('card_expires') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label for="cardCVV">CVV:</label>
+        <input id="cardCVV" formControlName="card_cvv" />
+        @if (getCardErrorMessage('card_cvv')) {
+          <small class="error">{{ getCardErrorMessage('card_cvv') }}</small>
+        }
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" formControlName="is_default" />
+          Set as default card
+        </label>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="save-button" [disabled]="creditCardForm.invalid">{{ editingCardId() ? 'Update Credit Card' : 'Add Credit Card' }}</button>
+      <button type="button" class="cancel-button" (click)="closeCreditCardModal()">Cancel</button>
+    </div>
+  </form>
+</app-modal>

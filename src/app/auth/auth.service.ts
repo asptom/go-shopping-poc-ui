@@ -1,6 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { Observable, map, of, catchError } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface UserData {
   name?: string;
@@ -128,7 +129,7 @@ export class AuthService {
     console.log('Logout called');
     this.getIdToken().subscribe(idToken => {
       if (idToken) {
-        const logoutUrl = `https://keycloak.local/realms/pocstore-realm/protocol/openid-connect/logout?id_token_hint=${idToken}&post_logout_redirect_uri=${encodeURIComponent(window.location.origin)}`;
+        const logoutUrl = `${environment.keycloak.issuer}/protocol/openid-connect/logout?id_token_hint=${idToken}&post_logout_redirect_uri=${encodeURIComponent(environment.keycloak.redirectUri)}`;
         // Clear local state
         localStorage.removeItem(this.STORAGE_KEY);
         this._isAuthenticated.set(false);

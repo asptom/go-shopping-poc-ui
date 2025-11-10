@@ -1,6 +1,6 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, ErrorHandler } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { APP_INITIALIZER } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
@@ -8,6 +8,9 @@ import { provideAuth } from 'angular-auth-oidc-client';
 
 import { routes } from './app.routes';
 import { authConfig } from './auth/oidc.config';
+import { ErrorInterceptor } from './core/error/error.interceptor';
+import { GlobalErrorHandler } from './core/error/global-error-handler';
+import { NotificationContainer } from './core/notification/notification-container.component';
 
 // App initializer to check authentication on startup
 function initializeAuth(oidcSecurityService: OidcSecurityService) {
@@ -50,6 +53,16 @@ export const appConfig: ApplicationConfig = {
       useFactory: initializeAuth,
       deps: [OidcSecurityService],
       multi: true,
-    }
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ErrorInterceptor,
+      multi: true
+    },
+    {
+      provide: ErrorHandler,
+      useClass: GlobalErrorHandler
+    },
+    NotificationContainer
   ]
 };
