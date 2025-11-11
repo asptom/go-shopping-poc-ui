@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { Customer } from '../../../models/customer';
-import { CustomValidators } from '../validators/custom-validators';
+import { getCustomerFormConfig, createCustomerFromForm, validateForm } from '../config/form-configs';
 
 @Injectable({
   providedIn: 'root'
@@ -10,58 +10,24 @@ export class CustomerFormService {
   private readonly fb = inject(FormBuilder);
 
   createCustomerForm(customer?: Partial<Customer>): FormGroup {
+    const config = getCustomerFormConfig(customer);
+    
     return this.fb.group({
-      customer_id: [customer?.customer_id || ''],
-      user_name: [customer?.user_name || '', Validators.required],
-      email: [
-        customer?.email || '', 
-        [CustomValidators.required('Email is required'), CustomValidators.email()]
-      ],
-      first_name: [
-        customer?.first_name || '', 
-        [CustomValidators.required('First name is required'), CustomValidators.sanitize()]
-      ],
-      last_name: [
-        customer?.last_name || '', 
-        [CustomValidators.required('Last name is required'), CustomValidators.sanitize()]
-      ],
-      phone: [
-        customer?.phone || '', 
-        [CustomValidators.phone()]
-      ]
+      customer_id: [config.customer_id.value],
+      user_name: [config.user_name.value, config.user_name.validators],
+      email: [config.email.value, config.email.validators],
+      first_name: [config.first_name.value, config.first_name.validators],
+      last_name: [config.last_name.value, config.last_name.validators],
+      phone: [config.phone.value, config.phone.validators]
     });
   }
 
   getCustomerFormData(form: FormGroup): Customer {
-    const formValue = form.value;
-    return {
-      ...formValue,
-      addresses: [],
-      credit_cards: [],
-      customer_statuses: []
-    };
+    return createCustomerFromForm(form.value);
   }
 
   validateCustomerForm(form: FormGroup): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
-    if (form.invalid) {
-      Object.keys(form.controls).forEach(key => {
-        const control = form.get(key);
-        if (control?.invalid && control?.errors) {
-          Object.values(control.errors).forEach((error: any) => {
-            if (error?.message) {
-              errors.push(error.message);
-            }
-          });
-        }
-      });
-    }
-
-    return {
-      isValid: form.valid && errors.length === 0,
-      errors
-    };
+    return validateForm(form);
   }
 
   resetCustomerForm(form: FormGroup): void {

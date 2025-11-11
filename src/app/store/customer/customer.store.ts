@@ -1,5 +1,4 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
-import { AuthService } from '../../auth/auth.service';
+import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import { CustomerService } from '../../services/customer.service';
 import { Customer } from '../../models/customer';
 import { NotificationService } from '../../core/notification/notification.service';
@@ -14,7 +13,6 @@ export interface CustomerState {
   providedIn: 'root'
 })
 export class CustomerStore {
-  private readonly authService = inject(AuthService);
   private readonly customerService = inject(CustomerService);
   private readonly notificationService = inject(NotificationService);
 
@@ -29,8 +27,6 @@ export class CustomerStore {
   readonly customer = computed(() => this.state().customer);
   readonly loading = computed(() => this.state().loading);
   readonly error = computed(() => this.state().error);
-  readonly isAuthenticated = this.authService.isAuthenticated;
-  readonly userData = this.authService.userData;
 
   // Computed selectors
   readonly hasCustomer = computed(() => !!this.state().customer);
@@ -39,8 +35,16 @@ export class CustomerStore {
     return cust ? `${cust.first_name || ''} ${cust.last_name || ''}`.trim() : '';
   });
   readonly customerEmail = computed(() => this.state().customer?.email || '');
-  readonly addresses = computed(() => this.state().customer?.addresses || []);
-  readonly creditCards = computed(() => this.state().customer?.credit_cards || []);
+  readonly addresses = computed(() => {
+    const addresses = this.state().customer?.addresses || [];
+    console.log('Addresses computed:', addresses);
+    return addresses;
+  });
+  readonly creditCards = computed(() => {
+    const creditCards = this.state().customer?.credit_cards || [];
+    console.log('Credit cards computed:', creditCards);
+    return creditCards;
+  });
   readonly defaultAddress = computed(() => 
     this.addresses().find(addr => addr.is_default)
   );
@@ -49,209 +53,198 @@ export class CustomerStore {
   );
 
   // Actions
-  loadCustomer(email: string): void {
+  async loadCustomer(email: string): Promise<void> {
     if (!email) return;
-
     this.setState({ loading: true, error: null });
 
-    this.customerService.getCustomer(email).subscribe({
-      next: (customer) => {
+    try {
+      console.log('Loading customer for email:', email);
+      const customer = await this.customerService.getCustomer(email).toPromise();
+        console.log('Customer data received:', customer);
         if (customer) {
+          console.log('Customer addresses:', customer.addresses);
+          console.log('Customer credit cards:', customer.credit_cards);
+          console.log('Addresses length:', customer.addresses?.length || 0);
+          console.log('Credit cards length:', customer.credit_cards?.length || 0);
           this.setState({ customer, loading: false });
         } else {
-          this.createCustomerFromAuth();
+          console.log('No customer found, setting null');
+          // Customer not found - return null without error, let caller decide what to do
+          this.setState({ customer: null, loading: false });
         }
-      },
-      error: () => {
-        this.setState({ 
-          loading: false, 
-          error: 'Failed to load customer data' 
-        });
-      }
-    });
+    } catch (error) {
+      console.error('Error loading customer:', error);
+      this.setState({ 
+        loading: false, 
+        error: 'Failed to load customer data' 
+      });
+    }
   }
 
-  createCustomerFromAuth(): void {
-    const user = this.userData();
-    if (!user?.email) return;
+  async createCustomerFromAuth(userData: any): Promise<void> {
+    if (!userData?.email) return;
 
     const newCustomer: Customer = {
       customer_id: '',
-      user_name: user.preferred_username || user.email || '',
-      email: user.email,
-      first_name: user.given_name,
-      last_name: user.family_name,
+      user_name: userData.preferred_username || userData.email || '',
+      email: userData.email,
+      first_name: userData.given_name,
+      last_name: userData.family_name,
       phone: '',
       addresses: [],
       credit_cards: [],
       customer_statuses: []
     };
 
-    this.customerService.createCustomer(newCustomer).subscribe({
-      next: (savedCustomer) => {
-        this.setState({ customer: savedCustomer, loading: false });
-        this.notificationService.showSuccess('Customer profile created successfully');
-      },
-      error: () => {
-        this.setState({ 
-          loading: false, 
-          error: 'Failed to create customer profile' 
-        });
-      }
-    });
+    try {
+      const savedCustomer = await this.customerService.createCustomer(newCustomer).toPromise();
+      this.setState({ customer: savedCustomer, loading: false });
+      this.notificationService.showSuccess('Customer profile created successfully');
+    } catch (error) {
+      this.setState({ 
+        loading: false, 
+        error: 'Failed to create customer profile' 
+      });
+    }
   }
 
-  updateCustomer(customer: Customer): void {
+  async updateCustomer(customer: Customer): Promise<void> {
     this.setState({ loading: true, error: null });
 
-    this.customerService.updateCustomer(customer).subscribe({
-      next: (updatedCustomer) => {
-        this.setState({ customer: updatedCustomer, loading: false });
-        this.notificationService.showSuccess('Profile updated successfully');
-      },
-      error: () => {
-        this.setState({ 
-          loading: false, 
-          error: 'Failed to update profile' 
-        });
-      }
-    });
+    try {
+      const updatedCustomer = await this.customerService.updateCustomer(customer).toPromise();
+      this.setState({ customer: updatedCustomer, loading: false });
+      this.notificationService.showSuccess('Profile updated successfully');
+    } catch (error) {
+      this.setState({ 
+        loading: false, 
+        error: 'Failed to update profile' 
+      });
+    }
   }
 
-  addAddress(address: any): void {
+  async addAddress(address: any): Promise<void> {
     const currentCustomer = this.state().customer;
     if (!currentCustomer?.customer_id) return;
 
     this.setState({ loading: true, error: null });
 
-    this.customerService.addAddress(currentCustomer.customer_id, address).subscribe({
-      next: () => {
-        // Reload customer to get updated addresses
-        this.loadCustomer(currentCustomer.email || '');
-        this.notificationService.showSuccess('Address added successfully');
-      },
-      error: () => {
-        this.setState({ 
-          loading: false, 
-          error: 'Failed to add address' 
-        });
-      }
-    });
+    try {
+      await this.customerService.addAddress(currentCustomer.customer_id, address).toPromise();
+      // Reload customer to get updated addresses
+      await this.loadCustomer(currentCustomer.email || '');
+      this.notificationService.showSuccess('Address added successfully');
+    } catch (error) {
+      this.setState({ 
+        loading: false, 
+        error: 'Failed to add address' 
+      });
+    }
   }
 
-  updateAddress(addressId: string, address: any): void {
+  async updateAddress(addressId: string, address: any): Promise<void> {
     this.setState({ loading: true, error: null });
 
-    this.customerService.updateAddress(addressId, address).subscribe({
-      next: () => {
-        // Reload customer data to get updated addresses
-        const currentCustomer = this.state().customer;
-        if (currentCustomer?.email) {
-          this.loadCustomer(currentCustomer.email);
-        }
-        this.notificationService.showSuccess('Address updated successfully');
-      },
-      error: () => {
-        this.setState({ 
-          loading: false, 
-          error: 'Failed to update address' 
-        });
+    try {
+      await this.customerService.updateAddress(addressId, address).toPromise();
+      // Reload customer data to get updated addresses
+      const currentCustomer = this.state().customer;
+      if (currentCustomer?.email) {
+        await this.loadCustomer(currentCustomer.email);
       }
-    });
+      this.notificationService.showSuccess('Address updated successfully');
+    } catch (error) {
+      this.setState({ 
+        loading: false, 
+        error: 'Failed to update address' 
+      });
+    }
   }
 
-  deleteAddress(addressId: string): void {
+  async deleteAddress(addressId: string): Promise<void> {
     this.setState({ loading: true, error: null });
 
-    this.customerService.deleteAddress(addressId).subscribe({
-      next: () => {
-        const currentCustomer = this.state().customer;
-        if (currentCustomer?.addresses) {
-          const updatedAddresses = currentCustomer.addresses.filter(
-            addr => addr.address_id !== addressId
-          );
-          this.setState({ 
-            customer: { ...currentCustomer, addresses: updatedAddresses },
-            loading: false 
-          });
-          this.notificationService.showSuccess('Address deleted successfully');
-        }
-      },
-      error: () => {
+    try {
+      await this.customerService.deleteAddress(addressId).toPromise();
+      const currentCustomer = this.state().customer;
+      if (currentCustomer?.addresses) {
+        const updatedAddresses = currentCustomer.addresses.filter(
+          addr => addr.address_id !== addressId
+        );
         this.setState({ 
-          loading: false, 
-          error: 'Failed to delete address' 
+          customer: { ...currentCustomer, addresses: updatedAddresses },
+          loading: false 
         });
+        this.notificationService.showSuccess('Address deleted successfully');
       }
-    });
+    } catch (error) {
+      this.setState({ 
+        loading: false, 
+        error: 'Failed to delete address' 
+      });
+    }
   }
 
-  addCreditCard(card: any): void {
+  async addCreditCard(card: any): Promise<void> {
     const currentCustomer = this.state().customer;
     if (!currentCustomer?.customer_id) return;
 
     this.setState({ loading: true, error: null });
 
-    this.customerService.addCreditCard(currentCustomer.customer_id, card).subscribe({
-      next: () => {
-        // Reload customer to get updated credit cards
-        this.loadCustomer(currentCustomer.email || '');
-        this.notificationService.showSuccess('Credit card added successfully');
-      },
-      error: () => {
-        this.setState({ 
-          loading: false, 
-          error: 'Failed to add credit card' 
-        });
-      }
-    });
+    try {
+      await this.customerService.addCreditCard(currentCustomer.customer_id, card).toPromise();
+      // Reload customer to get updated credit cards
+      await this.loadCustomer(currentCustomer.email || '');
+      this.notificationService.showSuccess('Credit card added successfully');
+    } catch (error) {
+      this.setState({ 
+        loading: false, 
+        error: 'Failed to add credit card' 
+      });
+    }
   }
 
-  updateCreditCard(cardId: string, card: any): void {
+  async updateCreditCard(cardId: string, card: any): Promise<void> {
     this.setState({ loading: true, error: null });
 
-    this.customerService.updateCreditCard(cardId, card).subscribe({
-      next: () => {
-        // Reload customer data to get updated credit cards
-        const currentCustomer = this.state().customer;
-        if (currentCustomer?.email) {
-          this.loadCustomer(currentCustomer.email);
-        }
-        this.notificationService.showSuccess('Credit card updated successfully');
-      },
-      error: () => {
-        this.setState({ 
-          loading: false, 
-          error: 'Failed to update credit card' 
-        });
+    try {
+      await this.customerService.updateCreditCard(cardId, card).toPromise();
+      // Reload customer data to get updated credit cards
+      const currentCustomer = this.state().customer;
+      if (currentCustomer?.email) {
+        await this.loadCustomer(currentCustomer.email);
       }
-    });
+      this.notificationService.showSuccess('Credit card updated successfully');
+    } catch (error) {
+      this.setState({ 
+        loading: false, 
+        error: 'Failed to update credit card' 
+      });
+    }
   }
 
-  deleteCreditCard(cardId: string): void {
+  async deleteCreditCard(cardId: string): Promise<void> {
     this.setState({ loading: true, error: null });
 
-    this.customerService.deleteCreditCard(cardId).subscribe({
-      next: () => {
-        const currentCustomer = this.state().customer;
-        if (currentCustomer?.credit_cards) {
-          const updatedCards = currentCustomer.credit_cards.filter(
-            card => card.card_id !== cardId
-          );
-          this.setState({ 
-            customer: { ...currentCustomer, credit_cards: updatedCards },
-            loading: false 
-          });
-          this.notificationService.showSuccess('Credit card deleted successfully');
-        }
-      },
-      error: () => {
+    try {
+      await this.customerService.deleteCreditCard(cardId).toPromise();
+      const currentCustomer = this.state().customer;
+      if (currentCustomer?.credit_cards) {
+        const updatedCards = currentCustomer.credit_cards.filter(
+          card => card.card_id !== cardId
+        );
         this.setState({ 
-          loading: false, 
-          error: 'Failed to delete credit card' 
+          customer: { ...currentCustomer, credit_cards: updatedCards },
+          loading: false 
         });
+        this.notificationService.showSuccess('Credit card deleted successfully');
       }
-    });
+    } catch (error) {
+      this.setState({ 
+        loading: false, 
+        error: 'Failed to delete credit card' 
+      });
+    }
   }
 
   clearError(): void {

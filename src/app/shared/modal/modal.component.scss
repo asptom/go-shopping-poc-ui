@@ -1,0 +1,122 @@
+// Reusable Modal Component Styles
+// Clean architecture using CSS Custom Properties for consistent theming
+
+// Main modal container
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(15, 17, 17, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+  
+  // Set base font for entire modal using cascade
+  font-size: var(--form-font-size);
+  font-family: var(--base-font-family);
+}
+
+// Modal content container
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  max-width: 700px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.2s ease-out;
+  
+  // Inherit font from parent
+  font-size: inherit;
+  font-family: inherit;
+}
+
+// Modal animation
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Modal header
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid #ddd;
+  
+  h3 {
+    margin: 0;
+    font-size: var(--heading-font-size);
+    font-weight: 600;
+    color: #0f1111;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    font-size: var(--heading-font-size);
+    cursor: pointer;
+    color: #565959;
+    padding: 0.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: #e7e9ec;
+      color: #0f1111;
+    }
+  }
+}
+
+// Modal body - contains projected content
+.modal-body {
+  padding: 2rem;
+  
+  // Ensure projected content inherits proper font sizing
+  * {
+    font-size: inherit;
+    font-family: inherit;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .modal-backdrop {
+    padding: 1rem;
+  }
+  
+  .modal-content {
+    width: 100%;
+    max-width: none;
+    margin: 1rem;
+  }
+  
+  .modal-header {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    
+    h3 {
+      font-size: 1.25rem;
+    }
+  }
+  
+  .modal-body {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+  }
+}

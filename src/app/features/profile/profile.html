@@ -22,8 +22,8 @@
           <!-- Profile Information Section -->
           <div class="profile-section">
             <h2>Profile Information</h2>
-            <form [formGroup]="customerForm" (ngSubmit)="saveProfile()">
-              <div class="form-grid">
+            <form [formGroup]="customerForm()" (ngSubmit)="saveProfile()">
+    <div class="form-grid" [style]="'gap: 1.5rem !important;'">
                 <div class="form-group">
                   <label for="firstName">First Name:</label>
                   <input id="firstName" formControlName="first_name" />
@@ -54,7 +54,7 @@
                 @if (!editingProfile()) {
                   <button type="button" class="edit-button" (click)="editingProfile.set(true)">Edit Profile</button>
                 } @else {
-                  <button type="submit" class="save-button" [disabled]="customerForm.invalid">Save Profile</button>
+                  <button type="submit" class="save-button" [disabled]="customerForm().invalid">Save Profile</button>
                   <button type="button" class="cancel-button" (click)="editingProfile.set(false)">Cancel</button>
                 }
               </div>
@@ -126,11 +126,11 @@
   [isOpen]="addressModalOpen()" 
   [title]="getAddressModalTitle()" 
   (close)="closeAddressModal()">
-  <form [formGroup]="addressForm" (ngSubmit)="saveAddress()">
-    <div class="form-grid">
+  <form [formGroup]="addressForm()" (ngSubmit)="saveAddress()">
+    <div class="form-grid" [style]="'gap: 1.5rem !important;'">
       <div class="form-group">
-        <label for="addressType">Address Type:</label>
-        <select id="addressType" formControlName="address_type">
+        <label for="addressType" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">Address Type:</label>
+        <select id="addressType" formControlName="address_type" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important;'">
           <option value="shipping">Shipping</option>
           <option value="billing">Billing</option>
         </select>
@@ -139,52 +139,52 @@
         }
       </div>
       <div class="form-group">
-        <label for="addressFirstName">First Name:</label>
-        <input id="addressFirstName" formControlName="first_name" />
+        <label for="first_name" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">First Name:</label>
+        <input id="first_name" formControlName="first_name" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important;'" />
         @if (getAddressErrorMessage('first_name')) {
-          <small class="error">{{ getAddressErrorMessage('first_name') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getAddressErrorMessage('first_name') }}</small>
         }
       </div>
       <div class="form-group">
-        <label for="addressLastName">Last Name:</label>
-        <input id="addressLastName" formControlName="last_name" />
+        <label for="last_name" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">Last Name:</label>
+        <input id="last_name" formControlName="last_name" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important;'" />
         @if (getAddressErrorMessage('last_name')) {
-          <small class="error">{{ getAddressErrorMessage('last_name') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getAddressErrorMessage('last_name') }}</small>
         }
       </div>
       <div class="form-group">
-        <label for="address1">Address Line 1:</label>
-        <input id="address1" formControlName="address_1" />
+        <label for="address1" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">Address Line 1:</label>
+        <input id="address1" formControlName="address_1" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important;'" />
         @if (getAddressErrorMessage('address_1')) {
-          <small class="error">{{ getAddressErrorMessage('address_1') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getAddressErrorMessage('address_1') }}</small>
         }
       </div>
       <div class="form-group">
-        <label for="address2">Address Line 2:</label>
-        <input id="address2" formControlName="address_2" />
+        <label for="address2" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">Address Line 2:</label>
+        <input id="address2" formControlName="address_2" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important;'" />
         @if (getAddressErrorMessage('address_2')) {
-          <small class="error">{{ getAddressErrorMessage('address_2') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getAddressErrorMessage('address_2') }}</small>
         }
       </div>
       <div class="form-group">
-        <label for="city">City:</label>
-        <input id="city" formControlName="city" />
+        <label for="city" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">City:</label>
+        <input id="city" formControlName="city" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important;'" />
         @if (getAddressErrorMessage('city')) {
-          <small class="error">{{ getAddressErrorMessage('city') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getAddressErrorMessage('city') }}</small>
         }
       </div>
       <div class="form-group">
-        <label for="state">State:</label>
-        <input id="state" formControlName="state" />
+        <label for="state" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">State:</label>
+        <input id="state" formControlName="state" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important;'" />
         @if (getAddressErrorMessage('state')) {
-          <small class="error">{{ getAddressErrorMessage('state') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getAddressErrorMessage('state') }}</small>
         }
       </div>
       <div class="form-group">
-        <label for="zip">ZIP Code:</label>
-        <input id="zip" formControlName="zip" />
+        <label for="zip" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">ZIP Code:</label>
+        <input id="zip" formControlName="zip" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important;'" />
         @if (getAddressErrorMessage('zip')) {
-          <small class="error">{{ getAddressErrorMessage('zip') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getAddressErrorMessage('zip') }}</small>
         }
       </div>
       <div class="form-group">
@@ -195,8 +195,8 @@
       </div>
     </div>
     <div class="form-actions">
-      <button type="submit" class="save-button" [disabled]="addressForm.invalid">{{ editingAddressId() ? 'Update Address' : 'Add Address' }}</button>
-      <button type="button" class="cancel-button" (click)="closeAddressModal()">Cancel</button>
+      <button type="submit" class="save-button" [disabled]="!addressFormState().canSave" [class.active]="addressFormState().canSave" [style]="addressFormState().canSave ? 'background-color: #28a745 !important; box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4) !important; border: 1px solid #218838 !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important; cursor: pointer !important;' : 'background-color: #cccccc !important; color: #666666 !important; cursor: not-allowed !important; opacity: 0.6 !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important;'">{{ editingAddressId() ? 'Update Address' : 'Add Address' }}</button>
+      <button type="button" class="cancel-button" (click)="closeAddressModal()" [style]="addressFormState().canSave ? 'background-color: #c5c8cc !important; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important; border: 1px solid #a8acb8 !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important; margin-left: 1rem !important;' : 'background-color: #e7e9ec !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important; margin-left: 1rem !important;'">Cancel</button>
     </div>
   </form>
 </app-modal>
@@ -206,46 +206,46 @@
   [isOpen]="creditCardModalOpen()" 
   [title]="getCreditCardModalTitle()" 
   (close)="closeCreditCardModal()">
-  <form [formGroup]="creditCardForm" (ngSubmit)="saveCreditCard()">
-    <div class="form-grid">
+  <form [formGroup]="creditCardForm()" (ngSubmit)="saveCreditCard()">
+    <div class="form-grid" [style]="'gap: 1.5rem !important;'">
       <div class="form-group">
-        <label for="cardType">Card Type:</label>
-        <select id="cardType" formControlName="card_type">
+        <label for="cardType" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">Card Type:</label>
+        <select id="cardType" formControlName="card_type" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important;'">
           <option value="visa">Visa</option>
           <option value="mastercard">Mastercard</option>
           <option value="amex">American Express</option>
           <option value="discover">Discover</option>
         </select>
         @if (getCardErrorMessage('card_type')) {
-          <small class="error">{{ getCardErrorMessage('card_type') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getCardErrorMessage('card_type') }}</small>
         }
       </div>
       <div class="form-group">
-        <label for="cardNumber">Card Number:</label>
-        <input id="cardNumber" formControlName="card_number" />
+        <label for="cardNumber" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">Card Number:</label>
+        <input id="cardNumber" formControlName="card_number" (input)="onCardNumberInput($event)" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important;'" />
         @if (getCardErrorMessage('card_number')) {
-          <small class="error">{{ getCardErrorMessage('card_number') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getCardErrorMessage('card_number') }}</small>
         }
       </div>
       <div class="form-group">
-        <label for="cardHolderName">Cardholder Name:</label>
-        <input id="cardHolderName" formControlName="card_holder_name" />
+        <label for="cardHolderName" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">Cardholder Name:</label>
+        <input id="cardHolderName" formControlName="card_holder_name" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important;'" />
         @if (getCardErrorMessage('card_holder_name')) {
-          <small class="error">{{ getCardErrorMessage('card_holder_name') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getCardErrorMessage('card_holder_name') }}</small>
         }
       </div>
       <div class="form-group">
-        <label for="cardExpires">Expiration Date (MM/YY):</label>
-        <input id="cardExpires" formControlName="card_expires" placeholder="MM/YY" />
+        <label for="cardExpires" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">Expiration Date (MM/YY):</label>
+        <input id="cardExpires" formControlName="card_expires" placeholder="MM/YY" (input)="onCardExpirationInput($event)" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important; width: 100px !important;'" />
         @if (getCardErrorMessage('card_expires')) {
-          <small class="error">{{ getCardErrorMessage('card_expires') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getCardErrorMessage('card_expires') }}</small>
         }
       </div>
       <div class="form-group">
-        <label for="cardCVV">CVV:</label>
-        <input id="cardCVV" formControlName="card_cvv" />
+        <label for="cardCVV" [style]="'font-size: var(--label-font-size) !important; font-family: var(--base-font-family) !important; margin-right: 1rem !important; display: inline-block !important; width: 120px !important;'">CVV:</label>
+        <input id="cardCVV" formControlName="card_cvv" [style]="'font-size: var(--input-font-size) !important; font-family: var(--base-font-family) !important; margin-bottom: 0.25rem !important; display: inline-block !important; width: 80px !important;'" />
         @if (getCardErrorMessage('card_cvv')) {
-          <small class="error">{{ getCardErrorMessage('card_cvv') }}</small>
+          <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getCardErrorMessage('card_cvv') }}</small>
         }
       </div>
       <div class="form-group">
@@ -256,8 +256,8 @@
       </div>
     </div>
     <div class="form-actions">
-      <button type="submit" class="save-button" [disabled]="creditCardForm.invalid">{{ editingCardId() ? 'Update Credit Card' : 'Add Credit Card' }}</button>
-      <button type="button" class="cancel-button" (click)="closeCreditCardModal()">Cancel</button>
+      <button type="submit" class="save-button" [disabled]="!creditCardFormState().canSave" [class.active]="creditCardFormState().canSave" [style]="creditCardFormState().canSave ? 'background-color: #28a745 !important; box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4) !important; border: 1px solid #218838 !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important; cursor: pointer !important;' : 'background-color: #cccccc !important; color: #666666 !important; cursor: not-allowed !important; opacity: 0.6 !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important;'">{{ editingCardId() ? 'Update Credit Card' : 'Add Credit Card' }}</button>
+      <button type="button" class="cancel-button" (click)="closeCreditCardModal()" [style]="creditCardFormState().canSave ? 'background-color: #c5c8cc !important; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important; border: 1px solid #a8acb8 !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important; margin-left: 1rem !important;' : 'background-color: #e7e9ec !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important; margin-left: 1rem !important;'">Cancel</button>
     </div>
   </form>
 </app-modal>

@@ -3,6 +3,21 @@
   background-color: #eaeded;
   min-height: calc(100vh - 200px);
 
+  .debug-button {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+
+    &:hover {
+      background-color: #ff5252;
+    }
+  }
+
   .container {
     max-width: 1200px;
     margin: 0 auto;

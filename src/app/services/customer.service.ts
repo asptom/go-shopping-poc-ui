@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Customer, Address, CreditCard } from '../models/customer';
 import { environment } from '../../environments/environment';
@@ -21,7 +21,7 @@ export class CustomerService {
       catchError((error: HttpErrorResponse) => {
         if (error.status === 404) {
           // Customer not found, return null
-          return [null];
+          return of(null);
         }
         const appError = this.errorHandler.handleError(error, 'getCustomer');
         this.notificationService.showError(appError.userMessage);

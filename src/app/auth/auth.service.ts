@@ -1,6 +1,7 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
 import { Observable, map, of, catchError } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '../../environments/environment';
 
 export interface UserData {
@@ -33,37 +34,55 @@ export class AuthService {
     // Load persisted auth state on startup
     this.loadPersistedAuthState();
 
-    // Subscribe to authentication state changes
-    this.oidcSecurityService.isAuthenticated$.subscribe(isAuthenticated => {
-      console.log('OIDC Auth state changed:', isAuthenticated);
+    // Convert observables to signals for reactive state management
+    const oidcAuthState = toSignal(this.oidcSecurityService.isAuthenticated$, { 
+      initialValue: undefined 
+    });
+    const oidcUserData = toSignal(this.oidcSecurityService.userData$, { 
+      initialValue: undefined 
+    });
+    const checkSessionChanged = toSignal(this.oidcSecurityService.checkSessionChanged$, { 
+      initialValue: undefined 
+    });
 
-      // Only update if OIDC service has valid authentication OR if it's explicitly setting to false
-      // Don't let OIDC service override persisted authenticated state with false
-      if (isAuthenticated.isAuthenticated || !this.hasPersistedAuthState()) {
-        this._isAuthenticated.set(isAuthenticated.isAuthenticated);
-        if (!isAuthenticated.isAuthenticated) {
-          // Clear persisted state only when explicitly logging out
-          this.clearPersistedAuthState();
+    // Reactive effects for state management
+    effect(() => {
+      const isAuthenticated = oidcAuthState();
+      if (isAuthenticated) {
+        console.log('OIDC Auth state changed:', isAuthenticated);
+
+        // Only update if OIDC service has valid authentication OR if it's explicitly setting to false
+        // Don't let OIDC service override persisted authenticated state with false
+        if (isAuthenticated.isAuthenticated || !this.hasPersistedAuthState()) {
+          this._isAuthenticated.set(isAuthenticated.isAuthenticated);
+          if (!isAuthenticated.isAuthenticated) {
+            // Clear persisted state only when explicitly logging out
+            this.clearPersistedAuthState();
+          }
+        } else {
+          console.log('Ignoring OIDC false state - using persisted authentication');
         }
-      } else {
-        console.log('Ignoring OIDC false state - using persisted authentication');
       }
-    });
+    }, { allowSignalWrites: true });
 
-    // Subscribe to user data changes
-    this.oidcSecurityService.userData$.subscribe(userData => {
-      console.log('OIDC User data changed:', userData);
+    effect(() => {
+      const userData = oidcUserData();
+      if (userData) {
+        console.log('OIDC User data changed:', userData);
 
-      // Only update user data if OIDC has valid data or we're not authenticated
-      if (userData.userData || !this._isAuthenticated()) {
-        this._userData.set(userData.userData as UserData);
-        this.persistAuthState();
+        // Only update user data if OIDC has valid data or we're not authenticated
+        if (userData.userData || !this._isAuthenticated()) {
+          this._userData.set(userData.userData as UserData);
+          this.persistAuthState();
+        }
       }
-    });
+    }, { allowSignalWrites: true });
 
-    // Subscribe to check session changed
-    this.oidcSecurityService.checkSessionChanged$.subscribe(checkSessionChanged => {
-      console.log('Check session changed:', checkSessionChanged);
+    effect(() => {
+      const sessionChanged = checkSessionChanged();
+      if (sessionChanged) {
+        console.log('Check session changed:', sessionChanged);
+      }
     });
   }
 
@@ -125,9 +144,10 @@ export class AuthService {
     this.oidcSecurityService.authorize();
   }
 
-  logout(): void {
+  async logout(): Promise<void> {
     console.log('Logout called');
-    this.getIdToken().subscribe(idToken => {
+    try {
+      const idToken = await this.getIdToken().toPromise();
       if (idToken) {
         const logoutUrl = `${environment.keycloak.issuer}/protocol/openid-connect/logout?id_token_hint=${idToken}&post_logout_redirect_uri=${encodeURIComponent(environment.keycloak.redirectUri)}`;
         // Clear local state
@@ -143,7 +163,14 @@ export class AuthService {
         this._userData.set(null);
         this.oidcSecurityService.logoff();
       }
-    });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Fallback to client logout
+      localStorage.removeItem(this.STORAGE_KEY);
+      this._isAuthenticated.set(false);
+      this._userData.set(null);
+      this.oidcSecurityService.logoff();
+    }
   }
 
   getAccessToken(): Observable<string> {
