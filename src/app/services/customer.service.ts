@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { Customer, Address, CreditCard } from '../models/customer';
+import { catchError, tap } from 'rxjs/operators';
+import { Customer, Address, CreditCard, CreateAddressRequest, CreateCreditCardRequest } from '../models/customer';
 import { environment } from '../../environments/environment';
 import { ErrorHandlerService } from '../core/error/error-handler.service';
 import { NotificationService } from '../core/notification/notification.service';
@@ -50,8 +50,18 @@ export class CustomerService {
     );
   }
 
-  addAddress(customerId: string, address: Address): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${customerId}/addresses`, address).pipe(
+  patchCustomer(customerId: string, updates: Partial<Customer>): Observable<Customer> {
+    return this.http.patch<Customer>(`${this.apiUrl}/${customerId}`, updates).pipe(
+      catchError((error: HttpErrorResponse) => {
+        const appError = this.errorHandler.handleError(error, 'patchCustomer');
+        this.notificationService.showError(appError.userMessage);
+        return throwError(() => appError);
+      })
+    );
+  }
+
+  addAddress(customerId: string, address: CreateAddressRequest): Observable<Address> {
+    return this.http.post<Address>(`${this.apiUrl}/${customerId}/addresses`, address).pipe(
       catchError((error: HttpErrorResponse) => {
         const appError = this.errorHandler.handleError(error, 'addAddress');
         this.notificationService.showError(appError.userMessage);
@@ -60,8 +70,8 @@ export class CustomerService {
     );
   }
 
-  updateAddress(addressId: string, address: Address): Observable<Address> {
-    return this.http.put<Address>(`${this.apiUrl}/addresses/${addressId}`, address).pipe(
+  updateAddress(addressId: string, address: Address): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/addresses/${addressId}`, address).pipe(
       catchError((error: HttpErrorResponse) => {
         const appError = this.errorHandler.handleError(error, 'updateAddress');
         this.notificationService.showError(appError.userMessage);
@@ -80,8 +90,8 @@ export class CustomerService {
     );
   }
 
-  addCreditCard(customerId: string, card: CreditCard): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${customerId}/credit-cards`, card).pipe(
+  addCreditCard(customerId: string, card: CreateCreditCardRequest): Observable<CreditCard> {
+    return this.http.post<CreditCard>(`${this.apiUrl}/${customerId}/credit-cards`, card).pipe(
       catchError((error: HttpErrorResponse) => {
         const appError = this.errorHandler.handleError(error, 'addCreditCard');
         this.notificationService.showError(appError.userMessage);
@@ -90,8 +100,8 @@ export class CustomerService {
     );
   }
 
-  updateCreditCard(cardId: string, card: CreditCard): Observable<CreditCard> {
-    return this.http.put<CreditCard>(`${this.apiUrl}/credit-cards/${cardId}`, card).pipe(
+  updateCreditCard(cardId: string, card: CreditCard): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/credit-cards/${cardId}`, card).pipe(
       catchError((error: HttpErrorResponse) => {
         const appError = this.errorHandler.handleError(error, 'updateCreditCard');
         this.notificationService.showError(appError.userMessage);
@@ -104,6 +114,67 @@ export class CustomerService {
     return this.http.delete<void>(`${this.apiUrl}/credit-cards/${cardId}`).pipe(
       catchError((error: HttpErrorResponse) => {
         const appError = this.errorHandler.handleError(error, 'deleteCreditCard');
+        this.notificationService.showError(appError.userMessage);
+        return throwError(() => appError);
+      })
+    );
+  }
+
+  // Default management methods
+  setDefaultShippingAddress(customerId: string, addressId: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${customerId}/default-shipping-address/${addressId}`, {}).pipe(
+      catchError((error: HttpErrorResponse) => {
+        const appError = this.errorHandler.handleError(error, 'setDefaultShippingAddress');
+        this.notificationService.showError(appError.userMessage);
+        return throwError(() => appError);
+      })
+    );
+  }
+
+  setDefaultBillingAddress(customerId: string, addressId: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${customerId}/default-billing-address/${addressId}`, {}).pipe(
+      catchError((error: HttpErrorResponse) => {
+        const appError = this.errorHandler.handleError(error, 'setDefaultBillingAddress');
+        this.notificationService.showError(appError.userMessage);
+        return throwError(() => appError);
+      })
+    );
+  }
+
+  setDefaultCreditCard(customerId: string, cardId: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${customerId}/default-credit-card/${cardId}`, {}).pipe(
+      catchError((error: HttpErrorResponse) => {
+        const appError = this.errorHandler.handleError(error, 'setDefaultCreditCard');
+        this.notificationService.showError(appError.userMessage);
+        return throwError(() => appError);
+      })
+    );
+  }
+
+  clearDefaultShippingAddress(customerId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${customerId}/default-shipping-address`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        const appError = this.errorHandler.handleError(error, 'clearDefaultShippingAddress');
+        this.notificationService.showError(appError.userMessage);
+        return throwError(() => appError);
+      })
+    );
+  }
+
+  clearDefaultBillingAddress(customerId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${customerId}/default-billing-address`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        const appError = this.errorHandler.handleError(error, 'clearDefaultBillingAddress');
+        this.notificationService.showError(appError.userMessage);
+        return throwError(() => appError);
+      })
+    );
+  }
+
+  clearDefaultCreditCard(customerId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${customerId}/default-credit-card`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        const appError = this.errorHandler.handleError(error, 'clearDefaultCreditCard');
         this.notificationService.showError(appError.userMessage);
         return throwError(() => appError);
       })

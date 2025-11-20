@@ -2,51 +2,38 @@
 
 ## Recent Development Summary
 
-**Date**: November 11, 2025 (Updated: Edit form logic fix completed)
+**Date**: November 20, 2025 (Updated: API Updates & UI Fixes)
 
-**Today's Session - Modal Form Fixes & Edit Functionality**:
-- ✅ **Fixed Add Address and Add Credit Card button functionality**:
-  - Added modal components to profile template with proper event binding
-  - Updated ModalComponent to use modern Angular `@if` syntax instead of deprecated `*ngIf`
-  - Implemented comprehensive address and credit card forms inside modals
-  - Added form validation and error handling for modal forms
-  - Fixed "ModalComponent is not used" warning by properly implementing modals
+**Today's Session - API Updates & UI Fixes**:
+- ✅ **Updated Application for New API Specification**:
+  - Modified PATCH response handling to trust API complete responses instead of merging with local data
+  - Added response validation to ensure API returns all required fields
+  - Implemented fallback merging for backward compatibility with incomplete responses
+  - Enhanced error handling for API response validation
 
-- ✅ **Implemented complete edit functionality for addresses and credit cards**:
-  - Added "Edit" buttons for both addresses and credit cards with blue styling (#146eb4)
-  - Created dynamic modal titles ("Add Address" vs "Edit Address")
-  - Implemented form pre-population with existing data when editing
-  - Added proper ID preservation during update operations
-  - Fixed form services to include address_id and card_id fields
+- ✅ **Fixed Profile Edit Data Loss Issue**:
+  - Resolved PATCH requests clearing default addresses by removing unnecessary response merging
+  - Added validation to detect complete vs incomplete API responses
+  - Ensured profile edits preserve all customer data including defaults
+  - Improved API compliance with guaranteed complete response handling
 
-- ✅ **Resolved critical ID null errors in update operations**:
-  - Fixed `TypeError: null is not an object (evaluating 't.address_id')` error
-  - Fixed `TypeError: null is not an object (evaluating 't.card_id')` error
-  - Updated form reset methods to include ID fields
-  - Changed from form recreation to patchValue() approach for better state management
-  - Enhanced CustomerStore to reload customer data after successful updates
+- ✅ **Enhanced Form Request Handling**:
+  - Updated address/credit card creation to exclude customer_id from request payloads
+  - Fixed 400 Bad Request errors by sending API-compliant request formats
+  - Added proper TypeScript types for creation requests (CreateAddressRequest, CreateCreditCardRequest)
+  - Improved type safety across form services and store methods
 
-- ✅ **Fixed data disappearing after update operations**:
-  - Modified CustomerStore update methods to use data reload pattern
-  - Both updateAddress() and updateCreditCard() now call loadCustomer() after success
-  - Ensures UI reflects latest data from backend after updates
-  - Eliminated potential sync issues between frontend and backend
+- ✅ **Fixed "Set as Default" Button Styling Issues**:
+  - Added `.default-button` to base button selector for consistent font size (1rem) and weight (600)
+  - Changed background color from #146eb4 to #0073bb for visual distinction from edit buttons
+  - Ensured consistent padding, border-radius, and hover effects across all action buttons
+  - Improved professional appearance and user experience
 
-- ✅ **Enhanced modal form styling to match application design**:
-  - Updated modal styling to match Amazon-inspired design system
-  - Added consistent color scheme (#0f1111, #ff9900, #0f7938, #c40000)
-  - Implemented proper spacing, padding, and responsive design
-  - Added hover effects, transitions, and focus states
-  - Enhanced button styling with proper visual feedback
-
-- ✅ **Multiple attempts to fix modal form font size consistency**:
-  - Attempted to match modal form styling to main profile form exactly
-  - Added explicit font-size declarations to prevent inheritance issues
-  - Updated input padding, grid layout, and spacing to match main form
-  - Set base font-size on modal content container
-  - Added global base font styles (html, body { font-size: 16px })
-  - Used !important declarations to override conflicting styles
-  - Issue persists - modal forms still appear to have smaller fonts than main form
+- ✅ **Added Customer Since Field to Profile**:
+  - Added "Member Since" readonly field displaying customer_since date with proper formatting
+  - Positioned after Email field in profile form grid
+  - Used Angular date pipe for user-friendly date display
+  - Maintained consistent styling with other readonly fields
 
 ## **RESOLVED: Modal Font Size Discrepancy**
 
@@ -209,16 +196,27 @@
   - Modified logout method to redirect to Keycloak logout endpoint with id_token_hint
   - Ensured user sessions are properly terminated in Keycloak upon logout
 
-**API Endpoints** (Updated for Individual ID Operations):
-- **Customer**: `GET /customers/{email}`, `POST /customers`, `PUT /customers`
+**API Endpoints** (Updated for Complete Response Specification):
+- **Customer**:
+  - `GET /customers/{email}` - Returns complete customer object with all fields
+  - `POST /customers` - Creates customer, returns complete object with generated IDs
+  - `PUT /customers` - Full replacement, returns complete updated object
+  - `PATCH /customers/{id}` - Partial updates, returns complete updated object with all fields
 - **Addresses**:
-  - `POST /customers/{customerId}/addresses` - Add address
-  - `PUT /customers/addresses/{addressId}` - Update address
-  - `DELETE /customers/addresses/{addressId}` - Delete address
+  - `POST /customers/{customerId}/addresses` - Add address, returns created address object
+  - `PUT /customers/addresses/{addressId}` - Update address, returns 204 No Content
+  - `DELETE /customers/addresses/{addressId}` - Delete address, returns 204 No Content
 - **Credit Cards**:
-  - `POST /customers/{customerId}/credit-cards` - Add credit card
-  - `PUT /customers/credit-cards/{cardId}` - Update credit card
-  - `DELETE /customers/credit-cards/{cardId}` - Delete credit card
+  - `POST /customers/{customerId}/credit-cards` - Add credit card, returns created card object
+  - `PUT /customers/credit-cards/{cardId}` - Update credit card, returns 204 No Content
+  - `DELETE /customers/credit-cards/{cardId}` - Delete credit card, returns 204 No Content
+- **Default Management**:
+  - `PUT /customers/{id}/default-shipping-address/{addressId}` - Set default shipping
+  - `PUT /customers/{id}/default-billing-address/{addressId}` - Set default billing
+  - `PUT /customers/{id}/default-credit-card/{cardId}` - Set default credit card
+  - `DELETE /customers/{id}/default-shipping-address` - Clear default shipping
+  - `DELETE /customers/{id}/default-billing-address` - Clear default billing
+  - `DELETE /customers/{id}/default-credit-card` - Clear default credit card
 
 **Key Architecture Decisions**:
 - Standalone components throughout (Angular 20 default)
@@ -231,6 +229,8 @@
 - OIDC-first authentication with comprehensive token validation and error handling
 - Persistent authentication state management to prevent navigation logout issues
 - Individual ID-based CRUD operations for better RESTful API design
+- API response validation with fallback handling for robust error recovery
+- Complete API response handling with trust-first approach for PATCH operations
 
 ## Commands
 - **Build**: `ng build` or `npm run build`

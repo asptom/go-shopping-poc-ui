@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AppError, ErrorType, ErrorSeverity, ApiError, ValidationError } from './error.types';
+import { AppError, ErrorType, ErrorSeverity, ApiError, ValidationError, ApiErrorResponse } from './error.types';
 
 @Injectable({
   providedIn: 'root'
@@ -34,56 +34,35 @@ export class ErrorHandlerService {
       details: error.error
     };
 
+    // Parse new API error response format
+    const apiErrorResponse = this.parseApiErrorResponse(error.error);
+
     let type: ErrorType;
     let severity: ErrorSeverity;
     let userMessage: string;
+    let errorCode: string;
 
-    switch (error.status) {
-      case 400:
-        type = ErrorType.VALIDATION;
-        severity = ErrorSeverity.MEDIUM;
-        userMessage = 'Please check your input and try again.';
-        break;
-      case 401:
-        type = ErrorType.AUTHENTICATION;
-        severity = ErrorSeverity.HIGH;
-        userMessage = 'Please sign in to continue.';
-        break;
-      case 403:
-        type = ErrorType.AUTHENTICATION;
-        severity = ErrorSeverity.HIGH;
-        userMessage = 'You do not have permission to perform this action.';
-        break;
-      case 404:
-        type = ErrorType.NOT_FOUND;
-        severity = ErrorSeverity.MEDIUM;
-        userMessage = 'The requested resource was not found.';
-        break;
-      case 422:
-        type = ErrorType.VALIDATION;
-        severity = ErrorSeverity.MEDIUM;
-        userMessage = 'The provided data is invalid.';
-        break;
-      case 500:
-      case 502:
-      case 503:
-      case 504:
-        type = ErrorType.SERVER_ERROR;
-        severity = ErrorSeverity.HIGH;
-        userMessage = 'Server error occurred. Please try again later.';
-        break;
-      default:
-        type = ErrorType.NETWORK;
-        severity = ErrorSeverity.MEDIUM;
-        userMessage = 'Network error occurred. Please check your connection.';
+    // First check for specific API error types
+    if (apiErrorResponse) {
+      type = this.mapApiErrorType(apiErrorResponse.error);
+      userMessage = apiErrorResponse.message;
+      errorCode = apiErrorResponse.code || error.status.toString();
+      severity = this.getSeverityForApiError(type);
+    } else {
+      // Fallback to HTTP status-based error handling
+      const statusBasedError = this.getStatusBasedError(error.status);
+      type = statusBasedError.type;
+      severity = statusBasedError.severity;
+      userMessage = statusBasedError.userMessage;
+      errorCode = error.status.toString();
     }
 
     return {
       type,
       severity,
-      message: error.message,
+      message: apiErrorResponse?.message || error.message,
       userMessage,
-      code: error.status.toString(),
+      code: errorCode,
       details: apiError,
       timestamp: new Date(),
       originalError: error
@@ -173,6 +152,96 @@ export class ErrorHandlerService {
         return 'warn';
       default:
         return 'log';
+    }
+  }
+
+  private parseApiErrorResponse(error: any): ApiErrorResponse | null {
+    if (error && typeof error === 'object' && error.error && error.message) {
+      return {
+        error: error.error,
+        message: error.message,
+        code: error.code
+      };
+    }
+    return null;
+  }
+
+  private mapApiErrorType(apiErrorType: string): ErrorType {
+    switch (apiErrorType) {
+      case 'invalid_request':
+        return ErrorType.INVALID_REQUEST;
+      case 'validation_error':
+        return ErrorType.VALIDATION;
+      case 'not_found':
+        return ErrorType.NOT_FOUND;
+      case 'internal_error':
+        return ErrorType.SERVER_ERROR;
+      default:
+        return ErrorType.UNKNOWN;
+    }
+  }
+
+  private getSeverityForApiError(errorType: ErrorType): ErrorSeverity {
+    switch (errorType) {
+      case ErrorType.INVALID_REQUEST:
+      case ErrorType.VALIDATION:
+        return ErrorSeverity.MEDIUM;
+      case ErrorType.NOT_FOUND:
+        return ErrorSeverity.MEDIUM;
+      case ErrorType.SERVER_ERROR:
+        return ErrorSeverity.HIGH;
+      default:
+        return ErrorSeverity.MEDIUM;
+    }
+  }
+
+  private getStatusBasedError(status: number): { type: ErrorType; severity: ErrorSeverity; userMessage: string } {
+    switch (status) {
+      case 400:
+        return {
+          type: ErrorType.VALIDATION,
+          severity: ErrorSeverity.MEDIUM,
+          userMessage: 'Please check your input and try again.'
+        };
+      case 401:
+        return {
+          type: ErrorType.AUTHENTICATION,
+          severity: ErrorSeverity.HIGH,
+          userMessage: 'Please sign in to continue.'
+        };
+      case 403:
+        return {
+          type: ErrorType.AUTHENTICATION,
+          severity: ErrorSeverity.HIGH,
+          userMessage: 'You do not have permission to perform this action.'
+        };
+      case 404:
+        return {
+          type: ErrorType.NOT_FOUND,
+          severity: ErrorSeverity.MEDIUM,
+          userMessage: 'The requested resource was not found.'
+        };
+      case 422:
+        return {
+          type: ErrorType.VALIDATION,
+          severity: ErrorSeverity.MEDIUM,
+          userMessage: 'The provided data is invalid.'
+        };
+      case 500:
+      case 502:
+      case 503:
+      case 504:
+        return {
+          type: ErrorType.SERVER_ERROR,
+          severity: ErrorSeverity.HIGH,
+          userMessage: 'Server error occurred. Please try again later.'
+        };
+      default:
+        return {
+          type: ErrorType.NETWORK,
+          severity: ErrorSeverity.MEDIUM,
+          userMessage: 'Network error occurred. Please check your connection.'
+        };
     }
   }
 }

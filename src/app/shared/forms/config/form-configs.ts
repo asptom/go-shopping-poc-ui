@@ -1,5 +1,5 @@
 import { FormControl, FormGroup } from '@angular/forms';
-import { Customer, Address, CreditCard } from '../../../models/customer';
+import { Customer, Address, CreditCard, CreateAddressRequest, CreateCreditCardRequest } from '../../../models/customer';
 import * as validators from '../validators/pure-validators';
 
 // Pure form configuration functions - no dependencies, pure input/output
@@ -19,7 +19,6 @@ export type CustomerFormConfig = {
 };
 
 export type AddressFormConfig = {
-  address_id: FormFieldConfig;
   address_type: FormFieldConfig;
   first_name: FormFieldConfig;
   last_name: FormFieldConfig;
@@ -28,17 +27,14 @@ export type AddressFormConfig = {
   city: FormFieldConfig;
   state: FormFieldConfig;
   zip: FormFieldConfig;
-  is_default: FormFieldConfig;
 };
 
 export type CreditCardFormConfig = {
-  card_id: FormFieldConfig;
   card_type: FormFieldConfig;
   card_number: FormFieldConfig;
   card_holder_name: FormFieldConfig;
   card_expires: FormFieldConfig;
   card_cvv: FormFieldConfig;
-  is_default: FormFieldConfig;
 };
 
 // Customer form configuration
@@ -80,10 +76,6 @@ export const getCustomerFormConfig = (customer?: Partial<Customer>): CustomerFor
 
 // Address form configuration
 export const getAddressFormConfig = (): AddressFormConfig => ({
-  address_id: {
-    value: '',
-    validators: []
-  },
   address_type: {
     value: 'shipping',
     validators: [validators.required('Address type is required')]
@@ -134,19 +126,11 @@ export const getAddressFormConfig = (): AddressFormConfig => ({
       validators.required('ZIP code is required'),
       validators.zipCode('Please enter a valid ZIP code')
     ]
-  },
-  is_default: {
-    value: false,
-    validators: []
   }
 });
 
 // Credit card form configuration
 export const getCreditCardFormConfig = (): CreditCardFormConfig => ({
-  card_id: {
-    value: '',
-    validators: []
-  },
   card_type: {
     value: 'visa',
     validators: [validators.required('Card type is required')]
@@ -178,10 +162,6 @@ export const getCreditCardFormConfig = (): CreditCardFormConfig => ({
       validators.required('CVV is required'),
       validators.cvv('Please enter a valid CVV')
     ]
-  },
-  is_default: {
-    value: false,
-    validators: []
   }
 });
 
@@ -193,14 +173,14 @@ export const createCustomerFromForm = (formValue: any): Customer => ({
   customer_statuses: []
 });
 
-export const createAddressFromForm = (formValue: any): Address => ({
-  ...formValue,
-  address_id: formValue.address_id || undefined
+export const createAddressFromForm = (formValue: any): CreateAddressRequest => ({
+  ...formValue
+  // customer_id omitted - not needed in request body, customer ID is in URL
 });
 
-export const createCreditCardFromForm = (formValue: any): CreditCard => ({
-  ...formValue,
-  card_id: formValue.card_id || undefined
+export const createCreditCardFromForm = (formValue: any): CreateCreditCardRequest => ({
+  ...formValue
+  // customer_id omitted - not needed in request body, customer ID is in URL
 });
 
 // Pure validation result extractor

@@ -4,6 +4,7 @@ export enum ErrorType {
   VALIDATION = 'VALIDATION',
   NOT_FOUND = 'NOT_FOUND',
   SERVER_ERROR = 'SERVER_ERROR',
+  INVALID_REQUEST = 'INVALID_REQUEST',
   UNKNOWN = 'UNKNOWN'
 }
 
@@ -37,4 +38,10 @@ export interface ApiError {
   url: string;
   message: string;
   details?: any;
+}
+
+export interface ApiErrorResponse {
+  error: string;
+  message: string;
+  code?: string;
 }

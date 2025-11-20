@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CreditCard } from '../../../models/customer';
+import { CreditCard, CreateCreditCardRequest } from '../../../models/customer';
 import { getCreditCardFormConfig, createCreditCardFromForm, validateForm } from '../config/form-configs';
 import { CustomValidators } from '../validators/custom-validators';
 
@@ -12,17 +12,15 @@ export class CreditCardFormService {
 
   createCreditCardForm(): FormGroup {
     return this.fb.group({
-      card_id: [''],
       card_type: ['visa', Validators.required],
       card_number: ['', [Validators.required, CustomValidators.creditCard()]],
       card_holder_name: ['', [Validators.required, Validators.maxLength(100)]],
       card_expires: ['', [Validators.required, CustomValidators.cardExpiration()]],
-      card_cvv: ['', [Validators.required, CustomValidators.cvv()]],
-      is_default: [false]
+      card_cvv: ['', [Validators.required, CustomValidators.cvv()]]
     });
   }
 
-  getCreditCardFormData(form: FormGroup): CreditCard {
+  getCreditCardFormData(form: FormGroup): CreateCreditCardRequest {
     return createCreditCardFromForm(form.value);
   }
 
@@ -32,13 +30,11 @@ export class CreditCardFormService {
 
   resetCreditCardForm(form: FormGroup): void {
     form.reset({
-      card_id: '',
       card_type: 'visa',
       card_number: '',
       card_holder_name: '',
       card_expires: '',
-      card_cvv: '',
-      is_default: false
+      card_cvv: ''
     });
   }
 }

@@ -8,7 +8,7 @@ import { AuthService } from '../../auth/auth.service';
 import { CustomerStore } from '../../store/customer/customer.store';
 import { CustomerFormService, AddressFormService, CreditCardFormService, ModalComponent } from '../../shared';
 import { maskCardNumber, formatCardNumber, formatExpiration } from '../../shared/forms/utils/ui-formatters';
-import { Customer } from '../../models/customer';
+import { Customer, CreateAddressRequest, CreateCreditCardRequest } from '../../models/customer';
 
 @Component({
   selector: 'app-profile',
@@ -164,19 +164,21 @@ export class ProfileComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Get existing customer to preserve addresses and credit cards
     const existingCustomer = this.customer();
-    const formCustomerData = this.customerFormService.getCustomerFormData(form);
-    
-    // Merge form data with existing addresses and credit cards
-    const updatedCustomerData: Customer = {
-      ...formCustomerData,
-      addresses: existingCustomer?.addresses || [],
-      credit_cards: existingCustomer?.credit_cards || [],
-      customer_statuses: existingCustomer?.customer_statuses || []
+    if (!existingCustomer?.customer_id) {
+      return; // Should not happen in normal flow
+    }
+
+    // For PATCH, only send the profile fields that can be updated
+    const profileUpdates = {
+      user_name: form.value.user_name,
+      email: form.value.email,
+      first_name: form.value.first_name,
+      last_name: form.value.last_name,
+      phone: form.value.phone
     };
 
-    this.customerStore.updateCustomer(updatedCustomerData);
+    this.customerStore.patchCustomer(existingCustomer.customer_id, profileUpdates);
     this.editingProfile.set(false);
   }
 
@@ -324,6 +326,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (confirm('Are you sure you want to delete this credit card?')) {
       this.customerStore.deleteCreditCard(cardId);
     }
+  }
+
+  setDefaultShippingAddress(addressId: string): void {
+    this.customerStore.setDefaultShippingAddress(addressId);
+  }
+
+  setDefaultBillingAddress(addressId: string): void {
+    this.customerStore.setDefaultBillingAddress(addressId);
+  }
+
+  setDefaultCreditCard(cardId: string): void {
+    this.customerStore.setDefaultCreditCard(cardId);
   }
 
   // Display formatting methods

@@ -45,11 +45,15 @@
                     <small class="error">{{ getErrorMessage('phone') }}</small>
                   }
                 </div>
-                <div class="form-group">
-                  <label for="email">Email:</label>
-                  <input id="email" formControlName="email" readonly />
-                </div>
-              </div>
+                 <div class="form-group">
+                   <label for="email">Email:</label>
+                   <input id="email" formControlName="email" readonly />
+                 </div>
+                 <div class="form-group">
+                   <label for="customerSince">Member Since:</label>
+                   <input id="customerSince" [value]="customer()?.customer_since | date:'mediumDate'" readonly />
+                 </div>
+               </div>
               <div class="form-actions">
                 @if (!editingProfile()) {
                   <button type="button" class="edit-button" (click)="editingProfile.set(true)">Edit Profile</button>
@@ -78,14 +82,23 @@
                     <p>{{ address.address_2 }}</p>
                   }
                   <p>{{ address.city }}, {{ address.state }} {{ address.zip }}</p>
-                  @if (address.is_default) {
-                    <span class="default-badge">Default</span>
-                  }
+                   @if (customer()?.default_shipping_address_id === address.address_id && address.address_type === 'shipping') {
+                     <span class="default-badge">Default Shipping</span>
+                   }
+                   @if (customer()?.default_billing_address_id === address.address_id && address.address_type === 'billing') {
+                     <span class="default-badge">Default Billing</span>
+                   }
                 </div>
-                <div class="address-actions">
-                  <button class="edit-button" (click)="openAddressModal(address.address_id!)">Edit</button>
-                  <button class="delete-button" (click)="deleteAddress(address.address_id!)">Delete</button>
-                </div>
+                 <div class="address-actions">
+                   <button class="edit-button" (click)="openAddressModal(address.address_id!)">Edit</button>
+                   @if (address.address_type === 'shipping' && customer()?.default_shipping_address_id !== address.address_id) {
+                     <button class="default-button" (click)="setDefaultShippingAddress(address.address_id!)">Set as Default Shipping</button>
+                   }
+                   @if (address.address_type === 'billing' && customer()?.default_billing_address_id !== address.address_id) {
+                     <button class="default-button" (click)="setDefaultBillingAddress(address.address_id!)">Set as Default Billing</button>
+                   }
+                   <button class="delete-button" (click)="deleteAddress(address.address_id!)">Delete</button>
+                 </div>
               </div>
             }
           </div>
@@ -104,14 +117,17 @@
                   <p>{{ maskCardNumber(card.card_number) }}</p>
                   <p>{{ card.card_holder_name }}</p>
                   <p>Expires: {{ card.card_expires }}</p>
-                  @if (card.is_default) {
-                    <span class="default-badge">Default</span>
-                  }
+                   @if (customer()?.default_credit_card_id === card.card_id) {
+                     <span class="default-badge">Default</span>
+                   }
                 </div>
-                <div class="card-actions">
-                  <button class="edit-button" (click)="openCreditCardModal(card.card_id!)">Edit</button>
-                  <button class="delete-button" (click)="deleteCreditCard(card.card_id!)">Delete</button>
-                </div>
+                 <div class="card-actions">
+                   <button class="edit-button" (click)="openCreditCardModal(card.card_id!)">Edit</button>
+                   @if (customer()?.default_credit_card_id !== card.card_id) {
+                     <button class="default-button" (click)="setDefaultCreditCard(card.card_id!)">Set as Default</button>
+                   }
+                   <button class="delete-button" (click)="deleteCreditCard(card.card_id!)">Delete</button>
+                 </div>
               </div>
             }
           </div>
@@ -187,12 +203,7 @@
           <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getAddressErrorMessage('zip') }}</small>
         }
       </div>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" formControlName="is_default" />
-          Set as default address
-        </label>
-      </div>
+
     </div>
     <div class="form-actions">
       <button type="submit" class="save-button" [disabled]="!addressFormState().canSave" [class.active]="addressFormState().canSave" [style]="addressFormState().canSave ? 'background-color: #28a745 !important; box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4) !important; border: 1px solid #218838 !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important; cursor: pointer !important;' : 'background-color: #cccccc !important; color: #666666 !important; cursor: not-allowed !important; opacity: 0.6 !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important;'">{{ editingAddressId() ? 'Update Address' : 'Add Address' }}</button>
@@ -248,12 +259,7 @@
           <small class="error" [style]="'margin-left: 1rem !important; display: inline-block !important; font-size: var(--error-font-size) !important; font-family: var(--base-font-family) !important; color: #c40000 !important;'">{{ getCardErrorMessage('card_cvv') }}</small>
         }
       </div>
-      <div class="form-group">
-        <label>
-          <input type="checkbox" formControlName="is_default" />
-          Set as default card
-        </label>
-      </div>
+
     </div>
     <div class="form-actions">
       <button type="submit" class="save-button" [disabled]="!creditCardFormState().canSave" [class.active]="creditCardFormState().canSave" [style]="creditCardFormState().canSave ? 'background-color: #28a745 !important; box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4) !important; border: 1px solid #218838 !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important; cursor: pointer !important;' : 'background-color: #cccccc !important; color: #666666 !important; cursor: not-allowed !important; opacity: 0.6 !important; font-size: var(--button-font-size) !important; font-family: var(--base-font-family) !important;'">{{ editingCardId() ? 'Update Credit Card' : 'Add Credit Card' }}</button>
