@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://pocstore.local/customers',
+  apiUrl: 'https://pocstore.local/api/v1',
   keycloak: {
     issuer: 'https://keycloak.local/realms/pocstore-realm',
     redirectUri: window.location.origin,

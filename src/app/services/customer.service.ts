@@ -12,7 +12,7 @@ import { NotificationService } from '../core/notification/notification.service';
 })
 export class CustomerService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = environment.apiUrl;
+  private readonly apiUrl = environment.apiUrl + "/customers";
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly notificationService = inject(NotificationService);
 
