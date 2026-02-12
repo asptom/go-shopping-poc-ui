@@ -59,27 +59,22 @@ export class CheckoutComponent implements OnInit {
     // Initialize all forms
     this.initializeForms();
 
-    // Load customer data if user is authenticated
-    this.loadCustomerData();
-
-    // Pre-fill forms if user data is available
-    this.prefillForms();
-
-    // Set up effect to pre-fill forms when customer data loads
-    effect(() => {
-      const customer = this.customer();
-      if (customer) {
-        this.prefillForms();
-      }
-    });
+    // Load customer data and pre-fill forms when ready
+    this.loadCustomerDataAndPrefill();
   }
 
-  private async loadCustomerData(): Promise<void> {
+  private async loadCustomerDataAndPrefill(): Promise<void> {
+    // First, pre-fill with user data that's immediately available
+    this.prefillForms();
+
+    // Then load customer data and pre-fill again when available
     const user = this.userData();
     if (user?.email) {
-      // Load customer data from the store
       await this.customerStore.loadCustomer(user.email);
     }
+
+    // Pre-fill after customer data loads
+    this.prefillForms();
   }
 
   private initializeForms(): void {
