@@ -1,0 +1,91 @@
+.filters-panel {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ddd;
+  
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #131921;
+  }
+  
+  .btn-clear {
+    background: none;
+    border: none;
+    color: #007185;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: underline;
+    
+    &:hover {
+      color: #c7511f;
+    }
+  }
+}
+
+.filter-section {
+  margin-bottom: 24px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #131921;
+    margin-bottom: 12px;
+  }
+}
+
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  
+  &.collapsed {
+    max-height: 300px;
+    overflow: hidden;
+  }
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #0f1111;
+  
+  input {
+    cursor: pointer;
+  }
+  
+  &:hover {
+    color: #c7511f;
+  }
+}
+
+.show-more-btn {
+  background: none;
+  border: none;
+  color: #007185;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 0;
+  
+  &:hover {
+    color: #c7511f;
+    text-decoration: underline;
+  }
+}

@@ -19,6 +19,16 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
         title: 'Profile - GoShopping'
       },
+      {
+        path: 'products',
+        loadComponent: () => import('./features/products/product-list/product-list.component').then(m => m.ProductListComponent),
+        title: 'Products - GoShopping'
+      },
+      {
+        path: 'products/:id',
+        loadComponent: () => import('./features/products/product-detail/product-detail.component').then(m => m.ProductDetailComponent),
+        title: 'Product Details - GoShopping'
+      },
       // Add other feature routes here
     ]
   }

@@ -112,6 +112,25 @@
   }
 }
 
+.clear-search-button {
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+
+  &:hover {
+    color: #131921;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
 .search-button {
   background-color: #febd69;
   border: none;

@@ -1,0 +1,31 @@
+<div class="image-gallery">
+  <!-- Main Image -->
+  <div class="main-image-container">
+    <img 
+      [src]="selectedImageUrl" 
+      [alt]="'Product image'"
+      class="main-image"
+      (error)="$event.target.src = '/assets/placeholder-product.jpg'">
+  </div>
+
+  <!-- Thumbnails -->
+  <div class="thumbnails-container" *ngIf="images.length > 1">
+    <button 
+      class="thumbnail"
+      *ngFor="let image of images"
+      [class.active]="image.id === selectedImage?.id"
+      (click)="selectImage(image)">
+      <img 
+        [src]="getImageUrl(image)" 
+        [alt]="'Thumbnail'"
+        loading="lazy"
+        (error)="$event.target.src = '/assets/placeholder-product.jpg'">
+    </button>
+  </div>
+
+  <!-- No Images State -->
+  <div class="no-images" *ngIf="images.length === 0">
+    <img src="/assets/placeholder-product.jpg" alt="No image available">
+    <p>No images available</p>
+  </div>
+</div>

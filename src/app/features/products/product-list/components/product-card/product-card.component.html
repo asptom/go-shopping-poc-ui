@@ -1,0 +1,37 @@
+<article class="product-card" (click)="onViewDetails()">
+  <div class="image-container">
+    <img 
+      [src]="mainImageUrl" 
+      [alt]="product.name"
+      loading="lazy"
+      (error)="$event.target.src = '/assets/placeholder-product.jpg'">
+    
+    <div class="discount-badge" *ngIf="hasDiscount">
+      -{{ discountPercentage }}%
+    </div>
+    
+    <button 
+      class="quick-view-btn"
+      (click)="onQuickView($event)">
+      Quick View
+    </button>
+  </div>
+  
+  <div class="product-info">
+    <h3 class="product-name">{{ product.name }}</h3>
+    
+    <div class="brand">{{ product.brand }}</div>
+    
+    <div class="price-section">
+      <span class="final-price">{{ product.final_price | currency:product.currency }}</span>
+      <span class="initial-price" *ngIf="hasDiscount">
+        {{ product.initial_price | currency:product.currency }}
+      </span>
+    </div>
+    
+    <div class="stock-status" [class.in-stock]="product.in_stock">
+      <span class="status-dot"></span>
+      {{ product.in_stock ? 'In Stock' : 'Out of Stock' }}
+    </div>
+  </div>
+</article>
