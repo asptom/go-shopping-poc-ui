@@ -33,5 +33,12 @@
       <span class="status-dot"></span>
       {{ product.in_stock ? 'In Stock' : 'Out of Stock' }}
     </div>
+    
+    <button 
+      class="btn-add-cart"
+      *ngIf="product.in_stock"
+      (click)="onAddToCart($event)">
+      Add to Cart
+    </button>
   </div>
 </article>

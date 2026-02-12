@@ -1,0 +1,154 @@
+// Cart summary component styles
+
+.cart-summary {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.summary-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #131921;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #ff9900;
+}
+
+.summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #666;
+
+  &.total {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #131921;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+    margin-top: 0.5rem;
+  }
+
+  &.discount {
+    color: #28a745;
+  }
+}
+
+.label {
+  color: #666;
+}
+
+.value {
+  font-weight: 500;
+  color: #131921;
+}
+
+.free-shipping {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.summary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.btn-checkout {
+  background: linear-gradient(180deg, #ffd700 0%, #ff9900 100%);
+  border: 1px solid #a88734;
+  color: #131921;
+  padding: 0.875rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(180deg, #ffcc00 0%, #ff8c00 100%);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-continue {
+  display: block;
+  text-align: center;
+  background: transparent;
+  border: 1px solid #ddd;
+  color: #131921;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f8f9fa;
+    border-color: #007185;
+    color: #007185;
+  }
+}
+
+.btn-clear {
+  background: transparent;
+  border: none;
+  color: #dc3545;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #a71d2a;
+  }
+}
+
+.secure-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+  color: #28a745;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.secure-icon {
+  width: 16px;
+  height: 16px;
+}
+
+// Responsive styles
+@media (max-width: 640px) {
+  .cart-summary {
+    padding: 1rem;
+  }
+
+  .summary-title {
+    font-size: 1.125rem;
+  }
+
+  .summary-row.total {
+    font-size: 1rem;
+  }
+}

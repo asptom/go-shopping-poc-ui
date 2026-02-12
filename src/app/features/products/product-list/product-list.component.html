@@ -46,11 +46,12 @@
 
       <!-- Product Grid -->
       <div class="product-grid" *ngIf="products().length > 0">
-        <app-product-card 
+        <app-product-card
           *ngFor="let product of products(); trackBy: trackByProductId"
           [product]="product"
           (viewDetails)="onViewDetails($event)"
-          (quickView)="onQuickView($event)">
+          (quickView)="onQuickView($event)"
+          (addToCart)="onAddToCart($event)">
         </app-product-card>
       </div>
 

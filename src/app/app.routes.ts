@@ -29,7 +29,16 @@ export const routes: Routes = [
         loadComponent: () => import('./features/products/product-detail/product-detail.component').then(m => m.ProductDetailComponent),
         title: 'Product Details - GoShopping'
       },
-      // Add other feature routes here
+      {
+        path: 'cart',
+        loadChildren: () => import('./features/cart/cart.routes').then(m => m.cartRoutes),
+        title: 'Shopping Cart - GoShopping'
+      },
+      {
+        path: 'checkout',
+        loadChildren: () => import('./features/checkout/checkout.routes').then(m => m.checkoutRoutes),
+        title: 'Checkout - GoShopping'
+      }
     ]
   }
 ];

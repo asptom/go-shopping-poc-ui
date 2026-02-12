@@ -1,0 +1,47 @@
+<!-- Cart Item Template -->
+<div class="cart-item">
+  <!-- Product Info -->
+  <div class="product-info">
+    <div class="product-details">
+      <h3 class="product-name">{{ item.product_name }}</h3>
+      <span class="product-id">Item #{{ item.line_number }}</span>
+      <span class="unit-price">{{ item.unit_price | currency:currency }} each</span>
+    </div>
+  </div>
+
+  <!-- Quantity Controls -->
+  <div class="quantity-section">
+    <div class="quantity-controls">
+      <button 
+        class="btn-quantity" 
+        (click)="decrementQuantity()"
+        [disabled]="item.quantity <= 1"
+        aria-label="Decrease quantity">
+        -
+      </button>
+      <input 
+        type="number" 
+        class="quantity-input"
+        [value]="item.quantity"
+        (change)="onQuantityChange($event)"
+        min="1"
+        max="99"
+        aria-label="Quantity">
+      <button 
+        class="btn-quantity" 
+        (click)="incrementQuantity()"
+        [disabled]="item.quantity >= 99"
+        aria-label="Increase quantity">
+        +
+      </button>
+    </div>
+    <button class="btn-remove" (click)="onRemove()">
+      Delete
+    </button>
+  </div>
+
+  <!-- Price -->
+  <div class="price-section">
+    <span class="item-total">{{ item.total_price | currency:currency }}</span>
+  </div>
+</div>

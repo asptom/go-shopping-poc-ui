@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ProductStore } from '../../../store/product/product.store';
+import { CartStore } from '../../../store';
 import { BreadcrumbItem, Product, SortOption, ProductFilters } from '../../../models/product';
 import { ProductCardComponent } from './components/product-card/product-card.component';
 import { ProductFiltersComponent } from './components/product-filters/product-filters.component';
@@ -31,6 +32,7 @@ import { QuickViewModalComponent } from './components/quick-view-modal/quick-vie
 })
 export class ProductListComponent implements OnInit, OnDestroy {
   readonly productStore = inject(ProductStore);
+  private readonly cartStore = inject(CartStore);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private destroy$ = new Subject<void>();
@@ -121,6 +123,12 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   onViewDetailsFromQuickView(product: Product): void {
     this.router.navigate(['/products', product.id]);
+  }
+
+  async onAddToCart(product: Product): Promise<void> {
+    if (product.in_stock) {
+      await this.cartStore.addItem(product.id.toString(), 1);
+    }
   }
 
   trackByProductId(index: number, product: Product): number {

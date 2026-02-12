@@ -64,6 +64,7 @@ export class ProductStore {
   readonly searchQuery!: ReturnType<typeof computed<string | null>>;
   readonly isFiltered!: ReturnType<typeof computed<boolean>>;
   readonly sortedProducts!: ReturnType<typeof computed<Product[]>>;
+  readonly categories!: ReturnType<typeof computed<string[]>>;
 
   constructor() {
     // Create all computed signals in constructor to ensure proper injection context
@@ -93,7 +94,7 @@ export class ProductStore {
     this.sortedProducts = computed(() => {
       const products = untracked(() => this.state().products);
       const sortBy = this.state().sortBy;
-      
+
       switch (sortBy) {
         case 'name_asc':
           return [...products].sort((a, b) => a.name.localeCompare(b.name));
@@ -108,6 +109,18 @@ export class ProductStore {
         default:
           return [...products];
       }
+    });
+
+    // Unique categories derived from loaded products
+    this.categories = computed(() => {
+      const products = this.state().products;
+      const uniqueCategories = new Set<string>();
+      products.forEach(product => {
+        if (product.category) {
+          uniqueCategories.add(product.category);
+        }
+      });
+      return Array.from(uniqueCategories).sort();
     });
   }
 

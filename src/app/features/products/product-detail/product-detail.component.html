@@ -64,11 +64,33 @@
         </div>
 
         <div class="actions">
+          <div class="quantity-selector" *ngIf="product()!.in_stock">
+            <label>Quantity:</label>
+            <div class="quantity-controls">
+              <button 
+                class="btn-quantity" 
+                (click)="onQuantityChange(-1)"
+                [disabled]="quantity() <= 1 || addingToCart()">
+                -
+              </button>
+              <span class="quantity-value">{{ quantity() }}</span>
+              <button 
+                class="btn-quantity" 
+                (click)="onQuantityChange(1)"
+                [disabled]="quantity() >= 10 || addingToCart()">
+                +
+              </button>
+            </div>
+          </div>
+          
           <button 
             class="btn-add-cart"
-            [disabled]="!product()!.in_stock"
+            [disabled]="!product()!.in_stock || addingToCart()"
             (click)="onAddToCart()">
-            {{ product()!.in_stock ? 'Add to Cart' : 'Out of Stock' }}
+            <span *ngIf="!addingToCart()">
+              {{ product()!.in_stock ? 'Add to Cart' : 'Out of Stock' }}
+            </span>
+            <span *ngIf="addingToCart()">Adding...</span>
           </button>
         </div>
 

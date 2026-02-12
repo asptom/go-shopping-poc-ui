@@ -1,0 +1,59 @@
+<!-- Cart Summary Template -->
+<div class="cart-summary">
+  <h2 class="summary-title">Order Summary</h2>
+  
+  <div class="summary-details">
+    <div class="summary-row">
+      <span class="label">Items ({{ itemCount }}):</span>
+      <span class="value">{{ subtotal | currency:currency }}</span>
+    </div>
+    
+    <div class="summary-row">
+      <span class="label">Tax:</span>
+      <span class="value">{{ tax | currency:currency }}</span>
+    </div>
+    
+    <div class="summary-row">
+      <span class="label">Shipping:</span>
+      <span class="value">
+        <span *ngIf="shipping === 0" class="free-shipping">FREE</span>
+        <span *ngIf="shipping > 0">{{ shipping | currency:currency }}</span>
+      </span>
+    </div>
+    
+    <div class="summary-row discount" *ngIf="false">
+      <span class="label">Discount:</span>
+      <span class="value">-$0.00</span>
+    </div>
+    
+    <div class="summary-row total">
+      <span class="label">Order Total:</span>
+      <span class="value">{{ total | currency:currency }}</span>
+    </div>
+  </div>
+
+  <div class="summary-actions">
+    <button 
+      class="btn-checkout"
+      [disabled]="!canCheckout"
+      [routerLink]="['/checkout']">
+      Proceed to Checkout
+    </button>
+    
+    <a [routerLink]="['/products']" class="btn-continue">
+      Continue Shopping
+    </a>
+    
+    <button class="btn-clear" (click)="onClearCart()">
+      Clear Cart
+    </button>
+  </div>
+
+  <div class="secure-badge">
+    <svg class="secure-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+    </svg>
+    <span>Secure checkout</span>
+  </div>
+</div>

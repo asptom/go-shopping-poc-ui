@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, effect, computed, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Product, ProductImage } from '../../../../../models/product';
@@ -15,6 +15,7 @@ export class ProductCardComponent {
   @Input() product!: Product;
   @Output() viewDetails = new EventEmitter<Product>();
   @Output() quickView = new EventEmitter<Product>();
+  @Output() addToCart = new EventEmitter<Product>();
 
   private productService = inject(ProductService);
 
@@ -64,5 +65,12 @@ export class ProductCardComponent {
   onQuickView(event: Event): void {
     event.stopPropagation();
     this.quickView.emit(this.product);
+  }
+
+  onAddToCart(event: Event): void {
+    event.stopPropagation();
+    if (this.product.in_stock) {
+      this.addToCart.emit(this.product);
+    }
   }
 }

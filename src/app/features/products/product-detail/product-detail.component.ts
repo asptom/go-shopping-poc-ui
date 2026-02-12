@@ -4,6 +4,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ProductStore } from '../../../store/product/product.store';
 import { ProductService } from '../../../services/product.service';
+import { CartStore } from '../../../store';
 import { BreadcrumbItem, Product } from '../../../models/product';
 import { ImageGalleryComponent } from './components/image-gallery/image-gallery.component';
 import { RelatedProductsComponent } from './components/related-products/related-products.component';
@@ -28,6 +29,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   private ngZone = inject(NgZone);
   private productStore = inject(ProductStore);
   private productService = inject(ProductService);
+  private cartStore = inject(CartStore);
   private destroy$ = new Subject<void>();
   private breadcrumbEffectRef?: EffectRef;
 
@@ -37,6 +39,10 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   error!: Signal<string | null>;
   
   breadcrumbs = signal<BreadcrumbItem[]>([]);
+  
+  // Quantity selector state
+  quantity = signal(1);
+  addingToCart = signal(false);
 
   constructor() {
     // Initialize store signals in constructor
@@ -105,9 +111,26 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     return this.productService.parseAvailableSizes(p.all_available_sizes);
   }
 
-  onAddToCart(): void {
-    // Placeholder - cart feature to be implemented separately
-    console.log('Add to cart:', this.product()?.id);
+  async onAddToCart(): Promise<void> {
+    const product = this.product();
+    if (!product || !product.in_stock || this.addingToCart()) return;
+
+    this.addingToCart.set(true);
+    
+    try {
+      await this.cartStore.addItem(product.id.toString(), this.quantity());
+      this.quantity.set(1); // Reset quantity
+    } finally {
+      this.addingToCart.set(false);
+    }
+  }
+
+  onQuantityChange(delta: number): void {
+    const current = this.quantity();
+    const newQuantity = current + delta;
+    if (newQuantity >= 1 && newQuantity <= 10) {
+      this.quantity.set(newQuantity);
+    }
   }
 
   onCategoryClick(): void {

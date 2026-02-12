@@ -1,0 +1,74 @@
+// Cart icon component styles
+// Amazon-inspired styling with #131921/#ff9900 color scheme
+
+:host {
+  display: block;
+}
+
+.cart-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  position: relative;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #ff9900;
+  color: #131921;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.cart-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.cart-text {
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .cart-text {
+    display: none;
+  }
+
+  .cart-link {
+    padding: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cart-count {
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    top: -6px;
+    right: -6px;
+  }
+
+  .cart-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
