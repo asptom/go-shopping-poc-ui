@@ -38,6 +38,11 @@ export const routes: Routes = [
         path: 'checkout',
         loadChildren: () => import('./features/checkout/checkout.routes').then(m => m.checkoutRoutes),
         title: 'Checkout - GoShopping'
+      },
+      {
+        path: 'order-confirmation',
+        loadChildren: () => import('./features/order-confirmation/order-confirmation.routes').then(m => m.orderConfirmationRoutes),
+        title: 'Order Confirmation - GoShopping'
       }
     ]
   }

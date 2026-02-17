@@ -277,45 +277,38 @@ export class CartStore {
   }
 
   /**
-   * Initiates the checkout process
-   * @returns True if checkout was successful
+   * Prepares cart for checkout - validates cart is ready
+   * @returns True if cart is ready for checkout
    */
-  async checkout(): Promise<boolean> {
-    const cartId = this.state().cartId;
-    if (!cartId) return false;
-
-    // Validate cart is ready for checkout
+  async prepareForCheckout(): Promise<boolean> {
     if (!this.canCheckout()) {
       this.notificationService.showError('Please complete all required information before checkout');
       return false;
     }
+    return true;
+  }
 
-    this.setLoading(true);
+  /**
+   * Clears cart after successful order placement
+   */
+  async clearCartAfterOrder(): Promise<void> {
+    const cartId = this.state().cartId;
+    if (!cartId) return;
 
-    try {
-      const cart = await firstValueFrom(this.cartService.checkout(cartId));
-      this.state.update(s => ({
-        ...s,
-        cart: null,
-        cartId: null,
-        checkoutStep: 'confirmation'
-      }));
-      this.clearPersistedCart();
-      this.notificationService.showSuccess('Order placed successfully!');
-      return true;
-    } catch (error) {
-      this.handleError(error, 'Checkout failed');
-      return false;
-    } finally {
-      this.setLoading(false);
-    }
+    this.clearPersistedCart();
+    this.state.update(s => ({
+      ...s,
+      cart: null,
+      cartId: null,
+      checkoutStep: 'cart'
+    }));
   }
 
   /**
    * Sets the current checkout step
    * @param step The checkout step to set
    */
-  setCheckoutStep(step: CartStoreState['checkoutStep']): void {
+  setCheckoutStep(step: Exclude<CartStoreState['checkoutStep'], 'confirmation'>): void {
     this.state.update(s => ({ ...s, checkoutStep: step }));
   }
 

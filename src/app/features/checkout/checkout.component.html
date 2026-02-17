@@ -113,8 +113,8 @@
               <button 
                 type="submit" 
                 class="btn-primary"
-                [disabled]="loading()">
-                {{ loading() ? 'Saving...' : 'Continue to Shipping' }}
+                [disabled]="cartLoading()">
+                {{ cartLoading() ? 'Saving...' : 'Continue to Shipping' }}
               </button>
             </div>
           </form>
@@ -237,8 +237,8 @@
               <button 
                 type="submit" 
                 class="btn-primary"
-                [disabled]="loading()">
-                {{ loading() ? 'Saving...' : (sameAsShipping() ? 'Continue to Payment' : 'Continue to Billing') }}
+                [disabled]="cartLoading()">
+                {{ cartLoading() ? 'Saving...' : (sameAsShipping() ? 'Continue to Payment' : 'Continue to Billing') }}
               </button>
             </div>
           </form>
@@ -347,8 +347,8 @@
               <button 
                 type="submit" 
                 class="btn-primary"
-                [disabled]="loading()">
-                {{ loading() ? 'Saving...' : 'Continue to Payment' }}
+                [disabled]="cartLoading()">
+                {{ cartLoading() ? 'Saving...' : 'Continue to Payment' }}
               </button>
             </div>
           </form>
@@ -464,8 +464,8 @@
               <button 
                 type="submit" 
                 class="btn-primary"
-                [disabled]="loading()">
-                {{ loading() ? 'Saving...' : 'Review Order' }}
+                [disabled]="cartLoading()">
+                {{ cartLoading() ? 'Saving...' : 'Review Order' }}
               </button>
             </div>
           </form>
@@ -473,53 +473,74 @@
 
         <!-- Step 5: Review & Confirm -->
         <div class="form-section review-section" *ngIf="currentStep() === 5">
-          <h2>Review Your Order</h2>
-          
-          <div class="review-block">
-            <h3>Contact Information</h3>
-            <p>{{ contactForm.value.firstName }} {{ contactForm.value.lastName }}</p>
-            <p>{{ contactForm.value.email }}</p>
-            <p>{{ contactForm.value.phone }}</p>
-            <button class="btn-edit" (click)="goToStep(1)">Edit</button>
+          <!-- Awaiting Order State -->
+          <div class="awaiting-order-state" *ngIf="isAwaitingOrder()">
+            <div class="spinner"></div>
+            <h3>Processing Your Order...</h3>
+            <p>Please wait while we confirm your order. This may take a few moments.</p>
+            <p class="sse-status">Connected to real-time order updates</p>
           </div>
 
-          <div class="review-block">
-            <h3>Shipping Address</h3>
-            <p>{{ shippingForm.value.firstName }} {{ shippingForm.value.lastName }}</p>
-            <p>{{ shippingForm.value.address1 }}</p>
-            <p *ngIf="shippingForm.value.address2">{{ shippingForm.value.address2 }}</p>
-            <p>{{ shippingForm.value.city }}, {{ shippingForm.value.state }} {{ shippingForm.value.zip }}</p>
-            <button class="btn-edit" (click)="goToStep(2)">Edit</button>
-          </div>
-
-          <div class="review-block" *ngIf="!sameAsShipping()">
-            <h3>Billing Address</h3>
-            <p>{{ billingForm.value.firstName }} {{ billingForm.value.lastName }}</p>
-            <p>{{ billingForm.value.address1 }}</p>
-            <p *ngIf="billingForm.value.address2">{{ billingForm.value.address2 }}</p>
-            <p>{{ billingForm.value.city }}, {{ billingForm.value.state }} {{ billingForm.value.zip }}</p>
-            <button class="btn-edit" (click)="goToStep(3)">Edit</button>
-          </div>
-
-          <div class="review-block">
-            <h3>Payment Method</h3>
-            <p>{{ paymentForm.value.cardType | titlecase }} ending in {{ paymentForm.value.cardNumber?.slice(-4) }}</p>
-            <p>{{ paymentForm.value.cardHolder }}</p>
-            <p>Expires: {{ paymentForm.value.expiryMonth }}/{{ paymentForm.value.expiryYear }}</p>
-            <button class="btn-edit" (click)="goToStep(sameAsShipping() ? 3 : 4)">Edit</button>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-secondary" (click)="previousStep()">
-              Back
+          <!-- Error State -->
+          <div class="checkout-error" *ngIf="orderError() && !isAwaitingOrder()">
+            <div class="error-icon">⚠️</div>
+            <h3>Checkout Error</h3>
+            <p>{{ orderError() }}</p>
+            <button type="button" class="btn-primary" (click)="retryCheckout()">
+              Try Again
             </button>
-            <button 
-              type="button" 
-              class="btn-primary btn-place-order"
-              (click)="completeCheckout()"
-              [disabled]="loading()">
-              {{ loading() ? 'Processing...' : 'Place Order' }}
-            </button>
+          </div>
+
+          <!-- Review Content -->
+          <div *ngIf="!isAwaitingOrder() && !orderError()">
+            <h2>Review Your Order</h2>
+            
+            <div class="review-block">
+              <h3>Contact Information</h3>
+              <p>{{ contactForm.value.firstName }} {{ contactForm.value.lastName }}</p>
+              <p>{{ contactForm.value.email }}</p>
+              <p>{{ contactForm.value.phone }}</p>
+              <button class="btn-edit" (click)="goToStep(1)">Edit</button>
+            </div>
+
+            <div class="review-block">
+              <h3>Shipping Address</h3>
+              <p>{{ shippingForm.value.firstName }} {{ shippingForm.value.lastName }}</p>
+              <p>{{ shippingForm.value.address1 }}</p>
+              <p *ngIf="shippingForm.value.address2">{{ shippingForm.value.address2 }}</p>
+              <p>{{ shippingForm.value.city }}, {{ shippingForm.value.state }} {{ shippingForm.value.zip }}</p>
+              <button class="btn-edit" (click)="goToStep(2)">Edit</button>
+            </div>
+
+            <div class="review-block" *ngIf="!sameAsShipping()">
+              <h3>Billing Address</h3>
+              <p>{{ billingForm.value.firstName }} {{ billingForm.value.lastName }}</p>
+              <p>{{ billingForm.value.address1 }}</p>
+              <p *ngIf="billingForm.value.address2">{{ billingForm.value.address2 }}</p>
+              <p>{{ billingForm.value.city }}, {{ billingForm.value.state }} {{ billingForm.value.zip }}</p>
+              <button class="btn-edit" (click)="goToStep(3)">Edit</button>
+            </div>
+
+            <div class="review-block">
+              <h3>Payment Method</h3>
+              <p>{{ paymentForm.value.cardType | titlecase }} ending in {{ paymentForm.value.cardNumber?.slice(-4) }}</p>
+              <p>{{ paymentForm.value.cardHolder }}</p>
+              <p>Expires: {{ paymentForm.value.expiryMonth }}/{{ paymentForm.value.expiryYear }}</p>
+              <button class="btn-edit" (click)="goToStep(sameAsShipping() ? 3 : 4)">Edit</button>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="previousStep()">
+                Back
+              </button>
+              <button 
+                type="button" 
+                class="btn-primary btn-place-order"
+                (click)="completeCheckout()"
+                [disabled]="isSubmitting()">
+                {{ isSubmitting() ? 'Processing...' : 'Place Order' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -540,7 +561,7 @@
                     type="button"
                     class="qty-btn"
                     (click)="updateItemQuantity(item.line_number, item.quantity - 1)"
-                    [disabled]="loading() || item.quantity <= 1">
+                    [disabled]="cartLoading() || item.quantity <= 1">
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M5 12h14"/>
                     </svg>
@@ -550,7 +571,7 @@
                     type="button"
                     class="qty-btn"
                     (click)="updateItemQuantity(item.line_number, item.quantity + 1)"
-                    [disabled]="loading()">
+                    [disabled]="cartLoading()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M12 5v14M5 12h14"/>
                     </svg>
@@ -560,7 +581,7 @@
                   type="button"
                   class="delete-btn"
                   (click)="removeItem(item.line_number)"
-                  [disabled]="loading()"
+                  [disabled]="cartLoading()"
                   title="Remove item">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>

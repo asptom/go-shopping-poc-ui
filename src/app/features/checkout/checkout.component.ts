@@ -1,12 +1,13 @@
-import { Component, inject, signal, OnInit, Signal, computed, effect } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, Signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { CartStore, CustomerStore } from '../../store';
+import { CartStore, CustomerStore, OrderStore } from '../../store';
 import { AuthService, UserData } from '../../auth';
 import { Cart, CartItem } from '../../models/cart';
 import { Address, CreditCard } from '../../models/customer';
 import { CustomValidators } from '../../shared';
+import { OrderConfirmation } from '../../models/order';
 
 /**
  * Checkout Page Component
@@ -19,9 +20,10 @@ import { CustomValidators } from '../../shared';
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss']
 })
-export class CheckoutComponent implements OnInit {
+export class CheckoutComponent implements OnInit, OnDestroy {
   private readonly cartStore = inject(CartStore);
   private readonly customerStore = inject(CustomerStore);
+  private readonly orderStore = inject(OrderStore);
   private readonly authService = inject(AuthService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
@@ -44,7 +46,13 @@ export class CheckoutComponent implements OnInit {
   readonly shipping: Signal<number> = this.cartStore.shipping;
   readonly total: Signal<number> = this.cartStore.total;
   readonly currency: Signal<string> = this.cartStore.currency;
-  readonly loading: Signal<boolean> = this.cartStore.loading;
+  readonly cartLoading: Signal<boolean> = this.cartStore.loading;
+
+  // Order store data
+  readonly isSubmitting: Signal<boolean> = this.orderStore.isSubmitting;
+  readonly isAwaitingOrder: Signal<boolean> = this.orderStore.isAwaitingOrder;
+  readonly orderError: Signal<string | null> = this.orderStore.error;
+  readonly orderConfirmation = this.orderStore.orderConfirmation;
 
   // User data for pre-filling
   readonly userData: Signal<UserData | null> = this.authService.userData;
@@ -61,6 +69,23 @@ export class CheckoutComponent implements OnInit {
 
     // Load customer data and pre-fill forms when ready
     this.loadCustomerDataAndPrefill();
+
+    // Use effect to watch for order confirmation and navigate
+    effect(() => {
+      const confirmation = this.orderStore.orderConfirmation();
+      if (confirmation) {
+        // Clear cart and navigate
+        this.cartStore.clearCartAfterOrder();
+        this.router.navigate(['/order-confirmation']);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Clean up order store if checkout not complete
+    if (!this.orderStore.hasOrder()) {
+      this.orderStore.destroy();
+    }
   }
 
   private async loadCustomerDataAndPrefill(): Promise<void> {
@@ -302,11 +327,29 @@ export class CheckoutComponent implements OnInit {
     this.nextStep();
   }
 
-  // Complete checkout
+  // Complete checkout - delegates to OrderStore
   async completeCheckout(): Promise<void> {
-    const success = await this.cartStore.checkout();
-    if (success) {
-      this.router.navigate(['/order-confirmation']);
+    const cartId = this.cartStore.cartId();
+    if (!cartId) {
+      return;
+    }
+
+    // Validate cart is ready
+    const isReady = await this.cartStore.prepareForCheckout();
+    if (!isReady) {
+      return;
+    }
+
+    // Start checkout via OrderStore
+    await this.orderStore.checkout(cartId);
+    // Navigation handled by subscription in ngOnInit
+  }
+
+  // Retry checkout after error
+  async retryCheckout(): Promise<void> {
+    const cartId = this.cartStore.cartId();
+    if (cartId) {
+      await this.orderStore.retryCheckout(cartId);
     }
   }
 

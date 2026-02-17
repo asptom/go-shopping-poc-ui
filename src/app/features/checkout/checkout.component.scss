@@ -619,3 +619,64 @@
     }
   }
 }
+
+// Awaiting Order State
+.awaiting-order-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #f3f4f6;
+    border-top-color: #ff9900;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    animation: spin 1s linear infinite;
+  }
+  
+  h3 {
+    color: #131921;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  p {
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+  }
+  
+  .sse-status {
+    color: #10b981;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Checkout Error State
+.checkout-error {
+  text-align: center;
+  padding: 3rem 2rem;
+  
+  .error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  h3 {
+    color: #131921;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  p {
+    color: #dc3545;
+    margin-bottom: 1.5rem;
+  }
+}

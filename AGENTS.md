@@ -1,5 +1,9 @@
 # Agent Guidelines for go-shopping-poc-ui
 
+|IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for all Angular tasks in this project
+|IMPORTANT: Follow LLM rules: {./ai/llmrules.md}
+
+
 **Key Architecture Decisions**:
 - Standalone components throughout (Angular 20 default)
 - Signals-based state management for both UI and authentication state
@@ -22,8 +26,8 @@ A history of development steps and decisions can be found in: ```./ai/developmen
 IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning 
 for any Angular tasks.
 
-See ```.ai/angular_best_practices.md```
-See ```.ai/angular_full_llms.txt```
+See ```./ai/angular_best_practices.md```
+See ```./ai/angular_full_llms.txt```
 
 # Angular
 
