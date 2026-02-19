@@ -24,6 +24,71 @@ export class CartItemComponent {
   private productService = inject(ProductService);
 
   /**
+   * Check if item is in pending validation state
+   */
+  get isPendingValidation(): boolean {
+    return this.item.status === 'pending_validation';
+  }
+
+  /**
+   * Check if item is on backorder
+   */
+  get isBackorder(): boolean {
+    return this.item.status === 'backorder';
+  }
+
+  /**
+   * Check if item is confirmed
+   */
+  get isConfirmed(): boolean {
+    const status = this.item.status as string;
+    return status === 'confirmed' || status === 'validated';
+  }
+
+  /**
+   * Get display status text
+   */
+  get statusText(): string {
+    const status = this.item.status as string;
+    switch (status) {
+      case 'pending_validation':
+        return 'Validating...';
+      case 'backorder':
+        return 'Backorder';
+      case 'confirmed':
+      case 'validated':
+        return 'Available';
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Get CSS class for status badge
+   */
+  get statusClass(): string {
+    const status = this.item.status as string;
+    switch (status) {
+      case 'pending_validation':
+        return 'status-pending';
+      case 'backorder':
+        return 'status-backorder';
+      case 'confirmed':
+      case 'validated':
+        return 'status-confirmed';
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Check if quantity controls should be disabled
+   */
+  get isQuantityControlsDisabled(): boolean {
+    return this.isPendingValidation || this.isBackorder;
+  }
+
+  /**
    * Handles quantity input change
    * @param event The input change event
    */
@@ -38,7 +103,7 @@ export class CartItemComponent {
    * Increments the quantity
    */
   incrementQuantity(): void {
-    if (this.item.quantity < 99) {
+    if (this.item.quantity < 99 && !this.isQuantityControlsDisabled) {
       this.updateQuantity.emit(this.item.quantity + 1);
     }
   }
@@ -47,7 +112,7 @@ export class CartItemComponent {
    * Decrements the quantity
    */
   decrementQuantity(): void {
-    if (this.item.quantity > 1) {
+    if (this.item.quantity > 1 && !this.isQuantityControlsDisabled) {
       this.updateQuantity.emit(this.item.quantity - 1);
     }
   }

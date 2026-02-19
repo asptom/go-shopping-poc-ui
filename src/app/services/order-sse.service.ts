@@ -5,11 +5,31 @@ import {
   SSEConnectionState, 
   SSEConnectionStatus 
 } from '../models/order';
+import { 
+  CartItemValidatedEvent, 
+  CartItemBackorderEvent 
+} from '../models/cart';
 import { Subject } from 'rxjs';
+
+function camelToSnakeCase(str: string): string {
+  return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+}
+
+function convertKeysToSnakeCase(obj: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const key in obj) {
+    const snakeKey = camelToSnakeCase(key);
+    result[snakeKey] = obj[key];
+  }
+  return result;
+}
 
 /**
  * Service for managing Server-Sent Events (SSE) connections
  * Uses native EventSource API with signals for reactive state
+ *
+ * Handles both order completion events and cart item validation events
+ * on a single SSE connection to /carts/{cartId}/stream
  */
 @Injectable({
   providedIn: 'root'
@@ -36,11 +56,15 @@ export class OrderSseService {
 
   // Event streams as Subjects for reactive handling
   private readonly orderCreated$ = new Subject<OrderCreatedEvent>();
+  private readonly cartItemValidated$ = new Subject<CartItemValidatedEvent>();
+  private readonly cartItemBackorder$ = new Subject<CartItemBackorderEvent>();
   private readonly connectionError$ = new Subject<Error>();
   private readonly connected$ = new Subject<string>();
 
   // Public observables for consumers
   readonly orderCreated = this.orderCreated$.asObservable();
+  readonly cartItemValidated = this.cartItemValidated$.asObservable();
+  readonly cartItemBackorder = this.cartItemBackorder$.asObservable();
   readonly connectionError = this.connectionError$.asObservable();
   readonly connected = this.connected$.asObservable();
 
@@ -51,14 +75,22 @@ export class OrderSseService {
    */
   connect(cartId: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Prevent multiple connections
+      // Reuse existing connection if already connected to the same cart
+      if (this.eventSource && this.cartId === cartId && this._connectionState().status === 'connected') {
+        console.log('[SSE] Reusing existing connection for cart:', cartId);
+        resolve();
+        return;
+      }
+
+      // Prevent multiple connections - disconnect if different cart
       if (this.eventSource) {
+        console.log('[SSE] Disconnecting existing connection before creating new one');
         this.disconnect();
       }
 
       this.cartId = cartId;
       this.reconnectAttempts = 0;
-      
+
       this._connectionState.set({
         status: 'connecting',
         error: null,
@@ -66,9 +98,12 @@ export class OrderSseService {
       });
 
       const url = `${environment.apiUrl}/carts/${cartId}/stream`;
-      
+      console.log(`[SSE] Connecting to: ${url}`);
+      console.log(`[SSE] Cart ID: ${cartId}`);
+
       try {
         this.eventSource = new EventSource(url);
+        console.log('[SSE] EventSource created successfully');
         this.setupEventHandlers(resolve, reject);
       } catch (error) {
         console.error('[SSE] Failed to create EventSource:', error);
@@ -116,17 +151,18 @@ export class OrderSseService {
 
     // Handle order.created event
     this.eventSource.addEventListener('order.created', (event: MessageEvent) => {
+      console.log('[SSE] ➡️ RAW order.created event received:', event.data);
       try {
         const data: OrderCreatedEvent = JSON.parse(event.data);
-        console.log('[SSE] Order created event received:', data);
-        
+        console.log('[SSE] ✅ Parsed order.created event:', data);
+
         this._connectionState.update(state => ({
           ...state,
           lastEventId: event.lastEventId || null
         }));
-        
+
         this.orderCreated$.next(data);
-        
+
         // Auto-disconnect after receiving order
         this.disconnect();
       } catch (e) {
@@ -134,21 +170,89 @@ export class OrderSseService {
       }
     });
 
+    // Handle cart.item.validated event
+    this.eventSource.addEventListener('cart.item.validated', (event: MessageEvent) => {
+      console.log('[SSE] ➡️ RAW cart.item.validated event received:');
+      console.log('  - Event type:', event.type);
+      console.log('  - Event lastEventId:', event.lastEventId);
+      console.log('  - Raw event data:', event.data);
+
+      try {
+        const parsed = JSON.parse(event.data);
+        const data: CartItemValidatedEvent = convertKeysToSnakeCase(parsed) as unknown as CartItemValidatedEvent;
+        console.log('[SSE] ✅ Parsed cart.item.validated event:', data);
+        console.log('  - line_number:', data.line_number);
+        console.log('  - product_id:', data.product_id);
+        console.log('  - status:', data.status);
+        console.log('  - product_name:', data.product_name);
+
+        this._connectionState.update(state => ({
+          ...state,
+          lastEventId: event.lastEventId || null
+        }));
+
+        this.cartItemValidated$.next(data);
+        console.log('[SSE] 📤 Emitted cartItemValidated$ event');
+      } catch (e) {
+        console.error('[SSE] ❌ Failed to parse cart.item.validated event:', e);
+        console.error('  - Raw data that failed:', event.data);
+      }
+    });
+
+    // Handle cart.item.backorder event
+    this.eventSource.addEventListener('cart.item.backorder', (event: MessageEvent) => {
+      console.log('[SSE] ➡️ RAW cart.item.backorder event received:');
+      console.log('  - Event type:', event.type);
+      console.log('  - Event lastEventId:', event.lastEventId);
+      console.log('  - Raw event data:', event.data);
+
+      try {
+        const parsed = JSON.parse(event.data);
+        const data: CartItemBackorderEvent = convertKeysToSnakeCase(parsed) as unknown as CartItemBackorderEvent;
+        console.log('[SSE] ✅ Parsed cart.item.backorder event:', data);
+        console.log('  - line_number:', data.line_number);
+        console.log('  - product_id:', data.product_id);
+        console.log('  - status:', data.status);
+        console.log('  - backorder_reason:', data.backorder_reason);
+
+        this._connectionState.update(state => ({
+          ...state,
+          lastEventId: event.lastEventId || null
+        }));
+
+        this.cartItemBackorder$.next(data);
+        console.log('[SSE] 📤 Emitted cartItemBackorder$ event');
+      } catch (e) {
+        console.error('[SSE] ❌ Failed to parse cart.item.backorder event:', e);
+        console.error('  - Raw data that failed:', event.data);
+      }
+    });
+
+    // Catch-all for any other events
+    this.eventSource.onmessage = (event) => {
+      console.log('[SSE] 📬 Unhandled message event:', event.type, event.data);
+    };
+
     // Handle errors
     this.eventSource.onerror = (error) => {
-      console.error('[SSE] Connection error:', error);
-      
+      console.error('[SSE] ❌ Connection error occurred');
+      console.error('  - Error object:', error);
+
       const readyState = this.eventSource?.readyState;
       const wasConnected = this._connectionState().status === 'connected';
-      
+
+      console.log(`[SSE] Connection state: readyState=${readyState}, wasConnected=${wasConnected}`);
+      console.log(`[SSE] ReadyState meanings: CONNECTING=0, OPEN=1, CLOSED=2`);
+
       // EventSource.CLOSED = 2
       if (readyState === EventSource.CLOSED) {
+        console.error('[SSE] Connection was closed unexpectedly');
         this._connectionState.set({
           status: 'error',
           error: 'Connection closed unexpectedly',
           lastEventId: this._connectionState().lastEventId
         });
-        
+
         this.connectionError$.next(new Error('Connection closed'));
 
         // Only reject if we haven't connected yet
@@ -214,6 +318,8 @@ export class OrderSseService {
   cleanup(): void {
     this.disconnect();
     this.orderCreated$.complete();
+    this.cartItemValidated$.complete();
+    this.cartItemBackorder$.complete();
     this.connectionError$.complete();
     this.connected$.complete();
   }

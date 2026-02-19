@@ -10,6 +10,12 @@ export class GlobalErrorHandler implements ErrorHandler {
   ) {}
 
   handleError(error: any): void {
+    console.error('========== GLOBAL ERROR HANDLER ==========');
+    console.error('Error:', error);
+    console.error('Error message:', error?.message);
+    console.error('Error stack:', error?.stack);
+    console.error('===========================================');
+    
     const appError = this.errorHandler.handleError(error, 'Global Error Handler');
     
     // Log the error

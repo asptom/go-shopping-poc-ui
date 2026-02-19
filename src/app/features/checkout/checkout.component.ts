@@ -5,6 +5,7 @@ import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, AbstractContro
 import { CartStore, CustomerStore, OrderStore } from '../../store';
 import { AuthService, UserData } from '../../auth';
 import { Cart, CartItem } from '../../models/cart';
+import { NotificationService } from '../../core/notification/notification.service';
 import { Address, CreditCard } from '../../models/customer';
 import { CustomValidators } from '../../shared';
 import { OrderConfirmation } from '../../models/order';
@@ -25,8 +26,19 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   private readonly customerStore = inject(CustomerStore);
   private readonly orderStore = inject(OrderStore);
   private readonly authService = inject(AuthService);
+  private readonly notificationService = inject(NotificationService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+
+  // Effect to watch for order confirmation and navigate - must be in constructor context
+  private readonly orderConfirmationEffect = effect(() => {
+    const confirmation = this.orderStore.orderConfirmation();
+    if (confirmation) {
+      // Clear cart and navigate
+      this.cartStore.clearCartAfterOrder();
+      this.router.navigate(['/order-confirmation']);
+    }
+  });
 
   // Current step in checkout flow
   currentStep = signal<number>(1);
@@ -47,6 +59,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   readonly total: Signal<number> = this.cartStore.total;
   readonly currency: Signal<string> = this.cartStore.currency;
   readonly cartLoading: Signal<boolean> = this.cartStore.loading;
+
+  // Validation state selectors
+  readonly hasPendingValidationItems: Signal<boolean> = this.cartStore.hasPendingValidationItems;
+  readonly hasBackorderItems: Signal<boolean> = this.cartStore.hasBackorderItems;
+  readonly backorderItems: Signal<CartItem[]> = this.cartStore.backorderItems;
 
   // Order store data
   readonly isSubmitting: Signal<boolean> = this.orderStore.isSubmitting;
@@ -69,16 +86,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
     // Load customer data and pre-fill forms when ready
     this.loadCustomerDataAndPrefill();
-
-    // Use effect to watch for order confirmation and navigate
-    effect(() => {
-      const confirmation = this.orderStore.orderConfirmation();
-      if (confirmation) {
-        // Clear cart and navigate
-        this.cartStore.clearCartAfterOrder();
-        this.router.navigate(['/order-confirmation']);
-      }
-    });
   }
 
   ngOnDestroy(): void {
@@ -330,6 +337,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   // Complete checkout - delegates to OrderStore
   async completeCheckout(): Promise<void> {
     const cartId = this.cartStore.cartId();
+    console.log('[CheckoutComponent] Completing checkout for cart:', cartId);
     if (!cartId) {
       return;
     }
@@ -338,6 +346,25 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     const isReady = await this.cartStore.prepareForCheckout();
     if (!isReady) {
       return;
+    }
+
+    // Check for pending validation items
+    if (this.hasPendingValidationItems()) {
+      this.notificationService.showError(
+        'Please wait for all items to be validated before checkout'
+      );
+      return;
+    }
+
+    // Check for backorder items and confirm
+    if (this.hasBackorderItems()) {
+      const confirmBackorder = confirm(
+        `Your cart contains ${this.backorderItems().length} item(s) on backorder. ` +
+        'These items will not ship immediately. Do you want to continue with checkout?'
+      );
+      if (!confirmBackorder) {
+        return;
+      }
     }
 
     // Start checkout via OrderStore

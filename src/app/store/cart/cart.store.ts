@@ -1,11 +1,14 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { CartService } from '../../services/cart.service';
-import { 
-  Cart, 
+import { OrderSseService } from '../../services/order-sse.service';
+import {
+  Cart,
   CartStoreState,
   SetContactRequest,
   AddAddressRequest,
-  SetPaymentRequest 
+  SetPaymentRequest,
+  CartItemValidatedEvent,
+  CartItemBackorderEvent
 } from '../../models/cart';
 import { NotificationService } from '../../core/notification/notification.service';
 import { ErrorHandlerService } from '../../core/error/error-handler.service';
@@ -20,6 +23,7 @@ import { firstValueFrom } from 'rxjs';
 })
 export class CartStore {
   private readonly cartService = inject(CartService);
+  private readonly orderSseService = inject(OrderSseService);
   private readonly notificationService = inject(NotificationService);
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly STORAGE_KEY = 'cart_id';
@@ -58,16 +62,208 @@ export class CartStore {
     this.state().cart?.addresses?.some(a => a.address_type === 'billing') ?? false
   );
   readonly hasPayment = computed(() => !!this.state().cart?.credit_card);
-  readonly canCheckout = computed(() => 
-    !this.isEmpty() && 
-    this.hasContact() && 
-    this.hasShippingAddress() && 
-    this.hasPayment()
+
+  // Validation state computed signals
+  readonly pendingValidationItems = computed(() =>
+    this.items().filter(item => item.status === 'pending_validation')
+  );
+  readonly hasPendingValidationItems = computed(() =>
+    this.pendingValidationItems().length > 0
+  );
+  readonly backorderItems = computed(() =>
+    this.items().filter(item => item.status === 'backorder')
+  );
+  readonly hasBackorderItems = computed(() =>
+    this.backorderItems().length > 0
+  );
+  readonly confirmedItems = computed(() =>
+    this.items().filter(item => {
+      const status = item.status as string;
+      return status === 'confirmed' || status === 'validated';
+    })
+  );
+
+  // Update canCheckout to only require valid items - contact/shipping/payment collected during checkout
+  readonly canCheckout = computed(() =>
+    !this.isEmpty() &&
+    !this.hasPendingValidationItems()
   );
 
   constructor() {
     // Try to load persisted cart on initialization
     this.loadPersistedCart();
+    this.setupSseSubscriptions();
+  }
+
+  // Setup SSE event subscriptions
+  private setupSseSubscriptions(): void {
+    console.log('[CartStore] 🔌 Setting up SSE subscriptions...');
+
+    // Subscribe to item validated events
+    this.orderSseService.cartItemValidated.subscribe({
+      next: (event: CartItemValidatedEvent) => {
+        try {
+          console.log('[CartStore] 📥 Received cartItemValidated event from SSE service');
+          this.handleItemValidated(event);
+        } catch (e) {
+          console.error('[CartStore] ❌ Error in cartItemValidated handler:', e);
+        }
+      },
+      error: (error) => {
+        console.error('[CartStore] ❌ cartItemValidated stream error:', error);
+      }
+    });
+    console.log('[CartStore] ✅ Subscribed to cartItemValidated events');
+
+    // Subscribe to item backorder events
+    this.orderSseService.cartItemBackorder.subscribe({
+      next: (event: CartItemBackorderEvent) => {
+        console.log('[CartStore] 📥 Received cartItemBackorder event from SSE service');
+        this.handleItemBackorder(event);
+      },
+      error: (error) => {
+        console.error('[CartStore] ❌ cartItemBackorder stream error:', error);
+      }
+    });
+    console.log('[CartStore] ✅ Subscribed to cartItemBackorder events');
+
+    // Subscribe to connection errors
+    this.orderSseService.connectionError.subscribe({
+      next: (error: Error) => {
+        console.warn('[CartStore] ⚠️ SSE connection error:', error.message);
+        // Let OrderSseService handle reconnection
+      }
+    });
+    console.log('[CartStore] ✅ Subscribed to connectionError events');
+    console.log('[CartStore] 🔌 SSE subscriptions setup complete');
+  }
+
+  // Handle cart.item.validated event
+  private handleItemValidated(event: CartItemValidatedEvent): void {
+    console.log('[CartStore] 🔄 Processing cart.item.validated event');
+    console.log('  - Event data:', event);
+    console.log('  - Current cart exists:', !!this.state().cart);
+
+    if (!this.state().cart) {
+      console.warn('[CartStore] ⚠️ Cannot process event - no cart loaded');
+      return;
+    }
+
+    const currentItems = this.state().cart!.items;
+    console.log(`[CartStore] 📋 Current cart has ${currentItems.length} items`);
+    console.log('[CartStore] 📋 Current items:', currentItems.map(i => ({ line: i.line_number, status: i.status, name: i.product_name })));
+
+    const matchingItem = currentItems.find(item => item.line_number === event.line_number);
+    if (!matchingItem) {
+      console.warn(`[CartStore] ⚠️ No item found with line_number: ${event.line_number}`);
+      console.warn('[CartStore] ⚠️ Available line_numbers:', currentItems.map(i => i.line_number));
+    } else {
+      console.log(`[CartStore] ✅ Found matching item:`, matchingItem);
+    }
+
+    this.state.update(s => {
+      if (!s.cart) return s;
+
+      const updatedItems = s.cart.items.map(item => {
+        if (item.line_number === event.line_number) {
+          console.log(`[CartStore] 📝 Updating item ${item.line_number}: ${item.status} → ${event.status}`);
+          return {
+            ...item,
+            status: event.status,
+            product_name: event.product_name,
+            unit_price: event.unit_price,
+            total_price: event.total_price
+          };
+        }
+        return item;
+      });
+
+      const updatedState = {
+        ...s,
+        cart: {
+          ...s.cart,
+          items: updatedItems
+        }
+      };
+
+      console.log('[CartStore] ✅ State updated with validated item');
+      console.log(`[CartStore] 📊 Items after update:`, updatedItems.map(i => ({ line: i.line_number, status: i.status })));
+
+      return updatedState;
+    });
+
+    this.notificationService.showSuccess(`${event.product_name} is now available in your cart`);
+  }
+
+  // Handle cart.item.backorder event
+  private handleItemBackorder(event: CartItemBackorderEvent): void {
+    console.log('[CartStore] 🔄 Processing cart.item.backorder event');
+    console.log('  - Event data:', event);
+    console.log('  - Current cart exists:', !!this.state().cart);
+
+    if (!this.state().cart) {
+      console.warn('[CartStore] ⚠️ Cannot process event - no cart loaded');
+      return;
+    }
+
+    const currentItems = this.state().cart!.items;
+    console.log(`[CartStore] 📋 Current cart has ${currentItems.length} items`);
+
+    const matchingItem = currentItems.find(item => item.line_number === event.line_number);
+    if (!matchingItem) {
+      console.warn(`[CartStore] ⚠️ No item found with line_number: ${event.line_number}`);
+      console.warn('[CartStore] ⚠️ Available line_numbers:', currentItems.map(i => i.line_number));
+    } else {
+      console.log(`[CartStore] ✅ Found matching item:`, matchingItem);
+    }
+
+    this.state.update(s => {
+      if (!s.cart) return s;
+
+      const updatedItems = s.cart.items.map(item => {
+        if (item.line_number === event.line_number) {
+          console.log(`[CartStore] 📝 Updating item ${item.line_number}: ${item.status} → ${event.status}`);
+          return {
+            ...item,
+            status: event.status,
+            product_name: event.product_name || item.product_name,
+            unit_price: event.unit_price || item.unit_price,
+            total_price: event.total_price || item.total_price,
+            backorder_reason: event.backorder_reason
+          };
+        }
+        return item;
+      });
+
+      const updatedState = {
+        ...s,
+        cart: {
+          ...s.cart,
+          items: updatedItems
+        }
+      };
+
+      console.log('[CartStore] ✅ State updated with backorder item');
+      console.log(`[CartStore] 📊 Items after update:`, updatedItems.map(i => ({ line: i.line_number, status: i.status })));
+
+      return updatedState;
+    });
+
+    this.notificationService.showWarning(
+      `${event.product_name || 'Item'} is on backorder: ${event.backorder_reason}`
+    );
+  }
+
+  // Connect to SSE when cart is loaded
+  private async connectSse(cartId: string): Promise<void> {
+    console.log(`[CartStore] 🔗 Attempting to connect SSE for cart: ${cartId}`);
+    try {
+      await this.orderSseService.connect(cartId);
+      console.log(`[CartStore] ✅ SSE connected successfully for cart: ${cartId}`);
+    } catch (error) {
+      console.error(`[CartStore] ❌ Failed to connect SSE for cart ${cartId}:`, error);
+      // Non-fatal - cart still works without SSE
+    }
   }
 
   // Actions
@@ -88,6 +284,10 @@ export class CartStore {
         cartId: cart.cart_id
       }));
       this.persistCartId(cart.cart_id);
+
+      // Connect to SSE for real-time validation updates
+      await this.connectSse(cart.cart_id);
+
       this.notificationService.showSuccess('Cart created successfully');
     } catch (error) {
       this.handleError(error, 'Failed to create cart');
@@ -112,6 +312,9 @@ export class CartStore {
         cartId: cart.cart_id
       }));
       this.persistCartId(cart.cart_id);
+
+      // Connect to SSE for real-time validation updates
+      await this.connectSse(cart.cart_id);
     } catch (error) {
       this.handleError(error, 'Failed to load cart');
       // Clear persisted cart if it fails to load
@@ -199,6 +402,10 @@ export class CartStore {
 
     try {
       await firstValueFrom(this.cartService.deleteCart(cartId));
+
+      // Disconnect SSE
+      this.orderSseService.disconnect();
+
       this.state.update(s => ({
         ...s,
         cart: null,
@@ -292,8 +499,8 @@ export class CartStore {
    * Clears cart after successful order placement
    */
   async clearCartAfterOrder(): Promise<void> {
-    const cartId = this.state().cartId;
-    if (!cartId) return;
+    // Disconnect SSE since cart is being cleared
+    this.orderSseService.disconnect();
 
     this.clearPersistedCart();
     this.state.update(s => ({

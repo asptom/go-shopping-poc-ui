@@ -1,6 +1,6 @@
-import { Component, inject, Signal } from '@angular/core';
+import { Component, inject, Signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { CartStore } from '../../store';
 import { Cart, CartItem } from '../../models/cart';
 import { CartItemComponent } from './components/cart-item/cart-item.component';
@@ -26,6 +26,7 @@ import { EmptyCartComponent } from './components/empty-cart/empty-cart.component
 })
 export class CartComponent {
   private readonly cartStore = inject(CartStore);
+  private readonly router = inject(Router);
 
   // Cart store selectors with explicit types
   readonly cart: Signal<Cart | null> = this.cartStore.cart;
@@ -37,6 +38,24 @@ export class CartComponent {
   readonly shipping: Signal<number> = this.cartStore.shipping;
   readonly total: Signal<number> = this.cartStore.total;
   readonly currency: Signal<string> = this.cartStore.currency;
+
+  // Validation state selectors
+  readonly hasPendingItems: Signal<boolean> = this.cartStore.hasPendingValidationItems;
+  readonly hasBackorderItems: Signal<boolean> = this.cartStore.hasBackorderItems;
+  readonly pendingItems: Signal<CartItem[]> = this.cartStore.pendingValidationItems;
+  readonly backorderItems: Signal<CartItem[]> = this.cartStore.backorderItems;
+  readonly canCheckout: Signal<boolean> = this.cartStore.canCheckout;
+
+  // Checkout disabled reason
+  readonly checkoutDisabledReason = computed(() => {
+    if (this.isEmpty()) {
+      return 'Your cart is empty';
+    }
+    if (this.hasPendingItems()) {
+      return 'Please wait for all items to be validated before checkout';
+    }
+    return null;
+  });
 
   /**
    * Updates the quantity of a cart item
@@ -72,6 +91,12 @@ export class CartComponent {
    * Proceeds to checkout
    */
   onProceedToCheckout(): void {
-    this.cartStore.setCheckoutStep('contact');
+    if (this.hasBackorderItems()) {
+      const confirmCheckout = confirm(
+        'Your cart contains items on backorder. These items will not ship immediately. Do you want to continue?'
+      );
+      if (!confirmCheckout) return;
+    }
+    this.router.navigate(['/checkout']);
   }
 }

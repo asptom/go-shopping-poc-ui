@@ -68,6 +68,7 @@ export class OrderStore {
       // Step 1: Initiate checkout via HTTP
       console.log('[OrderStore] Initiating checkout for cart:', cartId);
       await firstValueFrom(this.cartService.checkout(cartId));
+      console.log('[OrderStore] Checkout HTTP call returned');
       
       console.log('[OrderStore] Checkout initiated, connecting to SSE stream...');
       
@@ -78,10 +79,14 @@ export class OrderStore {
       }));
 
       // Step 3: Subscribe to SSE events before connecting
+      console.log('[OrderStore] Subscribing to SSE events...');
       this.subscribeToSseEvents();
+      console.log('[OrderStore] SSE events subscribed');
 
       // Step 4: Connect to SSE
+      console.log('[OrderStore] Connecting to SSE for cart:', cartId);
       await this.orderSseService.connect(cartId);
+      console.log('[OrderStore] SSE connected');
       
       // Step 5: Wait for order.created event with timeout
       const orderConfirmation = await this.waitForOrderCreated(30000);

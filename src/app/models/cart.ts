@@ -23,6 +23,11 @@ export interface Cart {
 }
 
 /**
+ * Cart item validation status
+ */
+export type CartItemStatus = 'confirmed' | 'pending_validation' | 'backorder' | 'validated';
+
+/**
  * Individual item within a cart
  */
 export interface CartItem {
@@ -34,6 +39,39 @@ export interface CartItem {
   unit_price: number;
   quantity: number;
   total_price: number;
+  // Validation status fields for SSE updates
+  status: CartItemStatus;
+  validation_id?: string;
+  backorder_reason?: string;
+}
+
+/**
+ * SSE Event: cart.item.validated
+ * Sent when an item passes validation and is confirmed
+ */
+export interface CartItemValidatedEvent {
+  line_number: string;
+  product_id: string;
+  status: 'confirmed';
+  product_name: string;
+  unit_price: number;
+  quantity: number;
+  total_price: number;
+}
+
+/**
+ * SSE Event: cart.item.backorder
+ * Sent when an item fails validation (out of stock or not found)
+ */
+export interface CartItemBackorderEvent {
+  line_number: string;
+  product_id: string;
+  status: 'backorder';
+  product_name?: string;
+  unit_price?: number;
+  quantity: number;
+  total_price?: number;
+  backorder_reason: string;
 }
 
 /**

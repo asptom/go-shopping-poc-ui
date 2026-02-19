@@ -33,10 +33,10 @@
   </div>
 
   <div class="summary-actions">
-    <button 
+    <button
       class="btn-checkout"
       [disabled]="!canCheckout"
-      [routerLink]="['/checkout']">
+      (click)="onCheckout()">
       Proceed to Checkout
     </button>
     

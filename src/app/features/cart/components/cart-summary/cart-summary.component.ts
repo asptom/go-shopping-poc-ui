@@ -21,6 +21,8 @@ export class CartSummaryComponent {
   @Input() currency = 'USD';
   @Input() itemCount = 0;
   @Input() canCheckout = false;
+  @Input() hasPendingItems = false;
+  @Input() hasBackorderItems = false;
   @Output() checkout = new EventEmitter<void>();
   @Output() clearCart = new EventEmitter<void>();
 

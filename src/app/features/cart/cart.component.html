@@ -19,6 +19,32 @@
 
     <!-- Cart Content -->
     <div class="cart-content" *ngIf="!isEmpty()">
+      <!-- Validation Warnings -->
+      <div class="validation-warnings" *ngIf="hasPendingItems() || hasBackorderItems()">
+        <!-- Pending Items Warning -->
+        <div class="alert alert-info" *ngIf="hasPendingItems()">
+          <span class="alert-icon">&#8635;</span>
+          <div class="alert-content">
+            <strong>Validating Items</strong>
+            <p>{{ pendingItems().length }} item(s) are being validated. Please wait before checking out.</p>
+          </div>
+        </div>
+
+        <!-- Backorder Items Warning -->
+        <div class="alert alert-warning" *ngIf="hasBackorderItems()">
+          <span class="alert-icon">!</span>
+          <div class="alert-content">
+            <strong>Backorder Items</strong>
+            <p>{{ backorderItems().length }} item(s) are on backorder and won't ship immediately.</p>
+            <ul class="backorder-list">
+              <li *ngFor="let item of backorderItems()">
+                {{ item.product_name }} - {{ item.backorder_reason }}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div class="cart-layout">
         <!-- Cart Items Section -->
         <div class="items-section">
@@ -57,10 +83,17 @@
             [total]="total()"
             [currency]="currency()"
             [itemCount]="items().length"
-            [canCheckout]="true"
+            [canCheckout]="canCheckout()"
+            [hasPendingItems]="hasPendingItems()"
+            [hasBackorderItems]="hasBackorderItems()"
             (checkout)="onProceedToCheckout()"
             (clearCart)="onClearCart()">
           </app-cart-summary>
+
+          <!-- Checkout Hint -->
+          <div class="checkout-hint-container" *ngIf="checkoutDisabledReason()">
+            <span class="checkout-hint">{{ checkoutDisabledReason() }}</span>
+          </div>
         </div>
       </div>
     </div>

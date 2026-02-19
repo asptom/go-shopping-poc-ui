@@ -131,6 +131,70 @@
   font-size: 1.125rem;
   font-weight: 600;
   color: #131921;
+
+  &.pending {
+    color: #999;
+  }
+}
+
+// Status badge styles
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+
+  .status-icon {
+    font-size: 0.875rem;
+  }
+
+  &.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  &.status-backorder {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  &.status-confirmed {
+    background-color: #d4edda;
+    color: #155724;
+  }
+}
+
+.backorder-reason {
+  display: block;
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.unit-price.pending {
+  color: #999;
+  font-style: italic;
+}
+
+// Disable styles for pending/backorder items
+.cart-item.pending {
+  opacity: 0.8;
+  background-color: #fafafa;
+}
+
+.cart-item.backorder {
+  background-color: #fff5f5;
+}
+
+.quantity-input:disabled,
+.btn-quantity:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 // Responsive styles

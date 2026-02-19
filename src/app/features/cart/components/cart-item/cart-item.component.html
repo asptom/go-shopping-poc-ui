@@ -1,36 +1,56 @@
 <!-- Cart Item Template -->
-<div class="cart-item">
+<div class="cart-item" [class.pending]="isPendingValidation" [class.backorder]="isBackorder">
   <!-- Product Info -->
   <div class="product-info">
     <div class="product-details">
       <h3 class="product-name">{{ item.product_name }}</h3>
       <span class="product-id">Item #{{ item.line_number }}</span>
-      <span class="unit-price">{{ item.unit_price | currency:currency }} each</span>
+
+      <!-- Status Badge -->
+      <span class="status-badge" [class]="statusClass" *ngIf="statusText">
+        <span class="status-icon" *ngIf="isPendingValidation">&#8635;</span>
+        <span class="status-icon" *ngIf="isBackorder">!</span>
+        <span class="status-icon" *ngIf="isConfirmed">&#10003;</span>
+        {{ statusText }}
+      </span>
+
+      <!-- Backorder Reason -->
+      <span class="backorder-reason" *ngIf="isBackorder && item.backorder_reason">
+        {{ item.backorder_reason }}
+      </span>
+
+      <span class="unit-price" *ngIf="isConfirmed">
+        {{ item.unit_price | currency:currency }} each
+      </span>
+      <span class="unit-price pending" *ngIf="!isConfirmed">
+        Price pending validation
+      </span>
     </div>
   </div>
 
   <!-- Quantity Controls -->
   <div class="quantity-section">
     <div class="quantity-controls">
-      <button 
-        class="btn-quantity" 
+      <button
+        class="btn-quantity"
         (click)="decrementQuantity()"
-        [disabled]="item.quantity <= 1"
+        [disabled]="item.quantity <= 1 || isQuantityControlsDisabled"
         aria-label="Decrease quantity">
         -
       </button>
-      <input 
-        type="number" 
+      <input
+        type="number"
         class="quantity-input"
         [value]="item.quantity"
         (change)="onQuantityChange($event)"
         min="1"
         max="99"
+        [disabled]="isQuantityControlsDisabled"
         aria-label="Quantity">
-      <button 
-        class="btn-quantity" 
+      <button
+        class="btn-quantity"
         (click)="incrementQuantity()"
-        [disabled]="item.quantity >= 99"
+        [disabled]="item.quantity >= 99 || isQuantityControlsDisabled"
         aria-label="Increase quantity">
         +
       </button>
@@ -42,6 +62,11 @@
 
   <!-- Price -->
   <div class="price-section">
-    <span class="item-total">{{ item.total_price | currency:currency }}</span>
+    <span class="item-total" *ngIf="isConfirmed">
+      {{ item.total_price | currency:currency }}
+    </span>
+    <span class="item-total pending" *ngIf="!isConfirmed">
+      --
+    </span>
   </div>
 </div>
