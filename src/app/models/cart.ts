@@ -139,6 +139,7 @@ export interface CreateCartRequest {
  */
 export interface AddItemRequest {
   product_id: string;
+  product_name: string;
   quantity: number;
 }
 

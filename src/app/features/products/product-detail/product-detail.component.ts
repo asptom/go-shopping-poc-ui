@@ -118,7 +118,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     this.addingToCart.set(true);
     
     try {
-      await this.cartStore.addItem(product.id.toString(), this.quantity());
+      await this.cartStore.addItem(product.id.toString(), product.name, this.quantity());
       this.quantity.set(1); // Reset quantity
     } finally {
       this.addingToCart.set(false);

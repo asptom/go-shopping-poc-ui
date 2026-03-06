@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { ErrorHandlerService } from '../core/error/error-handler.service';
 import { NotificationService } from '../core/notification/notification.service';
@@ -79,11 +79,12 @@ export class CartService {
    * Adds an item to the cart
    * @param cartId The UUID of the cart
    * @param productId The product identifier
+   * @param productName The product name
    * @param quantity The quantity to add
    * @returns Observable of the created CartItem
    */
-  addItem(cartId: string, productId: string, quantity: number): Observable<CartItem> {
-    const body: AddItemRequest = { product_id: productId, quantity };
+  addItem(cartId: string, productId: string, productName: string, quantity: number): Observable<CartItem> {
+    const body: AddItemRequest = { product_id: productId, product_name: productName, quantity };
     return this.http.post<CartItem>(`${this.apiUrl}/${cartId}/items`, body).pipe(
       catchError((error: HttpErrorResponse) => {
         const appError = this.errorHandler.handleError(error, 'addItem');
@@ -181,8 +182,11 @@ export class CartService {
    * @returns Observable of the updated Cart after checkout
    */
   checkout(cartId: string): Observable<Cart> {
+    console.log('[CartService] Checkout called for cart:', cartId);
     return this.http.post<Cart>(`${this.apiUrl}/${cartId}/checkout`, {}).pipe(
+      tap(response => console.log('[CartService] Checkout response:', response)),
       catchError((error: HttpErrorResponse) => {
+        console.error('[CartService] Checkout error:', error);
         const appError = this.errorHandler.handleError(error, 'checkout');
         this.notificationService.showError(appError.userMessage);
         return throwError(() => appError);

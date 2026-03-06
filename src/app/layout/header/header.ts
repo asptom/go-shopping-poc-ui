@@ -122,6 +122,10 @@ export class Header implements OnInit, OnDestroy {
     this.authService.login();
   }
 
+  goToOrderHistory(): void {
+    this.router.navigate(['/profile/orders']);
+  }
+
   toggleAccountDropdown(): void {
     console.log('Header: Toggle account dropdown');
     this.accountDropdownOpen.set(!this.accountDropdownOpen());

@@ -1,6 +1,7 @@
 import { Component, inject, signal, effect, computed, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -13,13 +14,14 @@ import { Customer, CreateAddressRequest, CreateCreditCardRequest } from '../../m
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ModalComponent, RouterModule],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss', '../../shared/modal/modal-forms.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   private readonly customerStore = inject(CustomerStore);
   private readonly customerFormService = inject(CustomerFormService);
   private readonly addressFormService = inject(AddressFormService);
@@ -396,6 +398,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   getCreditCardModalTitle(): string {
     return this.editingCardId() ? 'Edit Credit Card' : 'Add Credit Card';
+  }
+
+  goToOrderHistory(): void {
+    this.router.navigate(['/profile/orders']);
   }
 
 

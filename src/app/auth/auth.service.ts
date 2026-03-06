@@ -61,6 +61,13 @@ export class AuthService {
           }
         } else {
           console.log('Ignoring OIDC false state - using persisted authentication');
+          // Ensure the signal is set to true since we have persisted authentication
+          const hasPersisted = this.hasPersistedAuthState();
+          console.log('hasPersistedAuthState():', hasPersisted);
+          if (hasPersisted) {
+            console.log('Setting _isAuthenticated to true');
+            this._isAuthenticated.set(true);
+          }
         }
       }
     }, { allowSignalWrites: true });
@@ -74,6 +81,15 @@ export class AuthService {
         if (userData.userData || !this._isAuthenticated()) {
           this._userData.set(userData.userData as UserData);
           this.persistAuthState();
+        }
+      } else if (this.hasPersistedAuthState()) {
+        // OIDC has no user data but we have persisted auth - reload from storage
+        const persisted = localStorage.getItem(this.STORAGE_KEY);
+        if (persisted) {
+          const authState = JSON.parse(persisted);
+          if (authState.userData) {
+            this._userData.set(authState.userData);
+          }
         }
       }
     }, { allowSignalWrites: true });
@@ -211,25 +227,24 @@ export class AuthService {
 
     // For route protection checks, use persisted state if available
     const currentAuthState = this.isAuthenticated();
-    console.log('No auth code, current auth state:', currentAuthState);
+    const persistedAuth = this.hasPersistedAuthState();
+    console.log('No auth code, current auth state:', currentAuthState, 'persisted auth:', persistedAuth);
 
-    // If we're currently authenticated (from persisted state), allow access
-    if (currentAuthState) {
+    // If we have persisted authentication, allow access
+    if (persistedAuth) {
       console.log('User is authenticated via persisted state, allowing access');
       return of(true);
     }
 
-    // Otherwise, check with OIDC service (but don't let it override persisted state)
+    // Otherwise, check with OIDC service
     return this.oidcSecurityService.checkAuth().pipe(
       map(result => {
         console.log('OIDC checkAuth result for route protection:', result);
-        // Only return false if OIDC also says false AND we have no persisted state
-        return result.isAuthenticated || currentAuthState;
+        return result.isAuthenticated;
       }),
       catchError(error => {
         console.error('OIDC checkAuth error for route protection:', error);
-        // If OIDC check fails, fall back to persisted state
-        return of(currentAuthState);
+        return of(false);
       })
     );
   }

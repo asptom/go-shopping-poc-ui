@@ -43,6 +43,12 @@ export const routes: Routes = [
         path: 'order-confirmation',
         loadChildren: () => import('./features/order-confirmation/order-confirmation.routes').then(m => m.orderConfirmationRoutes),
         title: 'Order Confirmation - GoShopping'
+      },
+      {
+        path: 'profile/orders',
+        loadComponent: () => import('./features/order-history/order-history.component').then(m => m.OrderHistoryComponent),
+        canActivate: [AuthGuard],
+        title: 'Order History - GoShopping'
       }
     ]
   }

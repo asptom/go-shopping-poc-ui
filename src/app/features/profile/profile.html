@@ -19,6 +19,11 @@
             <button (click)="clearError()">Retry</button>
           </div>
         } @else if (customer(); as cust) {
+          <!-- Navigation Bar -->
+          <div class="profile-nav">
+            <a routerLink="/profile" class="nav-link">Profile Information</a>
+            <button (click)="goToOrderHistory()" class="nav-button">Order History</button>
+          </div>
           <!-- Profile Information Section -->
           <div class="profile-section">
             <h2>Profile Information</h2>

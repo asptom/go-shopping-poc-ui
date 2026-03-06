@@ -47,6 +47,6 @@ export class OrderConfirmationComponent implements OnInit {
    */
   viewOrders(): void {
     this.orderStore.clearOrder();
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/profile/orders']);
   }
 }

@@ -13,6 +13,8 @@ import {
 import { NotificationService } from '../../core/notification/notification.service';
 import { ErrorHandlerService } from '../../core/error/error-handler.service';
 import { firstValueFrom } from 'rxjs';
+import { CustomerStore } from '../customer/customer.store';
+import { AuthService } from '../../auth/auth.service';
 
 /**
  * CartStore manages shopping cart state using Angular signals
@@ -26,6 +28,8 @@ export class CartStore {
   private readonly orderSseService = inject(OrderSseService);
   private readonly notificationService = inject(NotificationService);
   private readonly errorHandler = inject(ErrorHandlerService);
+  private readonly customerStore = inject(CustomerStore);
+  private readonly authService = inject(AuthService);
   private readonly STORAGE_KEY = 'cart_id';
 
   // Private state signal
@@ -273,11 +277,13 @@ export class CartStore {
    * @param customerId Optional customer ID for authenticated users
    */
   async createCart(customerId?: string): Promise<void> {
+    console.log('[CartStore] Creating cart with customerId:', customerId);
     this.setLoading(true);
     this.setError(null);
 
     try {
       const cart = await firstValueFrom(this.cartService.createCart(customerId));
+      console.log('[CartStore] Cart created:', cart);
       this.state.update(s => ({
         ...s,
         cart,
@@ -328,16 +334,17 @@ export class CartStore {
    * Adds an item to the cart
    * Creates a new cart if one doesn't exist
    * @param productId The product identifier
+   * @param productName The product name
    * @param quantity The quantity to add (default: 1)
    */
-  async addItem(productId: string, quantity: number = 1): Promise<void> {
+  async addItem(productId: string, productName: string, quantity: number = 1): Promise<void> {
     const cartId = await this.ensureCart();
     if (!cartId) return;
 
     this.setLoading(true);
 
     try {
-      await firstValueFrom(this.cartService.addItem(cartId, productId, quantity));
+      await firstValueFrom(this.cartService.addItem(cartId, productId, productName, quantity));
       // Reload cart to get updated totals and items
       await this.reloadCart();
       this.notificationService.showSuccess('Item added to cart');
@@ -544,9 +551,23 @@ export class CartStore {
       }
     }
     
-    // If still no cart, create one
+    // If still no cart, create one with customerId if authenticated
     if (!cartId) {
-      await this.createCart();
+      // First ensure customer is loaded - get email from AuthService (available after login)
+      let customer = this.customerStore.customer();
+      if (!customer) {
+        console.log('[CartStore] ensureCart - customer not loaded, loading...');
+        const userEmail = this.authService.userData()?.email;
+        console.log('[CartStore] ensureCart - userEmail from auth:', userEmail);
+        if (userEmail) {
+          await this.customerStore.loadCustomer(userEmail);
+          customer = this.customerStore.customer();
+        }
+      }
+      
+      const customerId = customer?.customer_id;
+      console.log('[CartStore] ensureCart - customerId:', customerId);
+      await this.createCart(customerId || undefined);
       cartId = this.state().cartId;
     }
     

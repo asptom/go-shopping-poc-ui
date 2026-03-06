@@ -74,7 +74,7 @@
           <span class="account-greeting">Hello, {{ userFirstName() }}</span>
           <div class="account-links">
             <a href="/profile" class="account-link">Your Account</a>
-            <a href="#" class="account-link">Your Orders</a>
+            <a class="account-link" (click)="goToOrderHistory(); $event.preventDefault()">Your Orders</a>
             <a href="#" class="account-link" (click)="onLogout(); $event.preventDefault()">Sign Out</a>
           </div>
         } @else {
