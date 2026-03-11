@@ -562,6 +562,16 @@ export class CartStore {
         if (userEmail) {
           await this.customerStore.loadCustomer(userEmail);
           customer = this.customerStore.customer();
+          
+          // If customer still doesn't exist (new user), create one from auth data
+          if (!customer) {
+            console.log('[CartStore] ensureCart - no customer found, creating...');
+            const userData = this.authService.userData();
+            if (userData) {
+              await this.customerStore.createCustomerFromAuth(userData);
+              customer = this.customerStore.customer();
+            }
+          }
         }
       }
       
