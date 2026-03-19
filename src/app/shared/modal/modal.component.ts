@@ -1,10 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy} from '@angular/core';
 
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-modal',
-  standalone: true,
   imports: [CdkTrapFocus],
   template: `
     @if (isOpen()) {
@@ -21,7 +20,8 @@ import { CdkTrapFocus } from '@angular/cdk/a11y';
       </div>
     }
   `,
-  styleUrls: ['./modal.component.scss']
+  styleUrls: ['./modal.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ModalComponent {
   readonly isOpen = input.required<boolean>();

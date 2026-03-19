@@ -1,41 +1,31 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { CurrencyPipe } from '@angular/common';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 
-/**
- * Cart Summary Component
- * Displays order totals and checkout actions
- */
 @Component({
   selector: 'app-cart-summary',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CurrencyPipe, RouterLink],
   templateUrl: './cart-summary.component.html',
-  styleUrls: ['./cart-summary.component.scss']
+  styleUrls: ['./cart-summary.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CartSummaryComponent {
-  @Input() subtotal = 0;
-  @Input() tax = 0;
-  @Input() shipping = 0;
-  @Input() total = 0;
-  @Input() currency = 'USD';
-  @Input() itemCount = 0;
-  @Input() canCheckout = false;
-  @Input() hasPendingItems = false;
-  @Input() hasBackorderItems = false;
-  @Output() checkout = new EventEmitter<void>();
-  @Output() clearCart = new EventEmitter<void>();
+  readonly subtotal = input<number>(0);
+  readonly tax = input<number>(0);
+  readonly shipping = input<number>(0);
+  readonly total = input<number>(0);
+  readonly currency = input<string>('USD');
+  readonly itemCount = input<number>(0);
+  readonly canCheckout = input<boolean>(false);
+  readonly hasPendingItems = input<boolean>(false);
+  readonly hasBackorderItems = input<boolean>(false);
+  readonly checkout = output<void>();
+  readonly clearCart = output<void>();
 
-  /**
-   * Emits checkout event
-   */
   onCheckout(): void {
     this.checkout.emit();
   }
 
-  /**
-   * Emits clear cart event
-   */
   onClearCart(): void {
     this.clearCart.emit();
   }

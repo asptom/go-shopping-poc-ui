@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { Component, ChangeDetectionStrategy} from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 
@@ -8,9 +9,9 @@ import { RouterModule } from '@angular/router';
  */
 @Component({
   selector: 'app-empty-cart',
-  standalone: true,
   imports: [RouterModule],
   templateUrl: './empty-cart.component.html',
-  styleUrls: ['./empty-cart.component.scss']
+  styleUrls: ['./empty-cart.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmptyCartComponent {}

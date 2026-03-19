@@ -1,6 +1,7 @@
-import { Component, inject, OnInit, Signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { Component, inject, OnInit, Signal, computed, ChangeDetectionStrategy} from '@angular/core';
+import { Router } from '@angular/router';
 import { OrderStore } from '../../store';
 import { OrderConfirmation } from '../../models/order';
 
@@ -10,10 +11,10 @@ import { OrderConfirmation } from '../../models/order';
  */
 @Component({
   selector: 'app-order-confirmation',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
   templateUrl: './order-confirmation.component.html',
-  styleUrls: ['./order-confirmation.component.scss']
+  styleUrls: ['./order-confirmation.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrderConfirmationComponent implements OnInit {
   private readonly orderStore = inject(OrderStore);
@@ -28,7 +29,6 @@ export class OrderConfirmationComponent implements OnInit {
   ngOnInit(): void {
     // If no order data, redirect to home
     if (!this.order()) {
-      console.warn('[OrderConfirmation] No order data found, redirecting to home');
       this.router.navigate(['/home']);
     }
   }

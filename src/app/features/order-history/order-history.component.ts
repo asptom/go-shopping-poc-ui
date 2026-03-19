@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { CustomerOrderHistoryService } from '../../services/customer-order-history.service';
 import { ProductService } from '../../services/product.service';
@@ -20,6 +20,7 @@ interface OrderDisplay {
   imports: [CurrencyPipe],
   templateUrl: './order-history.component.html',
   styleUrl: './order-history.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrderHistoryComponent implements OnInit {
   private readonly orderService = inject(CustomerOrderHistoryService);

@@ -1,7 +1,7 @@
 import { Component, inject, signal, effect, computed, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormGroup } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { DatePipe } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -13,8 +13,7 @@ import { Customer, CreateAddressRequest, CreateCreditCardRequest } from '../../m
 
 @Component({
   selector: 'app-profile',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ModalComponent, RouterModule],
+  imports: [DatePipe, ReactiveFormsModule, FormsModule, ModalComponent, RouterLink],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss', '../../shared/modal/modal-forms.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -157,8 +156,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
 
-
-
   saveProfile(): void {
     const form = this.customerForm();
     if (form.invalid) {
@@ -239,7 +236,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       newForm.valueChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
-          console.log('Credit card form valueChanges detected');
           this.updateCreditCardFormState();
         });
       
@@ -252,7 +248,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       newForm.valueChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
-          console.log('Credit card form valueChanges detected');
           this.updateCreditCardFormState();
         });
       
@@ -389,8 +384,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     return '';
   }
 
-
-
   // Helper methods for modal titles
   getAddressModalTitle(): string {
     return this.editingAddressId() ? 'Edit Address' : 'Add Address';
@@ -403,6 +396,5 @@ export class ProfileComponent implements OnInit, OnDestroy {
   goToOrderHistory(): void {
     this.router.navigate(['/profile/orders']);
   }
-
 
 }

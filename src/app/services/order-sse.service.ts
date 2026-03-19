@@ -77,14 +77,12 @@ export class OrderSseService {
     return new Promise((resolve, reject) => {
       // Reuse existing connection if already connected to the same cart
       if (this.eventSource && this.cartId === cartId && this._connectionState().status === 'connected') {
-        console.log('[SSE] Reusing existing connection for cart:', cartId);
         resolve();
         return;
       }
 
       // Prevent multiple connections - disconnect if different cart
       if (this.eventSource) {
-        console.log('[SSE] Disconnecting existing connection before creating new one');
         this.disconnect();
       }
 
@@ -98,12 +96,9 @@ export class OrderSseService {
       });
 
       const url = `${environment.apiUrl}/carts/${cartId}/stream`;
-      console.log(`[SSE] Connecting to: ${url}`);
-      console.log(`[SSE] Cart ID: ${cartId}`);
 
       try {
         this.eventSource = new EventSource(url);
-        console.log('[SSE] EventSource created successfully');
         this.setupEventHandlers(resolve, reject);
       } catch (error) {
         console.error('[SSE] Failed to create EventSource:', error);
@@ -128,7 +123,6 @@ export class OrderSseService {
 
     // Handle connection open
     this.eventSource.onopen = () => {
-      console.log('[SSE] Connection opened for cart:', this.cartId);
       this.reconnectAttempts = 0;
       this._connectionState.update(state => ({
         ...state,
@@ -142,7 +136,6 @@ export class OrderSseService {
     this.eventSource.addEventListener('connected', (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
-        console.log('[SSE] Connected event received:', data);
         this.connected$.next(data.cartId);
       } catch (e) {
         console.error('[SSE] Failed to parse connected event:', e);
@@ -151,10 +144,8 @@ export class OrderSseService {
 
     // Handle order.created event
     this.eventSource.addEventListener('order.created', (event: MessageEvent) => {
-      console.log('[SSE] ➡️ RAW order.created event received:', event.data);
       try {
         const data: OrderCreatedEvent = JSON.parse(event.data);
-        console.log('[SSE] ✅ Parsed order.created event:', data);
 
         this._connectionState.update(state => ({
           ...state,
@@ -172,19 +163,10 @@ export class OrderSseService {
 
     // Handle cart.item.validated event
     this.eventSource.addEventListener('cart.item.validated', (event: MessageEvent) => {
-      console.log('[SSE] ➡️ RAW cart.item.validated event received:');
-      console.log('  - Event type:', event.type);
-      console.log('  - Event lastEventId:', event.lastEventId);
-      console.log('  - Raw event data:', event.data);
 
       try {
         const parsed = JSON.parse(event.data);
         const data: CartItemValidatedEvent = convertKeysToSnakeCase(parsed) as unknown as CartItemValidatedEvent;
-        console.log('[SSE] ✅ Parsed cart.item.validated event:', data);
-        console.log('  - line_number:', data.line_number);
-        console.log('  - product_id:', data.product_id);
-        console.log('  - status:', data.status);
-        console.log('  - product_name:', data.product_name);
 
         this._connectionState.update(state => ({
           ...state,
@@ -192,28 +174,17 @@ export class OrderSseService {
         }));
 
         this.cartItemValidated$.next(data);
-        console.log('[SSE] 📤 Emitted cartItemValidated$ event');
       } catch (e) {
-        console.error('[SSE] ❌ Failed to parse cart.item.validated event:', e);
-        console.error('  - Raw data that failed:', event.data);
+        console.error('[SSE] Failed to parse cart.item.validated event:', e);
       }
     });
 
     // Handle cart.item.backorder event
     this.eventSource.addEventListener('cart.item.backorder', (event: MessageEvent) => {
-      console.log('[SSE] ➡️ RAW cart.item.backorder event received:');
-      console.log('  - Event type:', event.type);
-      console.log('  - Event lastEventId:', event.lastEventId);
-      console.log('  - Raw event data:', event.data);
 
       try {
         const parsed = JSON.parse(event.data);
         const data: CartItemBackorderEvent = convertKeysToSnakeCase(parsed) as unknown as CartItemBackorderEvent;
-        console.log('[SSE] ✅ Parsed cart.item.backorder event:', data);
-        console.log('  - line_number:', data.line_number);
-        console.log('  - product_id:', data.product_id);
-        console.log('  - status:', data.status);
-        console.log('  - backorder_reason:', data.backorder_reason);
 
         this._connectionState.update(state => ({
           ...state,
@@ -221,28 +192,21 @@ export class OrderSseService {
         }));
 
         this.cartItemBackorder$.next(data);
-        console.log('[SSE] 📤 Emitted cartItemBackorder$ event');
       } catch (e) {
-        console.error('[SSE] ❌ Failed to parse cart.item.backorder event:', e);
-        console.error('  - Raw data that failed:', event.data);
+        console.error('[SSE] Failed to parse cart.item.backorder event:', e);
       }
     });
 
     // Catch-all for any other events
     this.eventSource.onmessage = (event) => {
-      console.log('[SSE] 📬 Unhandled message event:', event.type, event.data);
     };
 
     // Handle errors
     this.eventSource.onerror = (error) => {
       console.error('[SSE] ❌ Connection error occurred');
-      console.error('  - Error object:', error);
 
       const readyState = this.eventSource?.readyState;
       const wasConnected = this._connectionState().status === 'connected';
-
-      console.log(`[SSE] Connection state: readyState=${readyState}, wasConnected=${wasConnected}`);
-      console.log(`[SSE] ReadyState meanings: CONNECTING=0, OPEN=1, CLOSED=2`);
 
       // EventSource.CLOSED = 2
       if (readyState === EventSource.CLOSED) {
@@ -268,7 +232,6 @@ export class OrderSseService {
    */
   disconnect(): void {
     if (this.eventSource) {
-      console.log('[SSE] Disconnecting...');
       this.eventSource.close();
       this.eventSource = null;
     }
@@ -301,7 +264,6 @@ export class OrderSseService {
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
     
-    console.log(`[SSE] Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
 
     setTimeout(() => {
       if (this.cartId) {

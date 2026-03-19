@@ -8,8 +8,6 @@ import { AppError, ErrorType, ErrorSeverity, ApiError, ValidationError, ApiError
 export class ErrorHandlerService {
   
   handleError(error: any, context?: string): AppError {
-    console.error('Error occurred:', error, 'Context:', context);
-
     if (error instanceof HttpErrorResponse) {
       return this.handleHttpError(error);
     }

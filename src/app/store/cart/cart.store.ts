@@ -101,13 +101,11 @@ export class CartStore {
 
   // Setup SSE event subscriptions
   private setupSseSubscriptions(): void {
-    console.log('[CartStore] 🔌 Setting up SSE subscriptions...');
 
     // Subscribe to item validated events
     this.orderSseService.cartItemValidated.subscribe({
       next: (event: CartItemValidatedEvent) => {
         try {
-          console.log('[CartStore] 📥 Received cartItemValidated event from SSE service');
           this.handleItemValidated(event);
         } catch (e) {
           console.error('[CartStore] ❌ Error in cartItemValidated handler:', e);
@@ -117,52 +115,37 @@ export class CartStore {
         console.error('[CartStore] ❌ cartItemValidated stream error:', error);
       }
     });
-    console.log('[CartStore] ✅ Subscribed to cartItemValidated events');
 
     // Subscribe to item backorder events
     this.orderSseService.cartItemBackorder.subscribe({
       next: (event: CartItemBackorderEvent) => {
-        console.log('[CartStore] 📥 Received cartItemBackorder event from SSE service');
         this.handleItemBackorder(event);
       },
       error: (error) => {
         console.error('[CartStore] ❌ cartItemBackorder stream error:', error);
       }
     });
-    console.log('[CartStore] ✅ Subscribed to cartItemBackorder events');
 
     // Subscribe to connection errors
     this.orderSseService.connectionError.subscribe({
       next: (error: Error) => {
-        console.warn('[CartStore] ⚠️ SSE connection error:', error.message);
         // Let OrderSseService handle reconnection
       }
     });
-    console.log('[CartStore] ✅ Subscribed to connectionError events');
-    console.log('[CartStore] 🔌 SSE subscriptions setup complete');
   }
 
   // Handle cart.item.validated event
   private handleItemValidated(event: CartItemValidatedEvent): void {
-    console.log('[CartStore] 🔄 Processing cart.item.validated event');
-    console.log('  - Event data:', event);
-    console.log('  - Current cart exists:', !!this.state().cart);
 
     if (!this.state().cart) {
-      console.warn('[CartStore] ⚠️ Cannot process event - no cart loaded');
       return;
     }
 
     const currentItems = this.state().cart!.items;
-    console.log(`[CartStore] 📋 Current cart has ${currentItems.length} items`);
-    console.log('[CartStore] 📋 Current items:', currentItems.map(i => ({ line: i.line_number, status: i.status, name: i.product_name })));
 
     const matchingItem = currentItems.find(item => item.line_number === event.line_number);
     if (!matchingItem) {
-      console.warn(`[CartStore] ⚠️ No item found with line_number: ${event.line_number}`);
-      console.warn('[CartStore] ⚠️ Available line_numbers:', currentItems.map(i => i.line_number));
     } else {
-      console.log(`[CartStore] ✅ Found matching item:`, matchingItem);
     }
 
     this.state.update(s => {
@@ -170,7 +153,6 @@ export class CartStore {
 
       const updatedItems = s.cart.items.map(item => {
         if (item.line_number === event.line_number) {
-          console.log(`[CartStore] 📝 Updating item ${item.line_number}: ${item.status} → ${event.status}`);
           return {
             ...item,
             status: event.status,
@@ -190,9 +172,6 @@ export class CartStore {
         }
       };
 
-      console.log('[CartStore] ✅ State updated with validated item');
-      console.log(`[CartStore] 📊 Items after update:`, updatedItems.map(i => ({ line: i.line_number, status: i.status })));
-
       return updatedState;
     });
 
@@ -201,24 +180,16 @@ export class CartStore {
 
   // Handle cart.item.backorder event
   private handleItemBackorder(event: CartItemBackorderEvent): void {
-    console.log('[CartStore] 🔄 Processing cart.item.backorder event');
-    console.log('  - Event data:', event);
-    console.log('  - Current cart exists:', !!this.state().cart);
 
     if (!this.state().cart) {
-      console.warn('[CartStore] ⚠️ Cannot process event - no cart loaded');
       return;
     }
 
     const currentItems = this.state().cart!.items;
-    console.log(`[CartStore] 📋 Current cart has ${currentItems.length} items`);
 
     const matchingItem = currentItems.find(item => item.line_number === event.line_number);
     if (!matchingItem) {
-      console.warn(`[CartStore] ⚠️ No item found with line_number: ${event.line_number}`);
-      console.warn('[CartStore] ⚠️ Available line_numbers:', currentItems.map(i => i.line_number));
     } else {
-      console.log(`[CartStore] ✅ Found matching item:`, matchingItem);
     }
 
     this.state.update(s => {
@@ -226,7 +197,6 @@ export class CartStore {
 
       const updatedItems = s.cart.items.map(item => {
         if (item.line_number === event.line_number) {
-          console.log(`[CartStore] 📝 Updating item ${item.line_number}: ${item.status} → ${event.status}`);
           return {
             ...item,
             status: event.status,
@@ -247,9 +217,6 @@ export class CartStore {
         }
       };
 
-      console.log('[CartStore] ✅ State updated with backorder item');
-      console.log(`[CartStore] 📊 Items after update:`, updatedItems.map(i => ({ line: i.line_number, status: i.status })));
-
       return updatedState;
     });
 
@@ -260,10 +227,8 @@ export class CartStore {
 
   // Connect to SSE when cart is loaded
   private async connectSse(cartId: string): Promise<void> {
-    console.log(`[CartStore] 🔗 Attempting to connect SSE for cart: ${cartId}`);
     try {
       await this.orderSseService.connect(cartId);
-      console.log(`[CartStore] ✅ SSE connected successfully for cart: ${cartId}`);
     } catch (error) {
       console.error(`[CartStore] ❌ Failed to connect SSE for cart ${cartId}:`, error);
       // Non-fatal - cart still works without SSE
@@ -277,13 +242,11 @@ export class CartStore {
    * @param customerId Optional customer ID for authenticated users
    */
   async createCart(customerId?: string): Promise<void> {
-    console.log('[CartStore] Creating cart with customerId:', customerId);
     this.setLoading(true);
     this.setError(null);
 
     try {
       const cart = await firstValueFrom(this.cartService.createCart(customerId));
-      console.log('[CartStore] Cart created:', cart);
       this.state.update(s => ({
         ...s,
         cart,
@@ -556,16 +519,13 @@ export class CartStore {
       // First ensure customer is loaded - get email from AuthService (available after login)
       let customer = this.customerStore.customer();
       if (!customer) {
-        console.log('[CartStore] ensureCart - customer not loaded, loading...');
         const userEmail = this.authService.userData()?.email;
-        console.log('[CartStore] ensureCart - userEmail from auth:', userEmail);
         if (userEmail) {
           await this.customerStore.loadCustomer(userEmail);
           customer = this.customerStore.customer();
           
           // If customer still doesn't exist (new user), create one from auth data
           if (!customer) {
-            console.log('[CartStore] ensureCart - no customer found, creating...');
             const userData = this.authService.userData();
             if (userData) {
               await this.customerStore.createCustomerFromAuth(userData);
@@ -576,7 +536,6 @@ export class CartStore {
       }
       
       const customerId = customer?.customer_id;
-      console.log('[CartStore] ensureCart - customerId:', customerId);
       await this.createCart(customerId || undefined);
       cartId = this.state().cartId;
     }

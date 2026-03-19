@@ -1,4 +1,5 @@
-import { Component, inject, Signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { Component, inject, Signal, ChangeDetectionStrategy} from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 import { CartStore } from '../../../store';
@@ -10,7 +11,6 @@ import { CartStore } from '../../../store';
  */
 @Component({
   selector: 'app-cart-icon',
-  standalone: true,
   imports: [RouterModule],
   template: `
     <a [routerLink]="['/cart']" class="cart-link" aria-label="Shopping cart">
@@ -27,7 +27,8 @@ import { CartStore } from '../../../store';
       <span class="cart-text">Cart</span>
     </a>
     `,
-  styleUrls: ['./cart-icon.component.scss']
+  styleUrls: ['./cart-icon.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CartIconComponent {
   private readonly cartStore = inject(CartStore);

@@ -1,6 +1,7 @@
-import { Component, OnInit, OnDestroy, inject, signal, Signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { Component, OnInit, OnDestroy, inject, signal, Signal, ChangeDetectionStrategy} from '@angular/core';
 
-import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ProductStore } from '../../../store/product/product.store';
 import { CartStore } from '../../../store';
@@ -15,9 +16,7 @@ import { QuickViewModalComponent } from './components/quick-view-modal/quick-vie
 
 @Component({
   selector: 'app-product-list',
-  standalone: true,
   imports: [
-    RouterModule,
     ProductCardComponent,
     ProductFiltersComponent,
     ProductSortComponent,
@@ -27,7 +26,8 @@ import { QuickViewModalComponent } from './components/quick-view-modal/quick-vie
     QuickViewModalComponent
 ],
   templateUrl: './product-list.component.html',
-  styleUrls: ['./product-list.component.scss']
+  styleUrls: ['./product-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductListComponent implements OnInit, OnDestroy {
   readonly productStore = inject(ProductStore);

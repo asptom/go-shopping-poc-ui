@@ -1,9 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 
 
 @Component({
   selector: 'app-error-state',
-  standalone: true,
   imports: [],
   template: `
     <div class="error-state">
@@ -53,9 +52,10 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
         }
       }
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ErrorStateComponent {
-  @Input() message: string | null = null;
-  @Output() retry = new EventEmitter<void>();
+  readonly message = input<string | null>(null);
+  readonly retry = output<void>();
 }

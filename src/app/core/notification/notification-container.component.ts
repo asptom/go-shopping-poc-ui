@@ -1,10 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy} from '@angular/core';
 
 import { NotificationService, Notification } from '../../core/notification/notification.service';
 
 @Component({
   selector: 'app-notification-container',
-  standalone: true,
   imports: [],
   template: `
     <div class="notification-container">
@@ -129,7 +128,8 @@ import { NotificationService, Notification } from '../../core/notification/notif
         max-width: none;
       }
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotificationContainer {
   private readonly notificationService = inject(NotificationService);

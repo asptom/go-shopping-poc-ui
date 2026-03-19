@@ -1,3 +1,4 @@
+import { firstValueFrom } from 'rxjs';
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { CustomerOrderHistoryService } from '../../services/customer-order-history.service';
 import { OrderConfirmation } from '../../models/order';
@@ -39,7 +40,7 @@ export class OrderHistoryStore {
     this.setState({ loading: true, error: null });
 
     try {
-      const orders = await this.customerOrderHistoryService.getCustomerOrders(customerId).toPromise();
+      const orders = await firstValueFrom(this.customerOrderHistoryService.getCustomerOrders(customerId));
       this.setState({ 
         orders: orders ?? [], 
         loading: false 

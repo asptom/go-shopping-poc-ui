@@ -1,13 +1,14 @@
-import { Component, inject, signal, OnInit, OnDestroy, Signal, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { CurrencyPipe, TitleCasePipe } from '@angular/common';
+import { Component, inject, signal, OnInit, OnDestroy, Signal, computed, effect, ChangeDetectionStrategy} from '@angular/core';
+import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormGroup, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CartStore, CustomerStore, OrderStore } from '../../store';
 import { AuthService, UserData } from '../../auth';
 import { Cart, CartItem } from '../../models/cart';
 import { NotificationService } from '../../core/notification/notification.service';
 import { Address, CreditCard } from '../../models/customer';
-import { CustomValidators } from '../../shared';
+import { creditCard as creditCardValidator, cvv as cvvValidator } from '../../shared/forms/validators/pure-validators';
 import { OrderConfirmation } from '../../models/order';
 
 /**
@@ -16,10 +17,10 @@ import { OrderConfirmation } from '../../models/order';
  */
 @Component({
   selector: 'app-checkout',
-  standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CurrencyPipe, TitleCasePipe, RouterLink, ReactiveFormsModule],
   templateUrl: './checkout.component.html',
-  styleUrls: ['./checkout.component.scss']
+  styleUrls: ['./checkout.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CheckoutComponent implements OnInit, OnDestroy {
   private readonly cartStore = inject(CartStore);
@@ -144,11 +145,11 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
     // Payment form - using CustomValidators for consistency with profile screen
     this.paymentForm = this.fb.group({
-      cardNumber: ['', [Validators.required, CustomValidators.creditCard('Please enter a valid credit card number')]],
+      cardNumber: ['', [Validators.required, creditCardValidator('Please enter a valid credit card number')]],
       cardHolder: ['', Validators.required],
       expiryMonth: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])$/)]],
       expiryYear: ['', [Validators.required, Validators.pattern(/^\d{4}$/), this.futureYearValidator()]],
-      cvv: ['', [Validators.required, CustomValidators.cvv('Please enter a valid CVV')]],
+      cvv: ['', [Validators.required, cvvValidator('Please enter a valid CVV')]],
       cardType: ['visa']
     });
   }
@@ -337,7 +338,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   // Complete checkout - delegates to OrderStore
   async completeCheckout(): Promise<void> {
     const cartId = this.cartStore.cartId();
-    console.log('[CheckoutComponent] Completing checkout for cart:', cartId);
     if (!cartId) {
       return;
     }

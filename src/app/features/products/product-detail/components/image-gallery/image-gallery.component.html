@@ -9,9 +9,9 @@
     </div>
 
     <!-- Thumbnails -->
-    @if (images.length > 1) {
+    @if (images().length > 1) {
       <div class="thumbnails-container">
-        @for (image of images; track image) {
+        @for (image of images(); track image) {
           <button
             class="thumbnail"
             [class.active]="image.id === selectedImage?.id"
@@ -27,7 +27,7 @@
     }
 
     <!-- No Images State -->
-    @if (images.length === 0) {
+    @if (images().length === 0) {
       <div class="no-images">
         <img src="/assets/placeholder-product.jpg" alt="No image available">
         <p>No images available</p>

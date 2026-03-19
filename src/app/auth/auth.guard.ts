@@ -12,7 +12,6 @@ export class AuthGuard implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
     const path = route.url.join('/');
-    console.log('AuthGuard.canActivate called for path:', path);
     
     return this.authService.checkAuth().pipe(
       take(1),
@@ -22,7 +21,6 @@ export class AuthGuard implements CanActivate {
         return of(false);
       }),
       map(isAuthenticated => {
-        console.log('AuthGuard checkAuth result:', isAuthenticated, 'for path:', path);
         if (isAuthenticated) {
           return true;
         } else {

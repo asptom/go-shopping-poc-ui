@@ -1,6 +1,6 @@
-import { Component, inject, Signal, computed } from '@angular/core';
+import { Component, inject, Signal, computed, ChangeDetectionStrategy} from '@angular/core';
 
-import { RouterModule, Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CartStore } from '../../store';
 import { Cart, CartItem } from '../../models/cart';
 import { CartItemComponent } from './components/cart-item/cart-item.component';
@@ -13,15 +13,14 @@ import { EmptyCartComponent } from './components/empty-cart/empty-cart.component
  */
 @Component({
   selector: 'app-cart',
-  standalone: true,
   imports: [
-    RouterModule,
-    CartItemComponent,
+    RouterLink, CartItemComponent,
     CartSummaryComponent,
     EmptyCartComponent
 ],
   templateUrl: './cart.component.html',
-  styleUrls: ['./cart.component.scss']
+  styleUrls: ['./cart.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CartComponent {
   private readonly cartStore = inject(CartStore);

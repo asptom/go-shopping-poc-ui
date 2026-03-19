@@ -2,9 +2,9 @@
   <div class="image-container">
     <img
       [src]="mainImageUrl"
-      [alt]="product.name"
+      [alt]="product().name"
       loading="lazy"
-      (error)="$event.target.src = '/assets/placeholder-product.jpg'">
+      (error)="$event.target.src = '/assets/placeholder-product().jpg'">
 
       @if (hasDiscount) {
         <div class="discount-badge">
@@ -20,25 +20,25 @@
   </div>
 
   <div class="product-info">
-    <h3 class="product-name">{{ product.name }}</h3>
+    <h3 class="product-name">{{ product().name }}</h3>
 
-    <div class="brand">{{ product.brand }}</div>
+    <div class="brand">{{ product().brand }}</div>
 
     <div class="price-section">
-      <span class="final-price">{{ product.final_price | currency:product.currency }}</span>
+      <span class="final-price">{{ product().final_price | currency:product().currency }}</span>
       @if (hasDiscount) {
         <span class="initial-price">
-          {{ product.initial_price | currency:product.currency }}
+          {{ product().initial_price | currency:product().currency }}
         </span>
       }
     </div>
 
-    <div class="stock-status" [class.in-stock]="product.in_stock">
+    <div class="stock-status" [class.in-stock]="product().in_stock">
       <span class="status-dot"></span>
-      {{ product.in_stock ? 'In Stock' : 'Out of Stock' }}
+      {{ product().in_stock ? 'In Stock' : 'Out of Stock' }}
     </div>
 
-    @if (product.in_stock) {
+    @if (product().in_stock) {
       <button
         class="btn-add-cart"
         (click)="onAddToCart($event)">

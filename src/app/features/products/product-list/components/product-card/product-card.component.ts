@@ -1,76 +1,62 @@
-import { Component, Input, Output, EventEmitter, inject, effect, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { CurrencyPipe } from '@angular/common';
+import { Component, inject, input, output, effect, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Product, ProductImage } from '../../../../../models/product';
 import { ProductService } from '../../../../../services/product.service';
 
 @Component({
   selector: 'app-product-card',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CurrencyPipe, RouterLink],
   templateUrl: './product-card.component.html',
-  styleUrls: ['./product-card.component.scss']
+  styleUrls: ['./product-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductCardComponent {
-  @Input() product!: Product;
-  @Output() viewDetails = new EventEmitter<Product>();
-  @Output() quickView = new EventEmitter<Product>();
-  @Output() addToCart = new EventEmitter<Product>();
+  readonly product = input.required<Product>();
+  readonly viewDetails = output<Product>();
+  readonly quickView = output<Product>();
+  readonly addToCart = output<Product>();
 
-  private productService = inject(ProductService);
-
-  private mainImage = signal<ProductImage | undefined>(undefined);
+  private readonly productService = inject(ProductService);
+  private readonly mainImage = signal<ProductImage | undefined>(undefined);
 
   constructor() {
     effect(() => {
-      if (this.product) {
-        const img = this.productService.getMainImage(this.product);
-        this.mainImage.set(img);
-      }
+      const img = this.productService.getMainImage(this.product());
+      this.mainImage.set(img);
     });
   }
 
   get mainImageUrl(): string {
-    if (!this.product) {
-      return '/assets/placeholder-product.jpg';
-    }
     const img = this.mainImage();
-    if (!img) {
-      return '/assets/placeholder-product.jpg';
-    }
-    return this.productService.getImageUrl(this.product.id, img.minio_object_name);
+    if (!img) return '/assets/placeholder-product.jpg';
+    return this.productService.getImageUrl(this.product().id, img.minio_object_name);
   }
 
   get discountPercentage(): number {
-    if (!this.product) {
-      return 0;
-    }
     return this.productService.calculateDiscountPercentage(
-      this.product.initial_price,
-      this.product.final_price
+      this.product().initial_price,
+      this.product().final_price
     );
   }
 
   get hasDiscount(): boolean {
-    if (!this.product) {
-      return false;
-    }
-    return this.product.final_price < this.product.initial_price;
+    return this.product().final_price < this.product().initial_price;
   }
 
   onViewDetails(): void {
-    this.viewDetails.emit(this.product);
+    this.viewDetails.emit(this.product());
   }
 
   onQuickView(event: Event): void {
     event.stopPropagation();
-    this.quickView.emit(this.product);
+    this.quickView.emit(this.product());
   }
 
   onAddToCart(event: Event): void {
     event.stopPropagation();
-    if (this.product.in_stock) {
-      this.addToCart.emit(this.product);
+    if (this.product().in_stock) {
+      this.addToCart.emit(this.product());
     }
   }
 }

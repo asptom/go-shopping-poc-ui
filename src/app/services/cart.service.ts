@@ -182,9 +182,7 @@ export class CartService {
    * @returns Observable of the updated Cart after checkout
    */
   checkout(cartId: string): Observable<Cart> {
-    console.log('[CartService] Checkout called for cart:', cartId);
     return this.http.post<Cart>(`${this.apiUrl}/${cartId}/checkout`, {}).pipe(
-      tap(response => console.log('[CartService] Checkout response:', response)),
       catchError((error: HttpErrorResponse) => {
         console.error('[CartService] Checkout error:', error);
         const appError = this.errorHandler.handleError(error, 'checkout');

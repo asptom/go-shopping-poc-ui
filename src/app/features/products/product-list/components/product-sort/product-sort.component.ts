@@ -1,16 +1,14 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-
+import { Component, input, output, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SortOption } from '../../../../../models/product';
 
 @Component({
   selector: 'app-product-sort',
-  standalone: true,
   imports: [FormsModule],
   template: `
     <div class="sort-container">
       <label for="sort-select">Sort by:</label>
-      <select 
+      <select
         id="sort-select"
         [(ngModel)]="selectedSort"
         (change)="onSortChange()"
@@ -29,12 +27,12 @@ import { SortOption } from '../../../../../models/product';
       align-items: center;
       gap: 12px;
       margin-bottom: 20px;
-      
+
       label {
         font-size: 14px;
         color: #565959;
       }
-      
+
       .sort-select {
         padding: 8px 12px;
         border: 1px solid #ddd;
@@ -42,23 +40,24 @@ import { SortOption } from '../../../../../models/product';
         background: white;
         font-size: 14px;
         cursor: pointer;
-        
+
         &:focus {
           outline: none;
           border-color: #ff9900;
         }
       }
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductSortComponent implements OnInit {
-  @Input() currentSort: SortOption = 'name_asc';
-  @Output() sortChange = new EventEmitter<SortOption>();
+  readonly currentSort = input<SortOption>('name_asc');
+  readonly sortChange = output<SortOption>();
 
   selectedSort: SortOption = 'name_asc';
 
   ngOnInit(): void {
-    this.selectedSort = this.currentSort;
+    this.selectedSort = this.currentSort();
   }
 
   onSortChange(): void {

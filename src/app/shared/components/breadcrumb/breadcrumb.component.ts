@@ -1,16 +1,14 @@
-import { Component, Input } from '@angular/core';
-
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { BreadcrumbItem } from '../../../models/product';
 
 @Component({
   selector: 'app-breadcrumb',
-  standalone: true,
-  imports: [RouterModule],
+  imports: [RouterLink],
   template: `
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <ol class="breadcrumb-list">
-        @for (item of items; track item; let last = $last) {
+        @for (item of items(); track item; let last = $last) {
           <li class="breadcrumb-item">
             @if (!last && item.url) {
               <a
@@ -43,7 +41,7 @@ import { BreadcrumbItem } from '../../../models/product';
       padding: 12px 0;
       font-size: 14px;
     }
-    
+
     .breadcrumb-list {
       display: flex;
       align-items: center;
@@ -52,37 +50,38 @@ import { BreadcrumbItem } from '../../../models/product';
       margin: 0;
       padding: 0;
     }
-    
+
     .breadcrumb-item {
       display: flex;
       align-items: center;
     }
-    
+
     .breadcrumb-link {
       color: #565959;
       text-decoration: none;
-      
+
       &:hover {
         color: #c7511f;
         text-decoration: underline;
       }
-      
+
       .home-icon {
         font-size: 16px;
       }
     }
-    
+
     .breadcrumb-current {
       color: #131921;
       font-weight: 500;
     }
-    
+
     .separator {
       margin: 0 8px;
       color: #565959;
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BreadcrumbComponent {
-  @Input() items: BreadcrumbItem[] = [];
+  readonly items = input<BreadcrumbItem[]>([]);
 }

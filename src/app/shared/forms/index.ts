@@ -1,6 +1,3 @@
-// Legacy validators (deprecated - use pure-validators instead)
-export { CustomValidators } from './validators/custom-validators';
-
 // Form services (refactored to use pure functions)
 export { AddressFormService } from './controls/address-form.service';
 export { CreditCardFormService } from './controls/credit-card-form.service';

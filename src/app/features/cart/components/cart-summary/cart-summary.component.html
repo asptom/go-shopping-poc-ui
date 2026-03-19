@@ -4,23 +4,23 @@
 
   <div class="summary-details">
     <div class="summary-row">
-      <span class="label">Items ({{ itemCount }}):</span>
-      <span class="value">{{ subtotal | currency:currency }}</span>
+      <span class="label">Items ({{ itemCount() }}):</span>
+      <span class="value">{{ subtotal() | currency:currency() }}</span>
     </div>
 
     <div class="summary-row">
       <span class="label">Tax:</span>
-      <span class="value">{{ tax | currency:currency }}</span>
+      <span class="value">{{ tax() | currency:currency() }}</span>
     </div>
 
     <div class="summary-row">
       <span class="label">Shipping:</span>
       <span class="value">
-        @if (shipping === 0) {
+        @if (shipping() === 0) {
           <span class="free-shipping">FREE</span>
         }
-        @if (shipping > 0) {
-          <span>{{ shipping | currency:currency }}</span>
+        @if (shipping() > 0) {
+          <span>{{ shipping() | currency:currency() }}</span>
         }
       </span>
     </div>
@@ -34,14 +34,14 @@
 
     <div class="summary-row total">
       <span class="label">Order Total:</span>
-      <span class="value">{{ total | currency:currency }}</span>
+      <span class="value">{{ total() | currency:currency() }}</span>
     </div>
   </div>
 
   <div class="summary-actions">
     <button
       class="btn-checkout"
-      [disabled]="!canCheckout"
+      [disabled]="!canCheckout()"
       (click)="onCheckout()">
       Proceed to Checkout
     </button>

@@ -1,6 +1,6 @@
 import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import { OidcSecurityService } from 'angular-auth-oidc-client';
-import { Observable, map, of, catchError } from 'rxjs';
+import { Observable, map, of, catchError, firstValueFrom } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '../../environments/environment';
 
@@ -49,7 +49,6 @@ export class AuthService {
     effect(() => {
       const isAuthenticated = oidcAuthState();
       if (isAuthenticated) {
-        console.log('OIDC Auth state changed:', isAuthenticated);
 
         // Only update if OIDC service has valid authentication OR if it's explicitly setting to false
         // Don't let OIDC service override persisted authenticated state with false
@@ -60,12 +59,9 @@ export class AuthService {
             this.clearPersistedAuthState();
           }
         } else {
-          console.log('Ignoring OIDC false state - using persisted authentication');
           // Ensure the signal is set to true since we have persisted authentication
           const hasPersisted = this.hasPersistedAuthState();
-          console.log('hasPersistedAuthState():', hasPersisted);
           if (hasPersisted) {
-            console.log('Setting _isAuthenticated to true');
             this._isAuthenticated.set(true);
           }
         }
@@ -75,7 +71,6 @@ export class AuthService {
     effect(() => {
       const userData = oidcUserData();
       if (userData) {
-        console.log('OIDC User data changed:', userData);
 
         // Only update user data if OIDC has valid data or we're not authenticated
         if (userData.userData || !this._isAuthenticated()) {
@@ -97,7 +92,6 @@ export class AuthService {
     effect(() => {
       const sessionChanged = checkSessionChanged();
       if (sessionChanged) {
-        console.log('Check session changed:', sessionChanged);
       }
     });
   }
@@ -117,7 +111,6 @@ export class AuthService {
 
   private clearPersistedAuthState(): void {
     localStorage.removeItem(this.STORAGE_KEY);
-    console.log('Cleared persisted auth state');
   }
 
   private loadPersistedAuthState(): void {
@@ -125,7 +118,6 @@ export class AuthService {
       const persisted = localStorage.getItem(this.STORAGE_KEY);
       if (persisted) {
         const authState = JSON.parse(persisted);
-        console.log('Loaded persisted auth state:', authState);
         if (authState.isAuthenticated) {
           this._isAuthenticated.set(true);
           this._userData.set(authState.userData);
@@ -145,10 +137,8 @@ export class AuthService {
       };
       if (authState.isAuthenticated) {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(authState));
-        console.log('Persisted auth state:', authState);
       } else {
         // Don't persist false state - let clearPersistedAuthState handle clearing
-        console.log('Not persisting false auth state');
       }
     } catch (error) {
       console.error('Error persisting auth state:', error);
@@ -156,14 +146,12 @@ export class AuthService {
   }
 
   login(): void {
-    console.log('Login called');
     this.oidcSecurityService.authorize();
   }
 
   async logout(): Promise<void> {
-    console.log('Logout called');
     try {
-      const idToken = await this.getIdToken().toPromise();
+      const idToken = await firstValueFrom(this.getIdToken());
       if (idToken) {
         const logoutUrl = `${environment.keycloak.issuer}/protocol/openid-connect/logout?id_token_hint=${idToken}&post_logout_redirect_uri=${encodeURIComponent(window.location.origin)}`;
         // Clear local state
@@ -202,20 +190,15 @@ export class AuthService {
   }
 
   checkAuth(): Observable<boolean> {
-    console.log('checkAuth called, URL:', window.location.href);
     // Check URL for auth code (when returning from Keycloak)
     const urlParams = new URLSearchParams(window.location.search);
     const hasCode = urlParams.has('code');
     const hasState = urlParams.has('state');
 
-    console.log('URL params - code:', hasCode, 'state:', hasState);
-
     // If there's an auth code, process the callback
     if (hasCode && hasState) {
-      console.log('Found auth code, processing callback');
       return this.oidcSecurityService.checkAuth().pipe(
         map(result => {
-          console.log('checkAuth result:', result);
           return result.isAuthenticated;
         }),
         catchError(error => {
@@ -228,18 +211,15 @@ export class AuthService {
     // For route protection checks, use persisted state if available
     const currentAuthState = this.isAuthenticated();
     const persistedAuth = this.hasPersistedAuthState();
-    console.log('No auth code, current auth state:', currentAuthState, 'persisted auth:', persistedAuth);
 
     // If we have persisted authentication, allow access
     if (persistedAuth) {
-      console.log('User is authenticated via persisted state, allowing access');
       return of(true);
     }
 
     // Otherwise, check with OIDC service
     return this.oidcSecurityService.checkAuth().pipe(
       map(result => {
-        console.log('OIDC checkAuth result for route protection:', result);
         return result.isAuthenticated;
       }),
       catchError(error => {

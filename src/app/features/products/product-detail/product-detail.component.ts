@@ -1,6 +1,7 @@
-import { Component, inject, OnDestroy, OnInit, signal, effect, EffectRef, NgZone, Signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { CurrencyPipe } from '@angular/common';
+import { Component, inject, OnDestroy, OnInit, signal, effect, EffectRef, NgZone, Signal, ChangeDetectionStrategy} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ProductStore } from '../../../store/product/product.store';
 import { ProductService } from '../../../services/product.service';
@@ -12,16 +13,14 @@ import { BreadcrumbComponent } from '../../../shared/components/breadcrumb/bread
 
 @Component({
   selector: 'app-product-detail',
-  standalone: true,
   imports: [
-    CommonModule,
-    RouterModule,
-    ImageGalleryComponent,
+    CurrencyPipe, RouterLink, ImageGalleryComponent,
     RelatedProductsComponent,
     BreadcrumbComponent
   ],
   templateUrl: './product-detail.component.html',
-  styleUrls: ['./product-detail.component.scss']
+  styleUrls: ['./product-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductDetailComponent implements OnInit, OnDestroy {
   route = inject(ActivatedRoute);

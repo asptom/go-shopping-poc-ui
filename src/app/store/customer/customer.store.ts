@@ -1,3 +1,4 @@
+import { firstValueFrom } from 'rxjs';
 import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import { CustomerService } from '../../services/customer.service';
 import { Customer, CreateAddressRequest, CreateCreditCardRequest } from '../../models/customer';
@@ -37,12 +38,10 @@ export class CustomerStore {
   readonly customerEmail = computed(() => this.state().customer?.email || '');
   readonly addresses = computed(() => {
     const addresses = this.state().customer?.addresses || [];
-    console.log('Addresses computed:', addresses);
     return addresses;
   });
   readonly creditCards = computed(() => {
     const creditCards = this.state().customer?.credit_cards || [];
-    console.log('Credit cards computed:', creditCards);
     return creditCards;
   });
   readonly defaultShippingAddress = computed(() => {
@@ -69,17 +68,10 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      console.log('Loading customer for email:', email);
-      const customer = await this.customerService.getCustomer(email).toPromise();
-        console.log('Customer data received:', customer);
+      const customer = await firstValueFrom(this.customerService.getCustomer(email));
         if (customer) {
-          console.log('Customer addresses:', customer.addresses);
-          console.log('Customer credit cards:', customer.credit_cards);
-          console.log('Addresses length:', customer.addresses?.length || 0);
-          console.log('Credit cards length:', customer.credit_cards?.length || 0);
           this.setState({ customer, loading: false });
         } else {
-          console.log('No customer found, setting null');
           // Customer not found - return null without error, let caller decide what to do
           this.setState({ customer: null, loading: false });
         }
@@ -114,7 +106,7 @@ export class CustomerStore {
     };
 
     try {
-      const savedCustomer = await this.customerService.createCustomer(newCustomer).toPromise();
+      const savedCustomer = await firstValueFrom(this.customerService.createCustomer(newCustomer));
       this.setState({ customer: savedCustomer, loading: false });
       this.notificationService.showSuccess('Customer profile created successfully');
     } catch (error) {
@@ -129,7 +121,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      const updatedCustomer = await this.customerService.updateCustomer(customer).toPromise();
+      const updatedCustomer = await firstValueFrom(this.customerService.updateCustomer(customer));
       this.setState({ customer: updatedCustomer, loading: false });
       this.notificationService.showSuccess('Profile updated successfully');
     } catch (error) {
@@ -145,14 +137,13 @@ export class CustomerStore {
 
     try {
       const currentCustomer = this.state().customer;
-      const updatedCustomer = await this.customerService.patchCustomer(customerId, updates).toPromise();
+      const updatedCustomer = await firstValueFrom(this.customerService.patchCustomer(customerId, updates));
 
       // API now returns complete customer objects with all fields
       // Validate response completeness, fallback to merge if incomplete
       if (this.isCompleteCustomerResponse(updatedCustomer)) {
         this.setState({ customer: updatedCustomer, loading: false });
       } else {
-        console.warn('API returned incomplete customer response, using merge fallback');
         let mergedCustomer: Customer;
         if (currentCustomer) {
           mergedCustomer = Object.assign({}, currentCustomer, updatedCustomer) as Customer;
@@ -178,7 +169,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.addAddress(currentCustomer.customer_id, address).toPromise();
+      await firstValueFrom(this.customerService.addAddress(currentCustomer.customer_id, address));
       // Reload customer data to get updated addresses with proper IDs
       await this.loadCustomer(currentCustomer.email || '');
       this.notificationService.showSuccess('Address added successfully');
@@ -194,7 +185,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.updateAddress(addressId, address).toPromise();
+      await firstValueFrom(this.customerService.updateAddress(addressId, address));
       // Reload customer data to get updated addresses
       const currentCustomer = this.state().customer;
       if (currentCustomer?.email) {
@@ -213,7 +204,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.deleteAddress(addressId).toPromise();
+      await firstValueFrom(this.customerService.deleteAddress(addressId));
       const currentCustomer = this.state().customer;
       if (currentCustomer?.addresses) {
         const updatedAddresses = currentCustomer.addresses.filter(
@@ -240,7 +231,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.addCreditCard(currentCustomer.customer_id, card).toPromise();
+      await firstValueFrom(this.customerService.addCreditCard(currentCustomer.customer_id, card));
       // Reload customer data to get updated credit cards with proper IDs
       await this.loadCustomer(currentCustomer.email || '');
       this.notificationService.showSuccess('Credit card added successfully');
@@ -256,7 +247,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.updateCreditCard(cardId, card).toPromise();
+      await firstValueFrom(this.customerService.updateCreditCard(cardId, card));
       // Reload customer data to get updated credit cards
       const currentCustomer = this.state().customer;
       if (currentCustomer?.email) {
@@ -275,7 +266,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.deleteCreditCard(cardId).toPromise();
+      await firstValueFrom(this.customerService.deleteCreditCard(cardId));
       const currentCustomer = this.state().customer;
       if (currentCustomer?.credit_cards) {
         const updatedCards = currentCustomer.credit_cards.filter(
@@ -303,7 +294,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.setDefaultShippingAddress(currentCustomer.customer_id, addressId).toPromise();
+      await firstValueFrom(this.customerService.setDefaultShippingAddress(currentCustomer.customer_id, addressId));
       // Reload customer to get updated defaults
       await this.loadCustomer(currentCustomer.email || '');
       this.notificationService.showSuccess('Default shipping address updated');
@@ -322,7 +313,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.setDefaultBillingAddress(currentCustomer.customer_id, addressId).toPromise();
+      await firstValueFrom(this.customerService.setDefaultBillingAddress(currentCustomer.customer_id, addressId));
       // Reload customer to get updated defaults
       await this.loadCustomer(currentCustomer.email || '');
       this.notificationService.showSuccess('Default billing address updated');
@@ -341,7 +332,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.setDefaultCreditCard(currentCustomer.customer_id, cardId).toPromise();
+      await firstValueFrom(this.customerService.setDefaultCreditCard(currentCustomer.customer_id, cardId));
       // Reload customer to get updated defaults
       await this.loadCustomer(currentCustomer.email || '');
       this.notificationService.showSuccess('Default credit card updated');
@@ -360,7 +351,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.clearDefaultShippingAddress(currentCustomer.customer_id).toPromise();
+      await firstValueFrom(this.customerService.clearDefaultShippingAddress(currentCustomer.customer_id));
       // Reload customer to get updated defaults
       await this.loadCustomer(currentCustomer.email || '');
       this.notificationService.showSuccess('Default shipping address cleared');
@@ -379,7 +370,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.clearDefaultBillingAddress(currentCustomer.customer_id).toPromise();
+      await firstValueFrom(this.customerService.clearDefaultBillingAddress(currentCustomer.customer_id));
       // Reload customer to get updated defaults
       await this.loadCustomer(currentCustomer.email || '');
       this.notificationService.showSuccess('Default billing address cleared');
@@ -398,7 +389,7 @@ export class CustomerStore {
     this.setState({ loading: true, error: null });
 
     try {
-      await this.customerService.clearDefaultCreditCard(currentCustomer.customer_id).toPromise();
+      await firstValueFrom(this.customerService.clearDefaultCreditCard(currentCustomer.customer_id));
       // Reload customer to get updated defaults
       await this.loadCustomer(currentCustomer.email || '');
       this.notificationService.showSuccess('Default credit card cleared');

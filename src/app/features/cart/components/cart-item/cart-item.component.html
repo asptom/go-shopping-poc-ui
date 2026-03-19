@@ -3,8 +3,8 @@
   <!-- Product Info -->
   <div class="product-info">
     <div class="product-details">
-      <h3 class="product-name">{{ item.product_name }}</h3>
-      <span class="product-id">Item #{{ item.line_number }}</span>
+      <h3 class="product-name">{{ item().product_name }}</h3>
+      <span class="product-id">Item #{{ item().line_number }}</span>
 
       <!-- Status Badge -->
       @if (statusText) {
@@ -23,15 +23,15 @@
       }
 
       <!-- Backorder Reason -->
-      @if (isBackorder && item.backorder_reason) {
+      @if (isBackorder && item().backorder_reason) {
         <span class="backorder-reason">
-          {{ item.backorder_reason }}
+          {{ item().backorder_reason }}
         </span>
       }
 
       @if (isConfirmed) {
         <span class="unit-price">
-          {{ item.unit_price | currency:currency }} each
+          {{ item().unit_price | currency:currency() }} each
         </span>
       }
       @if (!isConfirmed) {
@@ -48,14 +48,14 @@
       <button
         class="btn-quantity"
         (click)="decrementQuantity()"
-        [disabled]="item.quantity <= 1 || isQuantityControlsDisabled"
+        [disabled]="item().quantity <= 1 || isQuantityControlsDisabled"
         aria-label="Decrease quantity">
         -
       </button>
       <input
         type="number"
         class="quantity-input"
-        [value]="item.quantity"
+        [value]="item().quantity"
         (change)="onQuantityChange($event)"
         min="1"
         max="99"
@@ -64,7 +64,7 @@
       <button
         class="btn-quantity"
         (click)="incrementQuantity()"
-        [disabled]="item.quantity >= 99 || isQuantityControlsDisabled"
+        [disabled]="item().quantity >= 99 || isQuantityControlsDisabled"
         aria-label="Increase quantity">
         +
       </button>
@@ -78,7 +78,7 @@
   <div class="price-section">
     @if (isConfirmed) {
       <span class="item-total">
-        {{ item.total_price | currency:currency }}
+        {{ item().total_price | currency:currency() }}
       </span>
     }
     @if (!isConfirmed) {

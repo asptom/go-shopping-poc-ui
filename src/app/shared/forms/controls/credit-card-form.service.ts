@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CreditCard, CreateCreditCardRequest } from '../../../models/customer';
 import { getCreditCardFormConfig, createCreditCardFromForm, validateForm } from '../config/form-configs';
-import { CustomValidators } from '../validators/custom-validators';
+import { creditCard, cardExpiration, cvv } from '../validators/pure-validators';
 
 @Injectable({
   providedIn: 'root'
@@ -13,10 +13,10 @@ export class CreditCardFormService {
   createCreditCardForm(): FormGroup {
     return this.fb.group({
       card_type: ['visa', Validators.required],
-      card_number: ['', [Validators.required, CustomValidators.creditCard()]],
+      card_number: ['', [Validators.required, creditCard()]],
       card_holder_name: ['', [Validators.required, Validators.maxLength(100)]],
-      card_expires: ['', [Validators.required, CustomValidators.cardExpiration()]],
-      card_cvv: ['', [Validators.required, CustomValidators.cvv()]]
+      card_expires: ['', [Validators.required, cardExpiration()]],
+      card_cvv: ['', [Validators.required, cvv()]]
     });
   }
 

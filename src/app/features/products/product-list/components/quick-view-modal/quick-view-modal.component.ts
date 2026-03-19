@@ -1,36 +1,36 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { CurrencyPipe, SlicePipe } from '@angular/common';
+import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Router } from '@angular/router';
 import { Product } from '../../../../../models/product';
 import { ProductService } from '../../../../../services/product.service';
 import { ImageGalleryComponent } from '../../../product-detail/components/image-gallery/image-gallery.component';
 
 @Component({
   selector: 'app-quick-view-modal',
-  standalone: true,
-  imports: [CommonModule, RouterModule, ImageGalleryComponent],
+  imports: [CurrencyPipe, SlicePipe, RouterLink, ImageGalleryComponent],
   templateUrl: './quick-view-modal.component.html',
-  styleUrls: ['./quick-view-modal.component.scss']
+  styleUrls: ['./quick-view-modal.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QuickViewModalComponent {
-  @Input() product: Product | null = null;
-  @Output() close = new EventEmitter<void>();
-  @Output() viewDetails = new EventEmitter<Product>();
+  readonly product = input<Product | null>(null);
+  readonly close = output<void>();
+  readonly viewDetails = output<Product>();
 
-  private productService = inject(ProductService);
-  private router = inject(Router);
+  private readonly productService = inject(ProductService);
+  private readonly router = inject(Router);
 
   get discountPercentage(): number {
-    if (!this.product) return 0;
-    return this.productService.calculateDiscountPercentage(
-      this.product.initial_price,
-      this.product.final_price
-    );
+    const p = this.product();
+    if (!p) return 0;
+    return this.productService.calculateDiscountPercentage(p.initial_price, p.final_price);
   }
 
   get hasDiscount(): boolean {
-    if (!this.product) return false;
-    return this.product.final_price < this.product.initial_price;
+    const p = this.product();
+    if (!p) return false;
+    return p.final_price < p.initial_price;
   }
 
   onClose(): void {
@@ -38,8 +38,9 @@ export class QuickViewModalComponent {
   }
 
   onViewDetails(): void {
-    if (this.product) {
-      this.viewDetails.emit(this.product);
+    const p = this.product();
+    if (p) {
+      this.viewDetails.emit(p);
       this.close.emit();
     }
   }

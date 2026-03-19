@@ -1,11 +1,11 @@
 <div class="filters-panel">
   <div class="filters-header">
     <h3>Filters</h3>
-    @if (activeCount > 0) {
+    @if (activeCount() > 0) {
       <button
         class="btn-clear"
         (click)="onClearAll()">
-        Clear All ({{ activeCount }})
+        Clear All ({{ activeCount() }})
       </button>
     }
   </div>
@@ -18,7 +18,7 @@
         <input
           type="radio"
           name="category"
-          [checked]="filters.category === null"
+          [checked]="filters().category === null"
           (change)="onCategoryChange(null)">
         <span>All Categories</span>
       </label>
@@ -28,7 +28,7 @@
             type="radio"
             name="category"
             [value]="category"
-            [checked]="filters.category === category"
+            [checked]="filters().category === category"
             (change)="onCategoryChange(category)">
           <span>{{ category }}</span>
         </label>
@@ -44,7 +44,7 @@
         <input
           type="radio"
           name="brand"
-          [checked]="filters.brand === null"
+          [checked]="filters().brand === null"
           (change)="onBrandChange(null)">
         <span>All Brands</span>
       </label>
@@ -54,7 +54,7 @@
             type="radio"
             name="brand"
             [value]="brand"
-            [checked]="filters.brand === brand"
+            [checked]="filters().brand === brand"
             (change)="onBrandChange(brand)">
           <span>{{ brand }}</span>
         </label>
@@ -75,7 +75,7 @@
     <label class="filter-option">
       <input
         type="checkbox"
-        [checked]="filters.inStockOnly"
+        [checked]="filters().inStockOnly"
         (change)="onStockChange($event.target.checked)">
       <span>In Stock Only</span>
     </label>

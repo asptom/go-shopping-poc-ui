@@ -1,4 +1,4 @@
-@if (product) {
+@if (product()) {
   <div class="modal-overlay" (click)="onBackdropClick($event)">
     <div class="modal-content">
       <button class="close-btn" (click)="onClose()">
@@ -10,37 +10,37 @@
       <div class="modal-body">
         <!-- Left: Image Gallery -->
         <div class="gallery-section">
-          <app-image-gallery [images]="product.images ?? []"></app-image-gallery>
+          <app-image-gallery [images]="product()!.images ?? []"></app-image-gallery>
         </div>
         <!-- Right: Product Info -->
         <div class="info-section">
-          <h2 class="product-name">{{ product.name }}</h2>
-          <div class="brand">{{ product.brand }}</div>
+          <h2 class="product-name">{{ product()!.name }}</h2>
+          <div class="brand">{{ product()!.brand }}</div>
           <div class="price-section">
-            <span class="final-price">{{ product.final_price | currency:product.currency }}</span>
+            <span class="final-price">{{ product()!.final_price | currency:product()!.currency }}</span>
             @if (hasDiscount) {
               <span class="initial-price">
-                {{ product.initial_price | currency:product.currency }}
+                {{ product()!.initial_price | currency:product()!.currency }}
               </span>
             }
             @if (hasDiscount) {
               <span class="discount-badge">-{{ discountPercentage }}%</span>
             }
           </div>
-          <div class="stock-status" [class.in-stock]="product.in_stock">
+          <div class="stock-status" [class.in-stock]="product()!.in_stock">
             <span class="status-dot"></span>
-            {{ product.in_stock ? 'In Stock' : 'Out of Stock' }}
+            {{ product()!.in_stock ? 'In Stock' : 'Out of Stock' }}
           </div>
-          @if (product.description) {
+          @if (product()!.description) {
             <p class="description">
-              {{ product.description | slice:0:200 }}{{ product.description.length > 200 ? '...' : '' }}
+              {{ product()!.description | slice:0:200 }}{{ product()!.description.length > 200 ? '...' : '' }}
             </p>
           }
           <div class="actions">
             <button
               class="btn-add-cart"
-              [disabled]="!product.in_stock">
-              {{ product.in_stock ? 'Add to Cart' : 'Out of Stock' }}
+              [disabled]="!product()!.in_stock">
+              {{ product()!.in_stock ? 'Add to Cart' : 'Out of Stock' }}
             </button>
             <button class="btn-view-details" (click)="onViewDetails()">
               View Full Details

@@ -1,14 +1,14 @@
-import { Component, Input, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { CurrencyPipe } from '@angular/common';
+import { Component, input, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Router } from '@angular/router';
 import { Product } from '../../../../../models/product';
 import { ProductStore } from '../../../../../store/product/product.store';
 import { ProductService } from '../../../../../services/product.service';
 
 @Component({
   selector: 'app-related-products',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CurrencyPipe, RouterLink],
   template: `
     @if (relatedProducts().length > 0) {
       <section class="related-products">
@@ -146,14 +146,15 @@ import { ProductService } from '../../../../../services/product.service';
         text-decoration: line-through;
       }
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RelatedProductsComponent implements OnInit {
-  @Input() currentProduct!: Product;
-  
-  private productStore = inject(ProductStore);
-  private productService = inject(ProductService);
-  private router = inject(Router);
+  readonly currentProduct = input.required<Product>();
+
+  private readonly productStore = inject(ProductStore);
+  private readonly productService = inject(ProductService);
+  private readonly router = inject(Router);
   
   relatedProducts = signal<Product[]>([]);
 
@@ -162,9 +163,9 @@ export class RelatedProductsComponent implements OnInit {
     
     const related = allProducts
       .filter((p: Product) => 
-        p.id !== this.currentProduct.id && 
-        (p.category === this.currentProduct.category || 
-         p.brand === this.currentProduct.brand)
+        p.id !== this.currentProduct().id && 
+        (p.category === this.currentProduct().category || 
+         p.brand === this.currentProduct().brand)
       )
       .slice(0, 4);
     
@@ -181,9 +182,9 @@ export class RelatedProductsComponent implements OnInit {
     const allProducts = this.productStore.products();
     const related = allProducts
       .filter((p: Product) => 
-        p.id !== this.currentProduct.id && 
-        (p.category === this.currentProduct.category || 
-         p.brand === this.currentProduct.brand)
+        p.id !== this.currentProduct().id && 
+        (p.category === this.currentProduct().category || 
+         p.brand === this.currentProduct().brand)
       )
       .slice(0, 4);
     

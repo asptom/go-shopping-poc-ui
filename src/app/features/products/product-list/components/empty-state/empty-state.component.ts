@@ -1,11 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-empty-state',
-  standalone: true,
-  imports: [RouterModule],
+  imports: [RouterLink],
   template: `
     <div class="empty-state">
       <div class="icon">
@@ -14,13 +12,13 @@ import { RouterModule } from '@angular/router';
           <path d="m21 21-4.35-4.35"></path>
         </svg>
       </div>
-      <h2>{{ isFiltered ? 'No products found' : 'No products available' }}</h2>
+      <h2>{{ isFiltered() ? 'No products found' : 'No products available' }}</h2>
       <p>
         {{ isFiltered
         ? 'Try adjusting your filters or search query to find what you\'re looking for.'
         : 'Check back later for new products.' }}
       </p>
-      @if (isFiltered) {
+      @if (isFiltered()) {
         <div class="actions">
           <button class="btn-clear" (click)="clearFilters.emit()">
             Clear Filters
@@ -93,9 +91,10 @@ import { RouterModule } from '@angular/router';
         }
       }
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmptyStateComponent {
-  @Input() isFiltered = false;
-  @Output() clearFilters = new EventEmitter<void>();
+  readonly isFiltered = input<boolean>(false);
+  readonly clearFilters = output<void>();
 }

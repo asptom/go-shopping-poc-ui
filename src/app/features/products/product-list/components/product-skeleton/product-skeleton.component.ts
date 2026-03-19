@@ -1,10 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
 
 import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-product-skeleton',
-  standalone: true,
   imports: [],
   template: `
     <div class="skeleton-card">
@@ -68,6 +67,7 @@ import { RouterModule } from '@angular/router';
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductSkeletonComponent {}
