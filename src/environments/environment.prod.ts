@@ -1,15 +1,12 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.pocstore.com/customers',
+  apiUrl: 'https://api.pocstore.com/api/v1',
   keycloak: {
     issuer: 'https://auth.pocstore.com/realms/pocstore-realm',
-    redirectUri: window.location.origin,
-    clientId: 'go-shopping-poc-ui',
+    clientId: 'pocstore-client',
     scope: 'openid profile email',
     responseType: 'code',
-    silentRenew: true,
+    silentRenew: false,
     useRefreshToken: true,
-    ignoreNonce: true,
-    logLevel: 'warn'
   }
 };

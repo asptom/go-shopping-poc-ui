@@ -165,7 +165,7 @@ export class AuthService {
     try {
       const idToken = await this.getIdToken().toPromise();
       if (idToken) {
-        const logoutUrl = `${environment.keycloak.issuer}/protocol/openid-connect/logout?id_token_hint=${idToken}&post_logout_redirect_uri=${encodeURIComponent(environment.keycloak.redirectUri)}`;
+        const logoutUrl = `${environment.keycloak.issuer}/protocol/openid-connect/logout?id_token_hint=${idToken}&post_logout_redirect_uri=${encodeURIComponent(window.location.origin)}`;
         // Clear local state
         localStorage.removeItem(this.STORAGE_KEY);
         this._isAuthenticated.set(false);
