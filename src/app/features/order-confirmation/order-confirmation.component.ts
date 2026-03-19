@@ -11,7 +11,7 @@ import { OrderConfirmation } from '../../models/order';
  */
 @Component({
   selector: 'app-order-confirmation',
-  imports: [CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
+  imports: [DatePipe, DecimalPipe],
   templateUrl: './order-confirmation.component.html',
   styleUrls: ['./order-confirmation.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

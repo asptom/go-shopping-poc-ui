@@ -65,7 +65,7 @@ export class OrderHistoryStore {
 
       this.setState({ orders, loading: false });
     } catch {
-      this.setState({ loading: false, error: 'Failed to load order history' });
+      this.setState({ loading: false });
     }
   }
 

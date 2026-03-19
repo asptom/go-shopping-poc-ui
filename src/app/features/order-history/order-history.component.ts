@@ -31,27 +31,32 @@ export class OrderHistoryComponent implements OnInit {
   readonly expandedOrderId = this.orderHistoryStore.expandedOrderId;
 
   ngOnInit(): void {
+    this.orderHistoryStore.clearError();
     this.loadOrders();
   }
 
   private async loadOrders(): Promise<void> {
-    let customer = this.customerStore.customer();
-    const userEmail = this.authService.userData()?.email;
+    try {
+      let customer = this.customerStore.customer();
+      const userEmail = this.authService.userData()?.email;
 
-    if (!customer && userEmail) {
-      await this.customerStore.loadCustomer(userEmail as string);
-      customer = this.customerStore.customer();
+      if (!customer && userEmail) {
+        await this.customerStore.loadCustomer(userEmail as string);
+        customer = this.customerStore.customer();
+      }
+
+      const customerId = customer?.customer_id;
+      if (!customerId) {
+        this.orderHistoryStore.setError(
+          'Unable to load customer information. Please visit Your Account page first.'
+        );
+        return;
+      }
+
+      await this.orderHistoryStore.loadCustomerOrders(customerId);
+    } catch (error) {
+      this.orderHistoryStore.clearError();
     }
-
-    const customerId = customer?.customer_id;
-    if (!customerId) {
-      this.orderHistoryStore.setError(
-        'Unable to load customer information. Please visit Your Account page first.'
-      );
-      return;
-    }
-
-    await this.orderHistoryStore.loadCustomerOrders(customerId);
   }
 
   viewOrderDetails(orderId: string): void {

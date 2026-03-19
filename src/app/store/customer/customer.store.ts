@@ -76,7 +76,6 @@ export class CustomerStore {
           this.setState({ customer: null, loading: false });
         }
     } catch (error) {
-      console.error('Error loading customer:', error);
       this.setState({ 
         loading: false, 
         error: 'Failed to load customer data' 

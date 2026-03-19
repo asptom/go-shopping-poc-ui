@@ -10,6 +10,10 @@ export const ErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      if (error.status === 404) {
+        return throwError(() => error);
+      }
+
       const appError = errorHandler.handleError(error, `HTTP ${req.method} ${req.url}`);
       errorHandler.logError(appError);
 

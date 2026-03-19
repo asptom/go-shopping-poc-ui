@@ -14,7 +14,7 @@
       }
 
       @if (!loading() && !error() && orders().length === 0) {
-        <div class="no-orders">No orders found</div>
+        <div class="no-orders">No orders yet - now is a great time to start!</div>
       }
 
       @for (order of orders(); track order.id) {

@@ -8,7 +8,7 @@ import { ProductService } from '../../../../../services/product.service';
 
 @Component({
   selector: 'app-related-products',
-  imports: [CurrencyPipe, RouterLink],
+  imports: [CurrencyPipe],
   template: `
     @if (relatedProducts().length > 0) {
       <section class="related-products">

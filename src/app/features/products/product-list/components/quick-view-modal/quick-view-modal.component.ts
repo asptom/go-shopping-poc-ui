@@ -8,7 +8,7 @@ import { ImageGalleryComponent } from '../../../product-detail/components/image-
 
 @Component({
   selector: 'app-quick-view-modal',
-  imports: [CurrencyPipe, SlicePipe, RouterLink, ImageGalleryComponent],
+  imports: [CurrencyPipe, SlicePipe, ImageGalleryComponent],
   templateUrl: './quick-view-modal.component.html',
   styleUrls: ['./quick-view-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
