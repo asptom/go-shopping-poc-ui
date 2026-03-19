@@ -7,13 +7,15 @@ import { map, startWith, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AuthService } from '../../auth/auth.service';
 import { CustomerStore } from '../../store/customer/customer.store';
-import { CustomerFormService, AddressFormService, CreditCardFormService, ModalComponent } from '../../shared';
+import { CustomerFormService, AddressFormService, CreditCardFormService, ModalComponent, ConfirmationModalComponent } from '../../shared';
+import { BreadcrumbComponent } from '../../shared/components/breadcrumb/breadcrumb.component';
+import { BreadcrumbItem } from '../../models/product';
 import { maskCardNumber, formatCardNumber, formatExpiration } from '../../shared/forms/utils/ui-formatters';
 import { Customer, CreateAddressRequest, CreateCreditCardRequest } from '../../models/customer';
 
 @Component({
   selector: 'app-profile',
-  imports: [DatePipe, ReactiveFormsModule, FormsModule, ModalComponent, RouterLink],
+  imports: [DatePipe, ReactiveFormsModule, FormsModule, ModalComponent, ConfirmationModalComponent, RouterLink, BreadcrumbComponent],
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss', '../../shared/modal/modal-forms.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -25,6 +27,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private readonly customerFormService = inject(CustomerFormService);
   private readonly addressFormService = inject(AddressFormService);
   private readonly creditCardFormService = inject(CreditCardFormService);
+
+  readonly breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Home', url: '/home' },
+    { label: 'Account', url: '/profile' },
+  ];
 
   // Selectors
   readonly isAuthenticated = this.authService.isAuthenticated;
@@ -46,6 +53,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   readonly creditCardModalOpen = signal(false);
   readonly editingAddressId = signal<string | null>(null);
   readonly editingCardId = signal<string | null>(null);
+
+  // Deletion confirmation state
+  readonly deleteAddressConfirmOpen = signal(false);
+  readonly deleteCardConfirmOpen = signal(false);
+  private pendingDeleteAddressId = signal<string | null>(null);
+  private pendingDeleteCardId = signal<string | null>(null);
   
   // Track original form values for edit forms
   readonly originalAddressValues = signal<any>(null);
@@ -314,15 +327,27 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   deleteAddress(addressId: string): void {
-    if (confirm('Are you sure you want to delete this address?')) {
-      this.customerStore.deleteAddress(addressId);
-    }
+    this.pendingDeleteAddressId.set(addressId);
+    this.deleteAddressConfirmOpen.set(true);
+  }
+
+  confirmDeleteAddress(): void {
+    const id = this.pendingDeleteAddressId();
+    if (id) this.customerStore.deleteAddress(id);
+    this.deleteAddressConfirmOpen.set(false);
+    this.pendingDeleteAddressId.set(null);
   }
 
   deleteCreditCard(cardId: string): void {
-    if (confirm('Are you sure you want to delete this credit card?')) {
-      this.customerStore.deleteCreditCard(cardId);
-    }
+    this.pendingDeleteCardId.set(cardId);
+    this.deleteCardConfirmOpen.set(true);
+  }
+
+  confirmDeleteCard(): void {
+    const id = this.pendingDeleteCardId();
+    if (id) this.customerStore.deleteCreditCard(id);
+    this.deleteCardConfirmOpen.set(false);
+    this.pendingDeleteCardId.set(null);
   }
 
   setDefaultShippingAddress(addressId: string): void {

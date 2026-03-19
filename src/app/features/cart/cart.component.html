@@ -1,6 +1,27 @@
+<!-- Confirmation Modals -->
+<app-confirmation-modal
+  [isOpen]="showClearCartConfirm()"
+  title="Clear Cart"
+  message="Are you sure you want to remove all items from your cart?"
+  confirmLabel="Clear Cart"
+  [danger]="true"
+  (confirmed)="confirmClearCart()"
+  (cancelled)="showClearCartConfirm.set(false)">
+</app-confirmation-modal>
+
+<app-confirmation-modal
+  [isOpen]="showBackorderConfirm()"
+  title="Backorder Items"
+  [message]="'Your cart contains ' + backorderItems().length + ' item(s) on backorder. These items will not ship immediately. Do you want to continue to checkout?'"
+  confirmLabel="Continue to Checkout"
+  (confirmed)="confirmBackorderCheckout()"
+  (cancelled)="showBackorderConfirm.set(false)">
+</app-confirmation-modal>
+
 <!-- Cart Page Template -->
 <div class="cart-page">
   <div class="container">
+    <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
     <!-- Page Header -->
     <div class="page-header">
       <h1 class="page-title">Shopping Cart</h1>

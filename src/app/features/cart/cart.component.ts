@@ -1,23 +1,24 @@
-import { Component, inject, Signal, computed, ChangeDetectionStrategy} from '@angular/core';
-
+import { Component, inject, Signal, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CartStore } from '../../store';
 import { Cart, CartItem } from '../../models/cart';
 import { CartItemComponent } from './components/cart-item/cart-item.component';
 import { CartSummaryComponent } from './components/cart-summary/cart-summary.component';
 import { EmptyCartComponent } from './components/empty-cart/empty-cart.component';
+import { ConfirmationModalComponent } from '../../shared/modal';
+import { BreadcrumbComponent } from '../../shared/components/breadcrumb/breadcrumb.component';
+import { BreadcrumbItem } from '../../models/product';
 
-/**
- * Cart Page Component
- * Main shopping cart page displaying cart items and order summary
- */
 @Component({
   selector: 'app-cart',
   imports: [
-    RouterLink, CartItemComponent,
+    RouterLink,
+    CartItemComponent,
     CartSummaryComponent,
-    EmptyCartComponent
-],
+    EmptyCartComponent,
+    ConfirmationModalComponent,
+    BreadcrumbComponent,
+  ],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,7 +27,7 @@ export class CartComponent {
   private readonly cartStore = inject(CartStore);
   private readonly router = inject(Router);
 
-  // Cart store selectors with explicit types
+  // Cart store selectors
   readonly cart: Signal<Cart | null> = this.cartStore.cart;
   readonly items: Signal<CartItem[]> = this.cartStore.items;
   readonly isEmpty: Signal<boolean> = this.cartStore.isEmpty;
@@ -37,29 +38,28 @@ export class CartComponent {
   readonly total: Signal<number> = this.cartStore.total;
   readonly currency: Signal<string> = this.cartStore.currency;
 
-  // Validation state selectors
+  // Validation state
   readonly hasPendingItems: Signal<boolean> = this.cartStore.hasPendingValidationItems;
   readonly hasBackorderItems: Signal<boolean> = this.cartStore.hasBackorderItems;
   readonly pendingItems: Signal<CartItem[]> = this.cartStore.pendingValidationItems;
   readonly backorderItems: Signal<CartItem[]> = this.cartStore.backorderItems;
   readonly canCheckout: Signal<boolean> = this.cartStore.canCheckout;
 
-  // Checkout disabled reason
+  // Confirmation modal state
+  readonly showClearCartConfirm = signal(false);
+  readonly showBackorderConfirm = signal(false);
+
+  readonly breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Home', url: '/home' },
+    { label: 'Shopping Cart', url: '/cart' },
+  ];
+
   readonly checkoutDisabledReason = computed(() => {
-    if (this.isEmpty()) {
-      return 'Your cart is empty';
-    }
-    if (this.hasPendingItems()) {
-      return 'Please wait for all items to be validated before checkout';
-    }
+    if (this.isEmpty()) return 'Your cart is empty';
+    if (this.hasPendingItems()) return 'Please wait for all items to be validated before checkout';
     return null;
   });
 
-  /**
-   * Updates the quantity of a cart item
-   * @param lineNumber The line number of the item
-   * @param quantity The new quantity
-   */
   onUpdateQuantity(lineNumber: string, quantity: number): void {
     if (quantity <= 0) {
       this.onRemoveItem(lineNumber);
@@ -68,33 +68,29 @@ export class CartComponent {
     }
   }
 
-  /**
-   * Removes an item from the cart
-   * @param lineNumber The line number of the item
-   */
   onRemoveItem(lineNumber: string): void {
     this.cartStore.removeItem(lineNumber);
   }
 
-  /**
-   * Clears all items from the cart
-   */
   onClearCart(): void {
-    if (confirm('Are you sure you want to clear your cart?')) {
-      this.cartStore.clearCart();
+    this.showClearCartConfirm.set(true);
+  }
+
+  confirmClearCart(): void {
+    this.showClearCartConfirm.set(false);
+    this.cartStore.clearCart();
+  }
+
+  onProceedToCheckout(): void {
+    if (this.hasBackorderItems()) {
+      this.showBackorderConfirm.set(true);
+    } else {
+      this.router.navigate(['/checkout']);
     }
   }
 
-  /**
-   * Proceeds to checkout
-   */
-  onProceedToCheckout(): void {
-    if (this.hasBackorderItems()) {
-      const confirmCheckout = confirm(
-        'Your cart contains items on backorder. These items will not ship immediately. Do you want to continue?'
-      );
-      if (!confirmCheckout) return;
-    }
+  confirmBackorderCheckout(): void {
+    this.showBackorderConfirm.set(false);
     this.router.navigate(['/checkout']);
   }
 }

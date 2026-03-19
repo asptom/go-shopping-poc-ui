@@ -10,6 +10,7 @@ import { NotificationService } from '../../core/notification/notification.servic
 import { Address, CreditCard } from '../../models/customer';
 import { creditCard as creditCardValidator, cvv as cvvValidator } from '../../shared/forms/validators/pure-validators';
 import { OrderConfirmation } from '../../models/order';
+import { ConfirmationModalComponent } from '../../shared/modal';
 
 /**
  * Checkout Page Component
@@ -17,7 +18,7 @@ import { OrderConfirmation } from '../../models/order';
  */
 @Component({
   selector: 'app-checkout',
-  imports: [CurrencyPipe, TitleCasePipe, RouterLink, ReactiveFormsModule],
+  imports: [CurrencyPipe, TitleCasePipe, RouterLink, ReactiveFormsModule, ConfirmationModalComponent],
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +44,9 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   // Current step in checkout flow
   currentStep = signal<number>(1);
+
+  // Confirmation modal state
+  readonly showBackorderConfirm = signal(false);
   
   // Form groups for each step
   contactForm!: FormGroup;
@@ -356,20 +360,27 @@ export class CheckoutComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Check for backorder items and confirm
+    // Check for backorder items — show accessible modal instead of window.confirm
     if (this.hasBackorderItems()) {
-      const confirmBackorder = confirm(
-        `Your cart contains ${this.backorderItems().length} item(s) on backorder. ` +
-        'These items will not ship immediately. Do you want to continue with checkout?'
-      );
-      if (!confirmBackorder) {
-        return;
-      }
+      this.showBackorderConfirm.set(true);
+      return; // Execution resumes via confirmBackorderCheckout()
     }
 
-    // Start checkout via OrderStore
+    await this.proceedWithCheckout(cartId);
+  }
+
+  // Called when user confirms backorder dialog
+  async confirmBackorderCheckout(): Promise<void> {
+    this.showBackorderConfirm.set(false);
+    const cartId = this.cartStore.cartId();
+    if (cartId) {
+      await this.proceedWithCheckout(cartId);
+    }
+  }
+
+  private async proceedWithCheckout(cartId: string): Promise<void> {
     await this.orderStore.checkout(cartId);
-    // Navigation handled by subscription in ngOnInit
+    // Navigation handled by orderConfirmationEffect
   }
 
   // Retry checkout after error

@@ -1,3 +1,13 @@
+<!-- Backorder Confirmation Modal -->
+<app-confirmation-modal
+  [isOpen]="showBackorderConfirm()"
+  title="Backorder Items"
+  [message]="'Your cart contains ' + backorderItems().length + ' item(s) on backorder. These items will not ship immediately. Do you want to continue with checkout?'"
+  confirmLabel="Continue to Checkout"
+  (confirmed)="confirmBackorderCheckout()"
+  (cancelled)="showBackorderConfirm.set(false)">
+</app-confirmation-modal>
+
 <!-- Checkout Page Template -->
 <div class="checkout-page">
   <div class="container">
