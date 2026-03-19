@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, Signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ProductStore } from '../../../store/product/product.store';
@@ -17,7 +17,6 @@ import { QuickViewModalComponent } from './components/quick-view-modal/quick-vie
   selector: 'app-product-list',
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     ProductCardComponent,
     ProductFiltersComponent,
@@ -26,7 +25,7 @@ import { QuickViewModalComponent } from './components/quick-view-modal/quick-vie
     EmptyStateComponent,
     ErrorStateComponent,
     QuickViewModalComponent
-  ],
+],
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.scss']
 })

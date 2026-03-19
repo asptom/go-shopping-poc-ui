@@ -4,98 +4,111 @@
     <!-- Page Header -->
     <div class="page-header">
       <h1 class="page-title">Shopping Cart</h1>
-      <span class="item-count" *ngIf="!isEmpty()">
-        {{ items().length }} item{{ items().length !== 1 ? 's' : '' }}
-      </span>
+      @if (!isEmpty()) {
+        <span class="item-count">
+          {{ items().length }} item{{ items().length !== 1 ? 's' : '' }}
+        </span>
+      }
     </div>
 
     <!-- Loading State -->
-    <div class="loading-state" *ngIf="loading() && isEmpty()">
-      <div class="skeleton-loader"></div>
-    </div>
+    @if (loading() && isEmpty()) {
+      <div class="loading-state">
+        <div class="skeleton-loader"></div>
+      </div>
+    }
 
     <!-- Empty Cart State -->
-    <app-empty-cart *ngIf="!loading() && isEmpty()"></app-empty-cart>
+    @if (!loading() && isEmpty()) {
+      <app-empty-cart></app-empty-cart>
+    }
 
     <!-- Cart Content -->
-    <div class="cart-content" *ngIf="!isEmpty()">
-      <!-- Validation Warnings -->
-      <div class="validation-warnings" *ngIf="hasPendingItems() || hasBackorderItems()">
-        <!-- Pending Items Warning -->
-        <div class="alert alert-info" *ngIf="hasPendingItems()">
-          <span class="alert-icon">&#8635;</span>
-          <div class="alert-content">
-            <strong>Validating Items</strong>
-            <p>{{ pendingItems().length }} item(s) are being validated. Please wait before checking out.</p>
+    @if (!isEmpty()) {
+      <div class="cart-content">
+        <!-- Validation Warnings -->
+        @if (hasPendingItems() || hasBackorderItems()) {
+          <div class="validation-warnings">
+            <!-- Pending Items Warning -->
+            @if (hasPendingItems()) {
+              <div class="alert alert-info">
+                <span class="alert-icon">&#8635;</span>
+                <div class="alert-content">
+                  <strong>Validating Items</strong>
+                  <p>{{ pendingItems().length }} item(s) are being validated. Please wait before checking out.</p>
+                </div>
+              </div>
+            }
+            <!-- Backorder Items Warning -->
+            @if (hasBackorderItems()) {
+              <div class="alert alert-warning">
+                <span class="alert-icon">!</span>
+                <div class="alert-content">
+                  <strong>Backorder Items</strong>
+                  <p>{{ backorderItems().length }} item(s) are on backorder and won't ship immediately.</p>
+                  <ul class="backorder-list">
+                    @for (item of backorderItems(); track item) {
+                      <li>
+                        {{ item.product_name }} - {{ item.backorder_reason }}
+                      </li>
+                    }
+                  </ul>
+                </div>
+              </div>
+            }
           </div>
-        </div>
-
-        <!-- Backorder Items Warning -->
-        <div class="alert alert-warning" *ngIf="hasBackorderItems()">
-          <span class="alert-icon">!</span>
-          <div class="alert-content">
-            <strong>Backorder Items</strong>
-            <p>{{ backorderItems().length }} item(s) are on backorder and won't ship immediately.</p>
-            <ul class="backorder-list">
-              <li *ngFor="let item of backorderItems()">
-                {{ item.product_name }} - {{ item.backorder_reason }}
-              </li>
-            </ul>
+        }
+        <div class="cart-layout">
+          <!-- Cart Items Section -->
+          <div class="items-section">
+            <div class="items-header">
+              <span class="header-label">Product</span>
+              <span class="header-label">Quantity</span>
+              <span class="header-label">Price</span>
+            </div>
+            <div class="items-list">
+              @for (item of items(); track item) {
+                <app-cart-item
+                  [item]="item"
+                  [currency]="currency()"
+                  (updateQuantity)="onUpdateQuantity(item.line_number, $event)"
+                  (remove)="onRemoveItem(item.line_number)">
+                </app-cart-item>
+              }
+            </div>
+            <div class="cart-actions">
+              <button class="btn-clear" (click)="onClearCart()">
+                Clear Cart
+              </button>
+              <a [routerLink]="['/products']" class="btn-continue">
+                Continue Shopping
+              </a>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <div class="cart-layout">
-        <!-- Cart Items Section -->
-        <div class="items-section">
-          <div class="items-header">
-            <span class="header-label">Product</span>
-            <span class="header-label">Quantity</span>
-            <span class="header-label">Price</span>
-          </div>
-
-          <div class="items-list">
-            <app-cart-item
-              *ngFor="let item of items()"
-              [item]="item"
+          <!-- Order Summary Section -->
+          <div class="summary-section">
+            <app-cart-summary
+              [subtotal]="subtotal()"
+              [tax]="tax()"
+              [shipping]="shipping()"
+              [total]="total()"
               [currency]="currency()"
-              (updateQuantity)="onUpdateQuantity(item.line_number, $event)"
-              (remove)="onRemoveItem(item.line_number)">
-            </app-cart-item>
-          </div>
-
-          <div class="cart-actions">
-            <button class="btn-clear" (click)="onClearCart()">
-              Clear Cart
-            </button>
-            <a [routerLink]="['/products']" class="btn-continue">
-              Continue Shopping
-            </a>
-          </div>
-        </div>
-
-        <!-- Order Summary Section -->
-        <div class="summary-section">
-          <app-cart-summary
-            [subtotal]="subtotal()"
-            [tax]="tax()"
-            [shipping]="shipping()"
-            [total]="total()"
-            [currency]="currency()"
-            [itemCount]="items().length"
-            [canCheckout]="canCheckout()"
-            [hasPendingItems]="hasPendingItems()"
-            [hasBackorderItems]="hasBackorderItems()"
-            (checkout)="onProceedToCheckout()"
-            (clearCart)="onClearCart()">
-          </app-cart-summary>
-
-          <!-- Checkout Hint -->
-          <div class="checkout-hint-container" *ngIf="checkoutDisabledReason()">
-            <span class="checkout-hint">{{ checkoutDisabledReason() }}</span>
+              [itemCount]="items().length"
+              [canCheckout]="canCheckout()"
+              [hasPendingItems]="hasPendingItems()"
+              [hasBackorderItems]="hasBackorderItems()"
+              (checkout)="onProceedToCheckout()"
+              (clearCart)="onClearCart()">
+            </app-cart-summary>
+            <!-- Checkout Hint -->
+            @if (checkoutDisabledReason()) {
+              <div class="checkout-hint-container">
+                <span class="checkout-hint">{{ checkoutDisabledReason() }}</span>
+              </div>
+            }
           </div>
         </div>
       </div>
-    </div>
+    }
   </div>
 </div>

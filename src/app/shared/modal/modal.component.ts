@@ -1,11 +1,11 @@
 import { Component, input, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-modal',
   standalone: true,
-  imports: [CommonModule, CdkTrapFocus],
+  imports: [CdkTrapFocus],
   template: `
     @if (isOpen()) {
       <div class="modal-backdrop" (click)="close.emit()">

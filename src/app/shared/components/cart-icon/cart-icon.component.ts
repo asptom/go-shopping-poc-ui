@@ -1,5 +1,5 @@
 import { Component, inject, Signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule } from '@angular/router';
 import { CartStore } from '../../../store';
 
@@ -11,12 +11,14 @@ import { CartStore } from '../../../store';
 @Component({
   selector: 'app-cart-icon',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [RouterModule],
   template: `
     <a [routerLink]="['/cart']" class="cart-link" aria-label="Shopping cart">
-      <span class="cart-count" *ngIf="itemCount() > 0" aria-label="Items in cart">
-        {{ itemCount() > 99 ? '99+' : itemCount() }}
-      </span>
+      @if (itemCount() > 0) {
+        <span class="cart-count" aria-label="Items in cart">
+          {{ itemCount() > 99 ? '99+' : itemCount() }}
+        </span>
+      }
       <svg class="cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <circle cx="9" cy="21" r="1"></circle>
         <circle cx="20" cy="21" r="1"></circle>
@@ -24,7 +26,7 @@ import { CartStore } from '../../../store';
       </svg>
       <span class="cart-text">Cart</span>
     </a>
-  `,
+    `,
   styleUrls: ['./cart-icon.component.scss']
 })
 export class CartIconComponent {

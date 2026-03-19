@@ -7,24 +7,38 @@
       <span class="product-id">Item #{{ item.line_number }}</span>
 
       <!-- Status Badge -->
-      <span class="status-badge" [class]="statusClass" *ngIf="statusText">
-        <span class="status-icon" *ngIf="isPendingValidation">&#8635;</span>
-        <span class="status-icon" *ngIf="isBackorder">!</span>
-        <span class="status-icon" *ngIf="isConfirmed">&#10003;</span>
-        {{ statusText }}
-      </span>
+      @if (statusText) {
+        <span class="status-badge" [class]="statusClass">
+          @if (isPendingValidation) {
+            <span class="status-icon">&#8635;</span>
+          }
+          @if (isBackorder) {
+            <span class="status-icon">!</span>
+          }
+          @if (isConfirmed) {
+            <span class="status-icon">&#10003;</span>
+          }
+          {{ statusText }}
+        </span>
+      }
 
       <!-- Backorder Reason -->
-      <span class="backorder-reason" *ngIf="isBackorder && item.backorder_reason">
-        {{ item.backorder_reason }}
-      </span>
+      @if (isBackorder && item.backorder_reason) {
+        <span class="backorder-reason">
+          {{ item.backorder_reason }}
+        </span>
+      }
 
-      <span class="unit-price" *ngIf="isConfirmed">
-        {{ item.unit_price | currency:currency }} each
-      </span>
-      <span class="unit-price pending" *ngIf="!isConfirmed">
-        Price pending validation
-      </span>
+      @if (isConfirmed) {
+        <span class="unit-price">
+          {{ item.unit_price | currency:currency }} each
+        </span>
+      }
+      @if (!isConfirmed) {
+        <span class="unit-price pending">
+          Price pending validation
+        </span>
+      }
     </div>
   </div>
 
@@ -62,11 +76,15 @@
 
   <!-- Price -->
   <div class="price-section">
-    <span class="item-total" *ngIf="isConfirmed">
-      {{ item.total_price | currency:currency }}
-    </span>
-    <span class="item-total pending" *ngIf="!isConfirmed">
-      --
-    </span>
+    @if (isConfirmed) {
+      <span class="item-total">
+        {{ item.total_price | currency:currency }}
+      </span>
+    }
+    @if (!isConfirmed) {
+      <span class="item-total pending">
+        --
+      </span>
+    }
   </div>
 </div>

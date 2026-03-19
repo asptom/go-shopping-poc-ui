@@ -1,11 +1,11 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-empty-state',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [RouterModule],
   template: `
     <div class="empty-state">
       <div class="icon">
@@ -16,18 +16,20 @@ import { RouterModule } from '@angular/router';
       </div>
       <h2>{{ isFiltered ? 'No products found' : 'No products available' }}</h2>
       <p>
-        {{ isFiltered 
-          ? 'Try adjusting your filters or search query to find what you\'re looking for.' 
-          : 'Check back later for new products.' }}
+        {{ isFiltered
+        ? 'Try adjusting your filters or search query to find what you\'re looking for.'
+        : 'Check back later for new products.' }}
       </p>
-      <div class="actions" *ngIf="isFiltered">
-        <button class="btn-clear" (click)="clearFilters.emit()">
-          Clear Filters
-        </button>
-        <a routerLink="/products" class="btn-browse">Browse All Products</a>
-      </div>
+      @if (isFiltered) {
+        <div class="actions">
+          <button class="btn-clear" (click)="clearFilters.emit()">
+            Clear Filters
+          </button>
+          <a routerLink="/products" class="btn-browse">Browse All Products</a>
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .empty-state {
       text-align: center;

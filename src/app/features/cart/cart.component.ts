@@ -1,5 +1,5 @@
 import { Component, inject, Signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule, Router } from '@angular/router';
 import { CartStore } from '../../store';
 import { Cart, CartItem } from '../../models/cart';
@@ -15,12 +15,11 @@ import { EmptyCartComponent } from './components/empty-cart/empty-cart.component
   selector: 'app-cart',
   standalone: true,
   imports: [
-    CommonModule, 
     RouterModule,
     CartItemComponent,
     CartSummaryComponent,
     EmptyCartComponent
-  ],
+],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss']
 })

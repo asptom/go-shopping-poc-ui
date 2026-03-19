@@ -18,34 +18,46 @@ interface OrderDisplay {
   selector: 'app-order-history',
   imports: [CommonModule, CurrencyPipe],
   template: '<div class="order-history-container">' +
-    '<div class="container">' +
-    '<h1>Order History</h1>' +
-    '<div class="orders-content">' +
-    '<h2>Your Orders</h2>' +
-    '<div *ngIf="loading()" class="loading">Loading orders...</div>' +
-    '<div *ngIf="error()" class="error">{{error()}}</div>' +
-    '<div *ngIf="!loading() && !error() && orders().length === 0" class="no-orders">No orders found</div>' +
-    '<div class="order-card" *ngFor="let order of orders()">' +
-    '<div class="order-header">' +
-    '<div class="order-id">Order #{{order.orderNumber}}</div>' +
-    '<div class="order-date">{{order.orderDate}}</div>' +
-    '</div>' +
-    '<div class="order-details">' +
-    '<div class="order-status">{{order.status}}</div>' +
-    '<div class="order-total">Total: {{order.total | currency:"USD":"symbol":"1.2-2"}}</div>' +
+      '<div class="container">' +
+      '<h1>Order History</h1>' +
+      '<div class="orders-content">' +
+      '<h2>Your Orders</h2>' +
+      '@if (loading()) {
+      <div class="loading">Loading orders...</div>
+      }' +
+      '@if (error()) {
+      <div class="error">{{error()}}</div>
+      }' +
+      '@if (!loading() && !error() && orders().length === 0) {
+      <div class="no-orders">No orders found</div>
+      }' +
+      '@for (order of orders(); track order) {
+      <div class="order-card">' +
+        '<div class="order-header">' +
+        '<div class="order-id">Order #{{order.orderNumber}}</div>' +
+        '<div class="order-date">{{order.orderDate}}</div>' +
+      '</div>' +
+      '<div class="order-details">' +
+      '<div class="order-status">{{order.status}}</div>' +
+      '<div class="order-total">Total: {{order.total | currency:"USD":"symbol":"1.2-2"}}</div>' +
     '</div>' +
     '<div class="order-actions">' +
     '<button (click)="viewOrderDetails(order.id)" class="view-details-button">{{expandedOrderId() === order.id ? "Hide Details" : "View Details"}}</button>' +
     '</div>' +
-    '<div *ngIf="expandedOrderId() === order.id" class="order-items">' +
-    '<div class="item-header"><span>Product</span><span>Qty</span><span>Price</span></div>' +
-    '<div class="item" *ngFor="let item of order.items">' +
-    '<div class="item-name">{{item.product_name || item.name || item.product_id || "Product"}}{{item.description ? (" - " + item.description) : ""}}</div>' +
-    '<div class="item-quantity">{{item.quantity}}</div>' +
-    '<div class="item-price">{{(item.unit_price || item.price) | currency:"USD":"symbol":"1.2-2"}}</div>' +
-    '</div>' +
-    '</div>' +
-    '</div>' +
+    '@if (expandedOrderId() === order.id) {
+    <div class="order-items">' +
+      '<div class="item-header"><span>Product</span><span>Qty</span><span>Price</span></div>' +
+      '@for (item of order.items; track item) {
+      <div class="item">' +
+        '<div class="item-name">{{item.product_name || item.name || item.product_id || "Product"}}{{item.description ? (" - " + item.description) : ""}}</div>' +
+        '<div class="item-quantity">{{item.quantity}}</div>' +
+        '<div class="item-price">{{(item.unit_price || item.price) | currency:"USD":"symbol":"1.2-2"}}</div>' +
+      '</div>
+      }' +
+    '</div>
+    }' +
+    '</div>
+    }' +
     '</div>' +
     '</div>' +
     '</div>',

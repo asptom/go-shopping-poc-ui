@@ -1,12 +1,13 @@
 <div class="filters-panel">
   <div class="filters-header">
     <h3>Filters</h3>
-    <button 
-      class="btn-clear"
-      *ngIf="activeCount > 0"
-      (click)="onClearAll()">
-      Clear All ({{ activeCount }})
-    </button>
+    @if (activeCount > 0) {
+      <button
+        class="btn-clear"
+        (click)="onClearAll()">
+        Clear All ({{ activeCount }})
+      </button>
+    }
   </div>
 
   <!-- Category Filter -->
@@ -14,22 +15,24 @@
     <h4>Category</h4>
     <div class="filter-options">
       <label class="filter-option">
-        <input 
-          type="radio" 
+        <input
+          type="radio"
           name="category"
           [checked]="filters.category === null"
           (change)="onCategoryChange(null)">
         <span>All Categories</span>
       </label>
-      <label class="filter-option" *ngFor="let category of availableCategories()">
-        <input 
-          type="radio"
-          name="category"
-          [value]="category"
-          [checked]="filters.category === category"
-          (change)="onCategoryChange(category)">
-        <span>{{ category }}</span>
-      </label>
+      @for (category of availableCategories(); track category) {
+        <label class="filter-option">
+          <input
+            type="radio"
+            name="category"
+            [value]="category"
+            [checked]="filters.category === category"
+            (change)="onCategoryChange(category)">
+          <span>{{ category }}</span>
+        </label>
+      }
     </div>
   </div>
 
@@ -38,36 +41,39 @@
     <h4>Brand</h4>
     <div class="filter-options" [class.collapsed]="availableBrands().length > 10 && !showAllBrands">
       <label class="filter-option">
-        <input 
+        <input
           type="radio"
           name="brand"
           [checked]="filters.brand === null"
           (change)="onBrandChange(null)">
         <span>All Brands</span>
       </label>
-      <label class="filter-option" *ngFor="let brand of availableBrands() | slice:0:(showAllBrands ? availableBrands().length : 10)">
-        <input 
-          type="radio"
-          name="brand"
-          [value]="brand"
-          [checked]="filters.brand === brand"
-          (change)="onBrandChange(brand)">
-        <span>{{ brand }}</span>
-      </label>
+      @for (brand of availableBrands() | slice:0:(showAllBrands ? availableBrands().length : 10); track brand) {
+        <label class="filter-option">
+          <input
+            type="radio"
+            name="brand"
+            [value]="brand"
+            [checked]="filters.brand === brand"
+            (change)="onBrandChange(brand)">
+          <span>{{ brand }}</span>
+        </label>
+      }
     </div>
-    <button 
-      class="show-more-btn" 
-      *ngIf="availableBrands().length > 10"
-      (click)="showAllBrands = !showAllBrands">
-      {{ showAllBrands ? 'Show Less' : 'Show More (' + (availableBrands().length - 10) + ')' }}
-    </button>
+    @if (availableBrands().length > 10) {
+      <button
+        class="show-more-btn"
+        (click)="showAllBrands = !showAllBrands">
+        {{ showAllBrands ? 'Show Less' : 'Show More (' + (availableBrands().length - 10) + ')' }}
+      </button>
+    }
   </div>
 
   <!-- Stock Filter -->
   <div class="filter-section">
     <h4>Availability</h4>
     <label class="filter-option">
-      <input 
+      <input
         type="checkbox"
         [checked]="filters.inStockOnly"
         (change)="onStockChange($event.target.checked)">

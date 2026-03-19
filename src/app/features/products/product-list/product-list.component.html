@@ -1,15 +1,17 @@
 <div class="product-list-page">
   <div class="page-header">
     <h1>Products</h1>
-    <div class="results-info" *ngIf="!loading() && products().length > 0">
-      Showing {{ products().length }} of {{ pagination().total }} products
-    </div>
+    @if (!loading() && products().length > 0) {
+      <div class="results-info">
+        Showing {{ products().length }} of {{ pagination().total }} products
+      </div>
+    }
   </div>
 
   <div class="product-list-container">
     <!-- Sidebar Filters -->
     <aside class="filters-sidebar">
-      <app-product-filters 
+      <app-product-filters
         [filters]="filters()"
         [activeCount]="activeFiltersCount()">
       </app-product-filters>
@@ -18,52 +20,65 @@
     <!-- Main Content -->
     <main class="products-content">
       <!-- Sort Toolbar -->
-      <div class="toolbar" *ngIf="products().length > 0">
-        <app-product-sort 
-          [currentSort]="sortBy()"
-          (sortChange)="onSortChange($event)">
-        </app-product-sort>
-      </div>
+      @if (products().length > 0) {
+        <div class="toolbar">
+          <app-product-sort
+            [currentSort]="sortBy()"
+            (sortChange)="onSortChange($event)">
+          </app-product-sort>
+        </div>
+      }
 
       <!-- Loading State -->
-      <div class="loading-grid" *ngIf="loading() && products().length === 0">
-        <app-product-skeleton *ngFor="let i of [1,2,3,4,5,6,7,8]"></app-product-skeleton>
-      </div>
+      @if (loading() && products().length === 0) {
+        <div class="loading-grid">
+          @for (i of [1,2,3,4,5,6,7,8]; track i) {
+            <app-product-skeleton></app-product-skeleton>
+          }
+        </div>
+      }
 
       <!-- Error State -->
-      <app-error-state 
-        *ngIf="error() && !loading()"
-        [message]="error()"
-        (retry)="productStore.loadProducts()">
-      </app-error-state>
+      @if (error() && !loading()) {
+        <app-error-state
+          [message]="error()"
+          (retry)="productStore.loadProducts()">
+        </app-error-state>
+      }
 
       <!-- Empty State -->
-      <app-empty-state 
-        *ngIf="!loading() && !error() && products().length === 0"
-        [isFiltered]="isFiltered()"
-        (clearFilters)="onClearFilters()">
-      </app-empty-state>
+      @if (!loading() && !error() && products().length === 0) {
+        <app-empty-state
+          [isFiltered]="isFiltered()"
+          (clearFilters)="onClearFilters()">
+        </app-empty-state>
+      }
 
       <!-- Product Grid -->
-      <div class="product-grid" *ngIf="products().length > 0">
-        <app-product-card
-          *ngFor="let product of products(); trackBy: trackByProductId"
-          [product]="product"
-          (viewDetails)="onViewDetails($event)"
-          (quickView)="onQuickView($event)"
-          (addToCart)="onAddToCart($event)">
-        </app-product-card>
-      </div>
+      @if (products().length > 0) {
+        <div class="product-grid">
+          @for (product of products(); track trackByProductId($index, product)) {
+            <app-product-card
+              [product]="product"
+              (viewDetails)="onViewDetails($event)"
+              (quickView)="onQuickView($event)"
+              (addToCart)="onAddToCart($event)">
+            </app-product-card>
+          }
+        </div>
+      }
 
       <!-- Load More -->
-      <div class="load-more-container" *ngIf="products().length > 0 && hasMore()">
-        <button 
-          class="btn-load-more"
-          (click)="onLoadMore()"
-          [disabled]="loading()">
-          {{ loading() ? 'Loading...' : 'Load More Products' }}
-        </button>
-      </div>
+      @if (products().length > 0 && hasMore()) {
+        <div class="load-more-container">
+          <button
+            class="btn-load-more"
+            (click)="onLoadMore()"
+            [disabled]="loading()">
+            {{ loading() ? 'Loading...' : 'Load More Products' }}
+          </button>
+        </div>
+      }
     </main>
   </div>
 

@@ -1,136 +1,153 @@
-<div class="product-detail-page" *ngIf="!loading() || product()">
-  <!-- Breadcrumbs -->
-  <app-breadcrumb [items]="breadcrumbs()"></app-breadcrumb>
-
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="loading() && !product()">
-    <div class="skeleton-gallery"></div>
-    <div class="skeleton-info">
-      <div class="skeleton-title"></div>
-      <div class="skeleton-price"></div>
-      <div class="skeleton-description"></div>
-    </div>
-  </div>
-
-  <!-- Error State -->
-  <div class="error-state" *ngIf="error() && !loading()">
-    <h2>Error Loading Product</h2>
-    <p>{{ error() }}</p>
-    <button class="btn-retry" (click)="loadProduct(route.snapshot.params['id'])">
-      Try Again
-    </button>
-    <a routerLink="/products" class="btn-back">Back to Products</a>
-  </div>
-
-  <!-- Product Content -->
-  <div class="product-content" *ngIf="product() && !error()">
-    <div class="product-layout">
-      <!-- Left: Image Gallery -->
-      <div class="gallery-section">
-        <app-image-gallery [images]="product()!.images ?? []"></app-image-gallery>
+@if (!loading() || product()) {
+  <div class="product-detail-page">
+    <!-- Breadcrumbs -->
+    <app-breadcrumb [items]="breadcrumbs()"></app-breadcrumb>
+    <!-- Loading State -->
+    @if (loading() && !product()) {
+      <div class="loading-state">
+        <div class="skeleton-gallery"></div>
+        <div class="skeleton-info">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-price"></div>
+          <div class="skeleton-description"></div>
+        </div>
       </div>
-
-      <!-- Right: Product Info -->
-      <div class="info-section">
-        <div class="product-header">
-          <h1 class="product-name">{{ product()!.name }}</h1>
-          
-          <div class="meta-info">
-            <span class="brand" (click)="onBrandClick()">{{ product()!.brand }}</span>
-            <span class="separator">|</span>
-            <span class="category" (click)="onCategoryClick()">{{ product()!.category }}</span>
-            <span class="separator">|</span>
-            <span class="model" *ngIf="product()!.model_number">
-              Model: {{ product()!.model_number }}
-            </span>
+    }
+    <!-- Error State -->
+    @if (error() && !loading()) {
+      <div class="error-state">
+        <h2>Error Loading Product</h2>
+        <p>{{ error() }}</p>
+        <button class="btn-retry" (click)="loadProduct(route.snapshot.params['id'])">
+          Try Again
+        </button>
+        <a routerLink="/products" class="btn-back">Back to Products</a>
+      </div>
+    }
+    <!-- Product Content -->
+    @if (product() && !error()) {
+      <div class="product-content">
+        <div class="product-layout">
+          <!-- Left: Image Gallery -->
+          <div class="gallery-section">
+            <app-image-gallery [images]="product()!.images ?? []"></app-image-gallery>
           </div>
-        </div>
-
-        <div class="price-section">
-          <div class="price-display">
-            <span class="final-price">{{ product()!.final_price | currency:product()!.currency }}</span>
-            <span class="initial-price" *ngIf="hasDiscount">
-              {{ product()!.initial_price | currency:product()!.currency }}
-            </span>
-          </div>
-          <div class="discount-badge" *ngIf="hasDiscount">
-            Save {{ discountPercentage }}%
-          </div>
-        </div>
-
-        <div class="stock-status" [class.in-stock]="product()!.in_stock">
-          <span class="status-dot"></span>
-          {{ product()!.in_stock ? 'In Stock' : 'Out of Stock' }}
-        </div>
-
-        <div class="actions">
-          <div class="quantity-selector" *ngIf="product()!.in_stock">
-            <label>Quantity:</label>
-            <div class="quantity-controls">
-              <button 
-                class="btn-quantity" 
-                (click)="onQuantityChange(-1)"
-                [disabled]="quantity() <= 1 || addingToCart()">
-                -
-              </button>
-              <span class="quantity-value">{{ quantity() }}</span>
-              <button 
-                class="btn-quantity" 
-                (click)="onQuantityChange(1)"
-                [disabled]="quantity() >= 10 || addingToCart()">
-                +
+          <!-- Right: Product Info -->
+          <div class="info-section">
+            <div class="product-header">
+              <h1 class="product-name">{{ product()!.name }}</h1>
+              <div class="meta-info">
+                <span class="brand" (click)="onBrandClick()">{{ product()!.brand }}</span>
+                <span class="separator">|</span>
+                <span class="category" (click)="onCategoryClick()">{{ product()!.category }}</span>
+                <span class="separator">|</span>
+                @if (product()!.model_number) {
+                  <span class="model">
+                    Model: {{ product()!.model_number }}
+                  </span>
+                }
+              </div>
+            </div>
+            <div class="price-section">
+              <div class="price-display">
+                <span class="final-price">{{ product()!.final_price | currency:product()!.currency }}</span>
+                @if (hasDiscount) {
+                  <span class="initial-price">
+                    {{ product()!.initial_price | currency:product()!.currency }}
+                  </span>
+                }
+              </div>
+              @if (hasDiscount) {
+                <div class="discount-badge">
+                  Save {{ discountPercentage }}%
+                </div>
+              }
+            </div>
+            <div class="stock-status" [class.in-stock]="product()!.in_stock">
+              <span class="status-dot"></span>
+              {{ product()!.in_stock ? 'In Stock' : 'Out of Stock' }}
+            </div>
+            <div class="actions">
+              @if (product()!.in_stock) {
+                <div class="quantity-selector">
+                  <label>Quantity:</label>
+                  <div class="quantity-controls">
+                    <button
+                      class="btn-quantity"
+                      (click)="onQuantityChange(-1)"
+                      [disabled]="quantity() <= 1 || addingToCart()">
+                      -
+                    </button>
+                    <span class="quantity-value">{{ quantity() }}</span>
+                    <button
+                      class="btn-quantity"
+                      (click)="onQuantityChange(1)"
+                      [disabled]="quantity() >= 10 || addingToCart()">
+                      +
+                    </button>
+                  </div>
+                </div>
+              }
+              <button
+                class="btn-add-cart"
+                [disabled]="!product()!.in_stock || addingToCart()"
+                (click)="onAddToCart()">
+                @if (!addingToCart()) {
+                  <span>
+                    {{ product()!.in_stock ? 'Add to Cart' : 'Out of Stock' }}
+                  </span>
+                }
+                @if (addingToCart()) {
+                  <span>Adding...</span>
+                }
               </button>
             </div>
+            <div class="product-details">
+              <h3>Product Details</h3>
+              @if (product()!.color) {
+                <div class="detail-row">
+                  <span class="label">Color:</span>
+                  <span class="value">{{ product()!.color }}</span>
+                </div>
+              }
+              @if (product()!.size) {
+                <div class="detail-row">
+                  <span class="label">Size:</span>
+                  <span class="value">{{ product()!.size }}</span>
+                </div>
+              }
+              @if (availableSizes.length > 0) {
+                <div class="detail-row">
+                  <span class="label">Available Sizes:</span>
+                  <span class="value sizes">
+                    @for (size of availableSizes; track size) {
+                      <span class="size-badge">{{ size }}</span>
+                    }
+                  </span>
+                </div>
+              }
+              @if (product()!.country_code) {
+                <div class="detail-row">
+                  <span class="label">Country of Origin:</span>
+                  <span class="value">{{ product()!.country_code }}</span>
+                </div>
+              }
+            </div>
+            @if (product()!.description) {
+              <div class="description-section">
+                <h3>Description</h3>
+                <p class="description">{{ product()!.description }}</p>
+              </div>
+            }
           </div>
-          
-          <button 
-            class="btn-add-cart"
-            [disabled]="!product()!.in_stock || addingToCart()"
-            (click)="onAddToCart()">
-            <span *ngIf="!addingToCart()">
-              {{ product()!.in_stock ? 'Add to Cart' : 'Out of Stock' }}
-            </span>
-            <span *ngIf="addingToCart()">Adding...</span>
-          </button>
         </div>
-
-        <div class="product-details">
-          <h3>Product Details</h3>
-          
-          <div class="detail-row" *ngIf="product()!.color">
-            <span class="label">Color:</span>
-            <span class="value">{{ product()!.color }}</span>
-          </div>
-          
-          <div class="detail-row" *ngIf="product()!.size">
-            <span class="label">Size:</span>
-            <span class="value">{{ product()!.size }}</span>
-          </div>
-          
-          <div class="detail-row" *ngIf="availableSizes.length > 0">
-            <span class="label">Available Sizes:</span>
-            <span class="value sizes">
-              <span class="size-badge" *ngFor="let size of availableSizes">{{ size }}</span>
-            </span>
-          </div>
-          
-          <div class="detail-row" *ngIf="product()!.country_code">
-            <span class="label">Country of Origin:</span>
-            <span class="value">{{ product()!.country_code }}</span>
-          </div>
-        </div>
-
-        <div class="description-section" *ngIf="product()!.description">
-          <h3>Description</h3>
-          <p class="description">{{ product()!.description }}</p>
-        </div>
+        <!-- Related Products -->
+        @if (product()) {
+          <app-related-products
+            [currentProduct]="product()!">
+          </app-related-products>
+        }
       </div>
-    </div>
-
-    <!-- Related Products -->
-    <app-related-products 
-      *ngIf="product()"
-      [currentProduct]="product()!">
-    </app-related-products>
+    }
   </div>
-</div>
+}

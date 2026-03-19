@@ -1,11 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { NotificationService, Notification } from '../../core/notification/notification.service';
 
 @Component({
   selector: 'app-notification-container',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="notification-container">
       @for (notification of notifications(); track notification.id) {

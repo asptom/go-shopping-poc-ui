@@ -10,37 +10,44 @@ import { ProductService } from '../../../../../services/product.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <section class="related-products" *ngIf="relatedProducts().length > 0">
-      <h2>Related Products</h2>
-      <div class="products-grid">
-        <article 
-          class="product-card"
-          *ngFor="let product of relatedProducts(); trackBy: trackByProductId"
-          (click)="onProductClick(product)">
-          <div class="image-container">
-            <img 
-              [src]="getImageUrl(product)" 
-              [alt]="product.name"
-              loading="lazy"
-              (error)="$event.target.src = '/assets/placeholder-product.jpg'">
-            <div class="discount-badge" *ngIf="hasDiscount(product)">
-              -{{ getDiscount(product) }}%
-            </div>
+    @if (relatedProducts().length > 0) {
+      <section class="related-products">
+        <h2>Related Products</h2>
+        <div class="products-grid">
+          @for (product of relatedProducts(); track trackByProductId($index, product)) {
+            <article
+              class="product-card"
+              (click)="onProductClick(product)">
+              <div class="image-container">
+                <img
+                  [src]="getImageUrl(product)"
+                  [alt]="product.name"
+                  loading="lazy"
+                  (error)="$event.target.src = '/assets/placeholder-product.jpg'">
+                  @if (hasDiscount(product)) {
+                    <div class="discount-badge">
+                      -{{ getDiscount(product) }}%
+                    </div>
+                  }
+                </div>
+                <div class="product-info">
+                  <h3 class="product-name">{{ product.name }}</h3>
+                  <div class="brand">{{ product.brand }}</div>
+                  <div class="price-section">
+                    <span class="final-price">{{ product.final_price | currency:product.currency }}</span>
+                    @if (hasDiscount(product)) {
+                      <span class="initial-price">
+                        {{ product.initial_price | currency:product.currency }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </article>
+            }
           </div>
-          <div class="product-info">
-            <h3 class="product-name">{{ product.name }}</h3>
-            <div class="brand">{{ product.brand }}</div>
-            <div class="price-section">
-              <span class="final-price">{{ product.final_price | currency:product.currency }}</span>
-              <span class="initial-price" *ngIf="hasDiscount(product)">
-                {{ product.initial_price | currency:product.currency }}
-              </span>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-  `,
+        </section>
+      }
+    `,
   styles: [`
     .related-products {
       margin-top: 60px;

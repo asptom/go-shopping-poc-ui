@@ -1,31 +1,37 @@
 <!-- Cart Summary Template -->
 <div class="cart-summary">
   <h2 class="summary-title">Order Summary</h2>
-  
+
   <div class="summary-details">
     <div class="summary-row">
       <span class="label">Items ({{ itemCount }}):</span>
       <span class="value">{{ subtotal | currency:currency }}</span>
     </div>
-    
+
     <div class="summary-row">
       <span class="label">Tax:</span>
       <span class="value">{{ tax | currency:currency }}</span>
     </div>
-    
+
     <div class="summary-row">
       <span class="label">Shipping:</span>
       <span class="value">
-        <span *ngIf="shipping === 0" class="free-shipping">FREE</span>
-        <span *ngIf="shipping > 0">{{ shipping | currency:currency }}</span>
+        @if (shipping === 0) {
+          <span class="free-shipping">FREE</span>
+        }
+        @if (shipping > 0) {
+          <span>{{ shipping | currency:currency }}</span>
+        }
       </span>
     </div>
-    
-    <div class="summary-row discount" *ngIf="false">
-      <span class="label">Discount:</span>
-      <span class="value">-$0.00</span>
-    </div>
-    
+
+    @if (false) {
+      <div class="summary-row discount">
+        <span class="label">Discount:</span>
+        <span class="value">-$0.00</span>
+      </div>
+    }
+
     <div class="summary-row total">
       <span class="label">Order Total:</span>
       <span class="value">{{ total | currency:currency }}</span>
@@ -39,11 +45,11 @@
       (click)="onCheckout()">
       Proceed to Checkout
     </button>
-    
+
     <a [routerLink]="['/products']" class="btn-continue">
       Continue Shopping
     </a>
-    
+
     <button class="btn-clear" (click)="onClearCart()">
       Clear Cart
     </button>

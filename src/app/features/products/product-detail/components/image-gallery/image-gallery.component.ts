@@ -1,12 +1,12 @@
 import { Component, Input, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ProductImage } from '../../../../../models/product';
 import { ProductService } from '../../../../../services/product.service';
 
 @Component({
   selector: 'app-image-gallery',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './image-gallery.component.html',
   styleUrls: ['./image-gallery.component.scss']
 })

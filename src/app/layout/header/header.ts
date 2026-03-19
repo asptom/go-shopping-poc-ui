@@ -1,5 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy, OnDestroy, OnInit, NgZone } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
@@ -10,7 +10,7 @@ import { ProductStore } from '../../store/product/product.store';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, FormsModule, CartIconComponent],
+  imports: [FormsModule, CartIconComponent],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
