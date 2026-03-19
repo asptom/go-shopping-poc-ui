@@ -1,5 +1,5 @@
 # Go-Shopping-Poc-Ui
-This project is the UI companion to the backend infrastructure and services being created in [go-shopping-poc](https://github.com/asptom/go-shopping-poc) (look in the develop branch for the latest)
+This project is the UI companion to the backend infrastructure and services being created in [go-shopping-poc](https://github.com/asptom/go-shopping-poc)
 
 This is a proof-of-concept/learning project intended to implement something with the latest version of Angular that exercises the backend services being created with Go.
 
