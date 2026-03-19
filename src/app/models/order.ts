@@ -1,6 +1,33 @@
 /**
- * Order model interfaces for SSE events and order confirmation
+ * Order model interfaces for SSE events, order confirmation, and order history
  */
+
+/**
+ * A single line item within an order from the order history API
+ */
+export interface OrderLineItem {
+  line_number?: string;
+  product_id?: string;
+  product_name?: string;
+  description?: string;
+  quantity: number;
+  unit_price?: number;
+  price?: number;
+}
+
+/**
+ * An order as returned by GET /orders/customer/{customerId}
+ */
+export interface OrderHistoryItem {
+  order_id: string;
+  order_number: string;
+  created_at?: string;
+  status?: string;
+  total_price?: number;
+  total?: number;
+  net_price?: number;
+  items: OrderLineItem[];
+}
 
 /**
  * Order data received from SSE order.created event

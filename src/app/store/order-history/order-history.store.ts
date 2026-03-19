@@ -1,64 +1,134 @@
 import { firstValueFrom } from 'rxjs';
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { CustomerOrderHistoryService } from '../../services/customer-order-history.service';
-import { OrderConfirmation } from '../../models/order';
-import { NotificationService } from '../../core/notification/notification.service';
+import { ProductService } from '../../services/product.service';
+import { OrderHistoryItem, OrderLineItem } from '../../models/order';
+
+export interface OrderDisplay {
+  id: string;
+  orderNumber: string;
+  orderDate: string;
+  total: number;
+  status: string;
+  items: OrderLineItem[];
+}
 
 export interface OrderHistoryState {
-  orders: OrderConfirmation[] | null;
+  orders: OrderDisplay[];
   loading: boolean;
   error: string | null;
+  expandedOrderId: string | null;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OrderHistoryStore {
-  private readonly customerOrderHistoryService = inject(CustomerOrderHistoryService);
-  private readonly notificationService = inject(NotificationService);
+  private readonly orderService = inject(CustomerOrderHistoryService);
+  private readonly productService = inject(ProductService);
 
-  // Private state
   private readonly state = signal<OrderHistoryState>({
-    orders: null,
+    orders: [],
     loading: false,
-    error: null
+    error: null,
+    expandedOrderId: null,
   });
 
   // Public selectors
   readonly orders = computed(() => this.state().orders);
   readonly loading = computed(() => this.state().loading);
   readonly error = computed(() => this.state().error);
-  readonly hasOrders = computed(() => {
-    const orders = this.state().orders;
-    return orders !== null && orders.length > 0;
-  });
+  readonly expandedOrderId = computed(() => this.state().expandedOrderId);
+  readonly hasOrders = computed(() => this.state().orders.length > 0);
 
   // Actions
   async loadCustomerOrders(customerId: string): Promise<void> {
     if (!customerId) return;
-    
+
     this.setState({ loading: true, error: null });
 
     try {
-      const orders = await firstValueFrom(this.customerOrderHistoryService.getCustomerOrders(customerId));
-      this.setState({ 
-        orders: orders ?? [], 
-        loading: false 
-      });
-    } catch (error) {
-      this.setState({ 
-        loading: false, 
-        error: 'Failed to load order history' 
-      });
+      const rawOrders = await firstValueFrom(
+        this.orderService.getCustomerOrders(customerId)
+      );
+
+      const orders: OrderDisplay[] = rawOrders.map(order => ({
+        id: order.order_id,
+        orderNumber: order.order_number,
+        orderDate: order.created_at
+          ? new Date(order.created_at).toLocaleDateString()
+          : 'N/A',
+        total: order.total_price ?? order.total ?? order.net_price ?? 0,
+        status: order.status ?? 'Completed',
+        items: order.items ?? [],
+      }));
+
+      this.setState({ orders, loading: false });
+    } catch {
+      this.setState({ loading: false, error: 'Failed to load order history' });
     }
+  }
+
+  async toggleOrderDetails(orderId: string): Promise<void> {
+    const currentExpanded = this.state().expandedOrderId;
+
+    if (currentExpanded === orderId) {
+      this.setState({ expandedOrderId: null });
+      return;
+    }
+
+    // Enrich order items with product names in parallel
+    const orders = this.state().orders;
+    const orderIndex = orders.findIndex(o => o.id === orderId);
+
+    if (orderIndex >= 0) {
+      const order = orders[orderIndex];
+      const enrichedItems = await this.enrichItemsWithProductNames(order.items);
+      const updatedOrders = [...orders];
+      updatedOrders[orderIndex] = { ...order, items: enrichedItems };
+      this.setState({ orders: updatedOrders, expandedOrderId: orderId });
+    } else {
+      this.setState({ expandedOrderId: orderId });
+    }
+  }
+
+  setError(error: string): void {
+    this.setState({ error });
   }
 
   clearError(): void {
     this.setState({ error: null });
   }
 
-  // Private helper methods
+  // ── Private helpers ──────────────────────────────────────────────────────
+
+  private async enrichItemsWithProductNames(
+    items: OrderLineItem[]
+  ): Promise<OrderLineItem[]> {
+    const enriched = items.map(item => ({ ...item }));
+
+    await Promise.all(
+      enriched
+        .filter(item => item.product_id && !item.product_name)
+        .map(async item => {
+          try {
+            const product = await firstValueFrom(
+              this.productService.getProductById(Number(item.product_id))
+            );
+            if (product) {
+              item.product_name = product.name;
+              item.description = product.description;
+            }
+          } catch {
+            // Non-fatal — item renders without product name
+          }
+        })
+    );
+
+    return enriched;
+  }
+
   private setState(partialState: Partial<OrderHistoryState>): void {
-    this.state.update(currentState => ({ ...currentState, ...partialState }));
+    this.state.update(s => ({ ...s, ...partialState }));
   }
 }

@@ -44,7 +44,7 @@
               @for (item of order.items; track $index) {
                 <div class="item">
                   <div class="item-name">
-                    {{ item.product_name || item.name || item.product_id || 'Product' }}
+                    {{ item.product_name || item.product_id || 'Product' }}
                     {{ item.description ? ' - ' + item.description : '' }}
                   </div>
                   <div class="item-quantity">{{ item.quantity }}</div>

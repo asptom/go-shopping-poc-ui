@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { OrderConfirmation } from '../models/order';
+import { OrderHistoryItem } from '../models/order';
 import { environment } from '../../environments/environment';
 import { ErrorHandlerService } from '../core/error/error-handler.service';
 import { NotificationService } from '../core/notification/notification.service';
@@ -16,8 +16,8 @@ export class CustomerOrderHistoryService {
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly notificationService = inject(NotificationService);
 
-  getCustomerOrders(customerId: string): Observable<OrderConfirmation[]> {
-    return this.http.get<OrderConfirmation[]>(`${this.apiUrl}/${customerId}`).pipe(
+  getCustomerOrders(customerId: string): Observable<OrderHistoryItem[]> {
+    return this.http.get<OrderHistoryItem[]>(`${this.apiUrl}/${customerId}`).pipe(
       catchError((error: HttpErrorResponse) => {
         const appError = this.errorHandler.handleError(error, 'getCustomerOrders');
         this.notificationService.showError(appError.userMessage);

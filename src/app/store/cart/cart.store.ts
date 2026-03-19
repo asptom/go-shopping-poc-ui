@@ -1,4 +1,5 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CartService } from '../../services/cart.service';
 import { OrderSseService } from '../../services/order-sse.service';
 import {
@@ -30,6 +31,7 @@ export class CartStore {
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly customerStore = inject(CustomerStore);
   private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly STORAGE_KEY = 'cart_id';
 
   // Private state signal
@@ -99,39 +101,36 @@ export class CartStore {
     this.setupSseSubscriptions();
   }
 
-  // Setup SSE event subscriptions
+  // Setup SSE event subscriptions with proper lifecycle management
   private setupSseSubscriptions(): void {
+    this.orderSseService.cartItemValidated
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (event: CartItemValidatedEvent) => {
+          try {
+            this.handleItemValidated(event);
+          } catch (e) {
+            console.error('[CartStore] Error in cartItemValidated handler:', e);
+          }
+        },
+        error: (error) => {
+          console.error('[CartStore] cartItemValidated stream error:', error);
+        },
+      });
 
-    // Subscribe to item validated events
-    this.orderSseService.cartItemValidated.subscribe({
-      next: (event: CartItemValidatedEvent) => {
-        try {
-          this.handleItemValidated(event);
-        } catch (e) {
-          console.error('[CartStore] ❌ Error in cartItemValidated handler:', e);
-        }
-      },
-      error: (error) => {
-        console.error('[CartStore] ❌ cartItemValidated stream error:', error);
-      }
-    });
+    this.orderSseService.cartItemBackorder
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (event: CartItemBackorderEvent) => this.handleItemBackorder(event),
+        error: (error) => {
+          console.error('[CartStore] cartItemBackorder stream error:', error);
+        },
+      });
 
-    // Subscribe to item backorder events
-    this.orderSseService.cartItemBackorder.subscribe({
-      next: (event: CartItemBackorderEvent) => {
-        this.handleItemBackorder(event);
-      },
-      error: (error) => {
-        console.error('[CartStore] ❌ cartItemBackorder stream error:', error);
-      }
-    });
-
-    // Subscribe to connection errors
-    this.orderSseService.connectionError.subscribe({
-      next: (error: Error) => {
-        // Let OrderSseService handle reconnection
-      }
-    });
+    // Subscribe to connection errors so the store is aware of SSE health
+    this.orderSseService.connectionError
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
   }
 
   // Handle cart.item.validated event
