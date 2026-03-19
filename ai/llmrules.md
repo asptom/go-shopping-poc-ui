@@ -64,3 +64,55 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+---
+
+## 5. Project-Specific Rules for go-shopping-poc-ui
+
+### Before modifying any file:
+1. Read the file first using the Read tool — never edit from memory
+2. Check `AGENTS.md` for current architecture decisions
+3. Run `ng build` before and after your changes to verify compilation
+
+### Angular version:
+This project uses Angular 21.x. Use Angular 21 APIs exclusively.
+When unsure about an API, check `ai/angular_full_llms.txt` before relying on pre-training knowledge.
+
+### The "What NOT to Do" rule:
+Before writing any Angular code, review the "What NOT to Do" list in `AGENTS.md`.
+Each item on that list was added because a previous LLM violated it. Do not repeat those mistakes.
+
+### Signal stores:
+Never create component-local async state using `Subject` or `BehaviorSubject`.
+All shared or cross-component state belongs in a signal store in `src/app/store/`.
+
+### Naming check (required before finalizing any component):
+After writing a component, verify ALL of the following before submitting:
+- [ ] File ends in `.component.ts`
+- [ ] Class ends in `Component`
+- [ ] `standalone: true` is NOT set in the decorator
+- [ ] `changeDetection: ChangeDetectionStrategy.OnPush` IS set in the decorator
+- [ ] All inputs use `input()` or `input.required<T>()` — not `@Input()`
+- [ ] All outputs use `output<T>()` — not `@Output()` + `EventEmitter`
+- [ ] Template uses `@if`/`@for`/`@switch` — not `*ngIf`/`*ngFor`/`*ngSwitch`
+- [ ] `inject()` is used for DI — not constructor injection
+
+### Deleting files:
+When you delete a file, immediately:
+1. Search for all import references to the deleted file
+2. Remove or update each import
+3. Verify `ng build` succeeds after deletion
+
+### No console.log:
+Never add `console.log`, `console.debug`, or `console.info` to production code.
+Use `NotificationService` for user-visible messages.
+Use `console.error` only in catch blocks for developer diagnostics, not for state tracing.
+
+### On SSE key casing:
+The SSE backend currently sends `cart.item.validated` and `cart.item.backorder` events with camelCase keys.
+The `OrderSseService` has a `convertKeysToSnakeCase()` workaround for this.
+DO NOT remove this workaround until the backend confirms it has been updated to use snake_case.
+
+### Improvement plan:
+The full codebase improvement plan is at `ai/plans/claude_code_improvement_plan.md`.
+Consult it before making broad refactoring decisions to understand the intended direction.

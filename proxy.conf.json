@@ -1,8 +1,8 @@
 {
-  "/customers": {
+  "/api/v1": {
     "target": "https://pocstore.local",
-    "secure": true,
+    "secure": false,
     "changeOrigin": true,
-    "logLevel": "debug"
+    "logLevel": "info"
   }
 }
