@@ -43,6 +43,8 @@ export interface CartItem {
   status: CartItemStatus;
   validation_id?: string;
   backorder_reason?: string;
+  product_image_url: string;
+  image_url: string;
 }
 
 /**
@@ -141,6 +143,7 @@ export interface AddItemRequest {
   product_id: string;
   product_name: string;
   quantity: number;
+  image_url: string;
 }
 
 /**

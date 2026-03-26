@@ -5,10 +5,11 @@ import { BreadcrumbItem } from '../../models/product';
 import { OrderHistoryStore } from '../../store/order-history/order-history.store';
 import { CustomerStore } from '../../store/customer/customer.store';
 import { AuthService } from '../../auth/auth.service';
+import { OrderTimelineComponent } from './components/order-timeline/order-timeline.component';
 
 @Component({
   selector: 'app-order-history',
-  imports: [CurrencyPipe, BreadcrumbComponent],
+  imports: [CurrencyPipe, BreadcrumbComponent, OrderTimelineComponent],
   templateUrl: './order-history.component.html',
   styleUrl: './order-history.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

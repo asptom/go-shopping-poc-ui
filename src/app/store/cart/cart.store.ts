@@ -298,15 +298,16 @@ export class CartStore {
    * @param productId The product identifier
    * @param productName The product name
    * @param quantity The quantity to add (default: 1)
+   * @param imageUrl The product image URL
    */
-  async addItem(productId: string, productName: string, quantity: number = 1): Promise<void> {
+  async addItem(productId: string, productName: string, quantity: number = 1, imageUrl: string = ''): Promise<void> {
     const cartId = await this.ensureCart();
     if (!cartId) return;
 
     this.setLoading(true);
 
     try {
-      await firstValueFrom(this.cartService.addItem(cartId, productId, productName, quantity));
+      await firstValueFrom(this.cartService.addItem(cartId, productId, productName, quantity, imageUrl));
       // Reload cart to get updated totals and items
       await this.reloadCart();
       this.notificationService.showSuccess('Item added to cart');

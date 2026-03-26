@@ -11,19 +11,6 @@ import {
 } from '../models/cart';
 import { Subject } from 'rxjs';
 
-function camelToSnakeCase(str: string): string {
-  return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-}
-
-function convertKeysToSnakeCase(obj: Record<string, unknown>): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-  for (const key in obj) {
-    const snakeKey = camelToSnakeCase(key);
-    result[snakeKey] = obj[key];
-  }
-  return result;
-}
-
 /**
  * Service for managing Server-Sent Events (SSE) connections
  * Uses native EventSource API with signals for reactive state
@@ -136,7 +123,7 @@ export class OrderSseService {
     this.eventSource.addEventListener('connected', (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
-        this.connected$.next(data.cartId);
+        this.connected$.next(data.cart_id);
       } catch (e) {
         console.error('[SSE] Failed to parse connected event:', e);
       }
@@ -165,8 +152,7 @@ export class OrderSseService {
     this.eventSource.addEventListener('cart.item.validated', (event: MessageEvent) => {
 
       try {
-        const parsed = JSON.parse(event.data);
-        const data: CartItemValidatedEvent = convertKeysToSnakeCase(parsed) as unknown as CartItemValidatedEvent;
+        const data: CartItemValidatedEvent = JSON.parse(event.data);
 
         this._connectionState.update(state => ({
           ...state,
@@ -183,8 +169,7 @@ export class OrderSseService {
     this.eventSource.addEventListener('cart.item.backorder', (event: MessageEvent) => {
 
       try {
-        const parsed = JSON.parse(event.data);
-        const data: CartItemBackorderEvent = convertKeysToSnakeCase(parsed) as unknown as CartItemBackorderEvent;
+        const data: CartItemBackorderEvent = JSON.parse(event.data);
 
         this._connectionState.update(state => ({
           ...state,

@@ -126,7 +126,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   async onAddToCart(product: Product): Promise<void> {
     if (product.in_stock) {
-      await this.cartStore.addItem(product.id.toString(), product.name, 1);
+      await this.cartStore.addItem(product.id.toString(), product.name, 1, product.main_image_url);
     }
   }
 

@@ -75,16 +75,17 @@ export class CartService {
     );
   }
 
-  /**
-   * Adds an item to the cart
-   * @param cartId The UUID of the cart
-   * @param productId The product identifier
-   * @param productName The product name
-   * @param quantity The quantity to add
-   * @returns Observable of the created CartItem
-   */
-  addItem(cartId: string, productId: string, productName: string, quantity: number): Observable<CartItem> {
-    const body: AddItemRequest = { product_id: productId, product_name: productName, quantity };
+   /**
+    * Adds an item to the cart
+    * @param cartId The UUID of the cart
+    * @param productId The product identifier
+    * @param productName The product name
+    * @param quantity The quantity to add
+    * @param imageUrl The product image URL
+    * @returns Observable of the created CartItem
+    */
+  addItem(cartId: string, productId: string, productName: string, quantity: number, imageUrl: string): Observable<CartItem> {
+    const body: AddItemRequest = { product_id: productId, product_name: productName, quantity, image_url: imageUrl };
     return this.http.post<CartItem>(`${this.apiUrl}/${cartId}/items`, body).pipe(
       catchError((error: HttpErrorResponse) => {
         const appError = this.errorHandler.handleError(error, 'addItem');

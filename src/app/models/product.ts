@@ -19,6 +19,7 @@ export interface Product {
   all_available_sizes: string;
   created_at: string;
   updated_at: string;
+  main_image_url: string;
   images?: ProductImage[];
 }
 

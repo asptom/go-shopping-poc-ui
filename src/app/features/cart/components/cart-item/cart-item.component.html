@@ -2,6 +2,11 @@
 <div class="cart-item" [class.pending]="isPendingValidation" [class.backorder]="isBackorder">
   <!-- Product Info -->
   <div class="product-info">
+    <img 
+      class="product-image"
+      [src]="imageUrl()"
+      [alt]="item().product_name"
+    />
     <div class="product-details">
       <h3 class="product-name">{{ item().product_name }}</h3>
       <span class="product-id">Item #{{ item().line_number }}</span>

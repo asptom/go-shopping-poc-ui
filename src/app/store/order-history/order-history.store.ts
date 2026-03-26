@@ -2,7 +2,7 @@ import { firstValueFrom } from 'rxjs';
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { CustomerOrderHistoryService } from '../../services/customer-order-history.service';
 import { ProductService } from '../../services/product.service';
-import { OrderHistoryItem, OrderLineItem } from '../../models/order';
+import { OrderHistoryItem, OrderLineItem, StatusHistoryEntry } from '../../models/order';
 
 export interface OrderDisplay {
   id: string;
@@ -11,6 +11,7 @@ export interface OrderDisplay {
   total: number;
   status: string;
   items: OrderLineItem[];
+  statusHistory: StatusHistoryEntry[];
 }
 
 export interface OrderHistoryState {
@@ -61,6 +62,7 @@ export class OrderHistoryStore {
         total: order.total_price ?? order.total ?? order.net_price ?? 0,
         status: order.status ?? 'Completed',
         items: order.items ?? [],
+        statusHistory: order.status_history ?? [],
       }));
 
       this.setState({ orders, loading: false });

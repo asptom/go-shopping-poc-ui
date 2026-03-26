@@ -1,10 +1,10 @@
 <article class="product-card" (click)="onViewDetails()">
   <div class="image-container">
     <img
-      [src]="mainImageUrl"
+      [src]="mainImageUrl()"
       [alt]="product().name"
       loading="lazy"
-      (error)="$event.target.src = '/assets/placeholder-product().jpg'">
+      (error)="$event.target.src = '/assets/placeholder-product.jpg'">
 
       @if (hasDiscount) {
         <div class="discount-badge">

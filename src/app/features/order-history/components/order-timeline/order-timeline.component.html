@@ -1,0 +1,12 @@
+<!-- Order Timeline Component -->
+<div class="timeline">
+  @for (entry of sortedEntries(); track entry.timestamp) {
+    <div class="timeline-entry" [class]="getStatusClass(entry.status)" [class.current]="isCurrentStatus(entry.status)">
+      <div class="timeline-marker"></div>
+      <div class="timeline-content">
+        <span class="status">{{ entry.status | titlecase }}</span>
+        <span class="timestamp">{{ formatDate(entry.timestamp) }}</span>
+      </div>
+    </div>
+  }
+</div>

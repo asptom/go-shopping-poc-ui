@@ -1,0 +1,82 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0.5rem 0;
+}
+
+.timeline-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 16px;
+  position: relative;
+
+  &:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 16px;
+    bottom: 0;
+    width: 2px;
+    background: #ddd;
+  }
+
+  &.current .timeline-marker {
+    background: #ff9900;
+    border-color: #ff9900;
+  }
+
+  &.current .timeline-content .status {
+    font-weight: 600;
+  }
+}
+
+.timeline-marker {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #666;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+
+  .status {
+    font-size: 0.875rem;
+    color: #131921;
+  }
+
+  .timestamp {
+    font-size: 0.75rem;
+    color: #666;
+  }
+}
+
+.status-created .timeline-marker {
+  border-color: #6c757d;
+}
+
+.status-confirmed .timeline-marker {
+  border-color: #17a2b8;
+}
+
+.status-processing .timeline-marker {
+  border-color: #ffc107;
+}
+
+.status-shipped .timeline-marker {
+  border-color: #28a745;
+}
+
+.status-delivered .timeline-marker {
+  border-color: #20c997;
+}
+
+.status-cancelled .timeline-marker,
+.status-refunded .timeline-marker {
+  border-color: #dc3545;
+}

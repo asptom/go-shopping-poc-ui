@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject, untracked } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { ProductService } from '../../services/product.service';
 import { Product, ProductFilters, SortOption } from '../../models/product';
 import { NotificationService } from '../../core/notification/notification.service';
@@ -59,7 +59,7 @@ export class ProductStore {
   readonly isFiltered = computed(() => this.activeFiltersCount() > 0);
 
   readonly sortedProducts = computed(() => {
-    const products = untracked(() => this.state().products);
+    const products = this.state().products;
     const sortBy = this.state().sortBy;
     const sorted = [...products];
     switch (sortBy) {
@@ -84,10 +84,10 @@ export class ProductStore {
     this.setError(null);
     try {
       const response = await firstValueFrom(this.productService.getAllProducts(limit, offset));
-      const productsWithImages = await this.fetchImagesForProducts(response.products);
+      const newProducts = response.products ?? [];
       this.state.update(s => ({
         ...s,
-        products: offset === 0 ? productsWithImages : [...s.products, ...productsWithImages],
+        products: offset === 0 ? newProducts : [...(s.products ?? []), ...newProducts],
         pagination: {
           limit: response.limit,
           offset: response.offset,
@@ -126,10 +126,10 @@ export class ProductStore {
     this.setError(null);
     try {
       const response = await firstValueFrom(this.productService.searchProducts(query, limit, offset));
-      const productsWithImages = await this.fetchImagesForProducts(response.products);
+      const newProducts = response.products ?? [];
       this.state.update(s => ({
         ...s,
-        products: offset === 0 ? productsWithImages : [...s.products, ...productsWithImages],
+        products: offset === 0 ? newProducts : [...(s.products ?? []), ...newProducts],
         filters: { ...s.filters, searchQuery: query },
         pagination: {
           limit: response.limit,
@@ -157,10 +157,10 @@ export class ProductStore {
       const response = await firstValueFrom(
         this.productService.getProductsByCategory(category, limit, offset)
       );
-      const productsWithImages = await this.fetchImagesForProducts(response.products);
+      const newProducts = response.products ?? [];
       this.state.update(s => ({
         ...s,
-        products: offset === 0 ? productsWithImages : [...s.products, ...productsWithImages],
+        products: offset === 0 ? newProducts : [...(s.products ?? []), ...newProducts],
         pagination: {
           limit: response.limit,
           offset: response.offset,
@@ -187,10 +187,10 @@ export class ProductStore {
       const response = await firstValueFrom(
         this.productService.getProductsByBrand(brand, limit, offset)
       );
-      const productsWithImages = await this.fetchImagesForProducts(response.products);
+      const newProducts = response.products ?? [];
       this.state.update(s => ({
         ...s,
-        products: offset === 0 ? productsWithImages : [...s.products, ...productsWithImages],
+        products: offset === 0 ? newProducts : [...(s.products ?? []), ...newProducts],
         pagination: {
           limit: response.limit,
           offset: response.offset,
@@ -217,10 +217,10 @@ export class ProductStore {
       const response = await firstValueFrom(
         this.productService.getProductsInStock(limit, offset)
       );
-      const productsWithImages = await this.fetchImagesForProducts(response.products);
+      const newProducts = response.products ?? [];
       this.state.update(s => ({
         ...s,
-        products: offset === 0 ? productsWithImages : [...s.products, ...productsWithImages],
+        products: offset === 0 ? newProducts : [...(s.products ?? []), ...newProducts],
         pagination: {
           limit: response.limit,
           offset: response.offset,
@@ -264,22 +264,6 @@ export class ProductStore {
   }
 
   // ── Private helpers ──────────────────────────────────────────────────────
-
-  private async fetchImagesForProducts(products: Product[]): Promise<Product[]> {
-    await Promise.all(
-      products.map(async product => {
-        try {
-          const response = await firstValueFrom(
-            this.productService.getProductImages(product.id)
-          );
-          product.images = response.images;
-        } catch {
-          product.images = [];
-        }
-      })
-    );
-    return products;
-  }
 
   private setLoading(loading: boolean): void {
     this.state.update(s => ({ ...s, loading }));

@@ -16,6 +16,14 @@ export interface OrderLineItem {
 }
 
 /**
+ * Status history entry for order tracking
+ */
+export interface StatusHistoryEntry {
+  status: string;
+  timestamp: string;
+}
+
+/**
  * An order as returned by GET /orders/customer/{customerId}
  */
 export interface OrderHistoryItem {
@@ -27,16 +35,17 @@ export interface OrderHistoryItem {
   total?: number;
   net_price?: number;
   items: OrderLineItem[];
+  status_history: StatusHistoryEntry[];
 }
 
 /**
  * Order data received from SSE order.created event
- * Matches backend payload structure
+ * Matches backend payload structure (snake_case)
  */
 export interface OrderCreatedEvent {
-  orderId: string;
-  orderNumber: string;
-  cartId: string;
+  order_id: string;
+  order_number: string;
+  cart_id: string;
   total: number;
 }
 

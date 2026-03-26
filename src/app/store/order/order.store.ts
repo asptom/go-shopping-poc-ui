@@ -181,9 +181,9 @@ export class OrderStore {
             clearTimeout(timeoutId);
             
             const confirmation: OrderConfirmation = {
-              orderId: event.orderId,
-              orderNumber: event.orderNumber,
-              cartId: event.cartId,
+              orderId: event.order_id,
+              orderNumber: event.order_number,
+              cartId: event.cart_id,
               total: event.total,
               createdAt: new Date()
             };

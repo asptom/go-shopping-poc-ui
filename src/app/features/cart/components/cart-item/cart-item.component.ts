@@ -1,7 +1,7 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CartItem } from '../../../../models/cart';
-import { ProductService } from '../../../../services/product.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-cart-item',
@@ -16,7 +16,13 @@ export class CartItemComponent {
   readonly updateQuantity = output<number>();
   readonly remove = output<void>();
 
-  private readonly productService = inject(ProductService);
+  readonly imageUrl = computed(() => {
+    const url = this.item().image_url || this.item().product_image_url;
+    if (!url) return '/assets/placeholder-product.jpg';
+    if (url.startsWith('http')) return url;
+    const baseUrl = environment.apiUrl.replace('/api/v1', '');
+    return `${baseUrl}${url}`;
+  });
 
   get isPendingValidation(): boolean {
     return this.item().status === 'pending_validation';

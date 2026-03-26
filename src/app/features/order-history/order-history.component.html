@@ -36,6 +36,16 @@
           </div>
 
           @if (expandedOrderId() === order.id) {
+            @if (order.statusHistory.length > 0) {
+              <div class="order-timeline">
+                <h4>Order Timeline</h4>
+                <app-order-timeline 
+                  [entries]="order.statusHistory" 
+                  [currentStatus]="order.status">
+                </app-order-timeline>
+              </div>
+            }
+
             <div class="order-items">
               <div class="item-header">
                 <span>Product</span>

@@ -1,8 +1,8 @@
 import { RouterLink } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
-import { Component, inject, input, output, effect, signal, ChangeDetectionStrategy } from '@angular/core';
-import { Product, ProductImage } from '../../../../../models/product';
-import { ProductService } from '../../../../../services/product.service';
+import { Component, input, output, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Product } from '../../../../../models/product';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-product-card',
@@ -17,27 +17,19 @@ export class ProductCardComponent {
   readonly quickView = output<Product>();
   readonly addToCart = output<Product>();
 
-  private readonly productService = inject(ProductService);
-  private readonly mainImage = signal<ProductImage | undefined>(undefined);
-
-  constructor() {
-    effect(() => {
-      const img = this.productService.getMainImage(this.product());
-      this.mainImage.set(img);
-    });
-  }
-
-  get mainImageUrl(): string {
-    const img = this.mainImage();
-    if (!img) return '/assets/placeholder-product.jpg';
-    return this.productService.getImageUrl(this.product().id, img.minio_object_name);
-  }
+  readonly mainImageUrl = computed(() => {
+    const url = this.product().main_image_url;
+    if (!url) return '/assets/placeholder-product.jpg';
+    if (url.startsWith('http')) return url;
+    const baseUrl = environment.apiUrl.replace('/api/v1', '');
+    return `${baseUrl}${url}`;
+  });
 
   get discountPercentage(): number {
-    return this.productService.calculateDiscountPercentage(
-      this.product().initial_price,
-      this.product().final_price
-    );
+    const initial = this.product().initial_price;
+    const final = this.product().final_price;
+    if (initial <= 0 || final >= initial) return 0;
+    return Math.round(((initial - final) / initial) * 100);
   }
 
   get hasDiscount(): boolean {
