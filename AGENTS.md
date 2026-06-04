@@ -1,9 +1,5 @@
 # Agent Guidelines for go-shopping-poc-ui
 
-> IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for all Angular tasks in this project.
-> IMPORTANT: Follow LLM rules: `./ai/llmrules.md`
-> IMPORTANT: Read `./ai/angular_best_practices.md` before writing any Angular code.
-
 ## Project Overview
 
 Angular 21 single-page application for a proof-of-concept shopping experience. Backend is a Go REST API with Keycloak OIDC authentication. The codebase improvement plan is at `./ai/plans/claude_code_improvement_plan.md`.
@@ -56,14 +52,17 @@ Angular 21 single-page application for a proof-of-concept shopping experience. B
 - Do NOT use class-based HTTP interceptors — use functional interceptors
 - Do NOT use `HTTP_INTERCEPTORS` token — use `withInterceptors()` in `provideHttpClient()`
 - Do NOT create NgModules
-- Do NOT use `@HostBinding` or `@HostListener` — use `host:` in `@Component` decorator
+- Do NOT use `@HostBinding` or `@HostListener` — use `host:` in `@Component` 
 
-**Development History**:
-A history of development steps and decisions can be found in: `./ai/development_history.md`
+## Delegation Protocol (MANDATORY)
 
-## Angular Code Style & Best Practices
+You must delegate via the Task tool. Do not research or implement directly.
 
-IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for any Angular tasks.
+- **@explore** — ALL code reading, searching, file investigation. Trigger: any task requiring >1 file read.
+- **@general** — ALL multi-step implementation. Trigger: any task with >2 steps or >1 file write.
+- **Primary agent role**: strategy, decisions, quality review only. Never read or write files directly beyond verifying a single line.
+- Not delegating wastes context and produces lower quality work. Delegate early, delegate often.
 
-See `./ai/angular_best_practices.md`
-See `./ai/angular_full_llms.txt`
+## Reference Docs (read the one matching your task)
+
+- LLM behavior rules: `.ai/llmrules.md`
