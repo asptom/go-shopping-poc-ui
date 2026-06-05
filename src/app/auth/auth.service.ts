@@ -29,15 +29,13 @@ export class AuthService {
 
   // Derive isAuthenticated directly from the OIDC observable.
   // Seed with persisted state so auth survives page reloads before OIDC resolves.
-  // Side-effect: persist or clear storage whenever auth state changes.
+  // Side-effect: persist auth state when authenticated (clear is handled by logout()).
+  // IMPORTANT: Do NOT clear persisted state on false — the OIDC library emits false
+  // before re-validating from sessionStorage on hard navigation, which would destroy
+  // the seed value. The seed bridges the gap until OIDC re-validates.
   private readonly _isAuthenticated = toSignal(
     this.oidcSecurityService.isAuthenticated$.pipe(
       map(authState => authState.isAuthenticated),
-      tap(isAuthenticated => {
-        if (!isAuthenticated) {
-          this.clearPersistedAuthState();
-        }
-      }),
       startWith(this.loadPersistedIsAuthenticated()),
     ),
     { initialValue: this.loadPersistedIsAuthenticated() },
@@ -45,12 +43,19 @@ export class AuthService {
 
   // Derive userData from the OIDC observable.
   // Seed with persisted userData, side-effect persists changes.
+  // Clears persisted state when OIDC confirms userData is null (session expired).
   private readonly _userData = toSignal(
     this.oidcSecurityService.userData$.pipe(
       map(state => (state?.userData as UserData) ?? null),
       tap(userData => {
         if (userData && this._isAuthenticated()) {
           this.persistAuthState(userData);
+        } else if (!userData && !this._isAuthenticated()) {
+          // Both userData is null AND isAuthenticated is false:
+          // OIDC has confirmed no valid session — clear persisted state.
+          // This avoids stale localStorage from surviving across page loads
+          // when a session expires between navigations.
+          this.clearPersistedAuthState();
         }
       }),
       startWith(this.loadPersistedUserData()),
@@ -122,6 +127,11 @@ export class AuthService {
     try {
       const idToken = await firstValueFrom(this.getIdToken());
       this.clearPersistedAuthState();
+      this.oidcSecurityService.logoffLocal();
+      // Also clear other persisted state that may have been set during the session
+      localStorage.removeItem('cart_id');
+      localStorage.removeItem('customer_id');
+      localStorage.removeItem('customer_data');
       if (idToken) {
         const logoutUrl =
           `${environment.keycloak.issuer}/protocol/openid-connect/logout` +
@@ -132,8 +142,11 @@ export class AuthService {
         this.oidcSecurityService.logoff();
       }
     } catch (error) {
-      console.error('Logout error:', error);
       this.clearPersistedAuthState();
+      this.oidcSecurityService.logoffLocal();
+      localStorage.removeItem('cart_id');
+      localStorage.removeItem('customer_id');
+      localStorage.removeItem('customer_data');
       this.oidcSecurityService.logoff();
     }
   }

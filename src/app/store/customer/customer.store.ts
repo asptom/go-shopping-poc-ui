@@ -16,6 +16,8 @@ export interface CustomerState {
 export class CustomerStore {
   private readonly customerService = inject(CustomerService);
   private readonly notificationService = inject(NotificationService);
+  private readonly CUSTOMER_ID_KEY = 'customer_id';
+  private readonly CUSTOMER_DATA_KEY = 'customer_data';
 
   // Private state
   private readonly state = signal<CustomerState>({
@@ -62,6 +64,47 @@ export class CustomerStore {
     return customer.credit_cards.find(card => card.card_id === customer.default_credit_card_id);
   });
 
+  constructor() {
+    this.hydrateFromStorage();
+  }
+
+  // ── Persistence helpers ───────────────────────────────────────────
+
+  private hydrateFromStorage(): void {
+    try {
+      const raw = localStorage.getItem(this.CUSTOMER_DATA_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Customer;
+        if (parsed && parsed.email) {
+          this.state.update(s => ({
+            ...s,
+            customer: parsed,
+          }));
+        }
+      }
+    } catch {
+      // Storage unavailable or corrupt — non-fatal
+    }
+  }
+
+  private persistCustomer(customer: Customer): void {
+    try {
+      if (customer?.customer_id) {
+        localStorage.setItem(this.CUSTOMER_ID_KEY, customer.customer_id);
+      }
+      if (customer?.email) {
+        localStorage.setItem(this.CUSTOMER_DATA_KEY, JSON.stringify(customer));
+      }
+    } catch {
+      // Storage unavailable — non-fatal
+    }
+  }
+
+  private clearPersistedCustomer(): void {
+    localStorage.removeItem(this.CUSTOMER_ID_KEY);
+    localStorage.removeItem(this.CUSTOMER_DATA_KEY);
+  }
+
   // Actions
   async loadCustomer(email: string): Promise<void> {
     if (!email) return;
@@ -71,6 +114,7 @@ export class CustomerStore {
       const customer = await firstValueFrom(this.customerService.getCustomer(email));
         if (customer) {
           this.setState({ customer, loading: false });
+          this.persistCustomer(customer);
         } else {
           // Customer not found - return null without error, let caller decide what to do
           this.setState({ customer: null, loading: false });
@@ -107,6 +151,7 @@ export class CustomerStore {
     try {
       const savedCustomer = await firstValueFrom(this.customerService.createCustomer(newCustomer));
       this.setState({ customer: savedCustomer, loading: false });
+      this.persistCustomer(savedCustomer);
       this.notificationService.showSuccess('Customer profile created successfully');
     } catch (error) {
       this.setState({ 
@@ -122,6 +167,7 @@ export class CustomerStore {
     try {
       const updatedCustomer = await firstValueFrom(this.customerService.updateCustomer(customer));
       this.setState({ customer: updatedCustomer, loading: false });
+      this.persistCustomer(updatedCustomer);
       this.notificationService.showSuccess('Profile updated successfully');
     } catch (error) {
       this.setState({
@@ -142,6 +188,7 @@ export class CustomerStore {
       // Validate response completeness, fallback to merge if incomplete
       if (this.isCompleteCustomerResponse(updatedCustomer)) {
         this.setState({ customer: updatedCustomer, loading: false });
+        this.persistCustomer(updatedCustomer);
       } else {
         let mergedCustomer: Customer;
         if (currentCustomer) {
@@ -150,6 +197,7 @@ export class CustomerStore {
           mergedCustomer = updatedCustomer as unknown as Customer;
         }
         this.setState({ customer: mergedCustomer, loading: false });
+        this.persistCustomer(mergedCustomer);
       }
 
       this.notificationService.showSuccess('Profile updated successfully');
@@ -209,10 +257,12 @@ export class CustomerStore {
         const updatedAddresses = currentCustomer.addresses.filter(
           addr => addr.address_id !== addressId
         );
+        const updatedCustomer = { ...currentCustomer, addresses: updatedAddresses };
         this.setState({ 
-          customer: { ...currentCustomer, addresses: updatedAddresses },
+          customer: updatedCustomer,
           loading: false 
         });
+        this.persistCustomer(updatedCustomer);
         this.notificationService.showSuccess('Address deleted successfully');
       }
     } catch (error) {
@@ -271,10 +321,12 @@ export class CustomerStore {
         const updatedCards = currentCustomer.credit_cards.filter(
           card => card.card_id !== cardId
         );
+        const updatedCustomer = { ...currentCustomer, credit_cards: updatedCards };
         this.setState({
-          customer: { ...currentCustomer, credit_cards: updatedCards },
+          customer: updatedCustomer,
           loading: false
         });
+        this.persistCustomer(updatedCustomer);
         this.notificationService.showSuccess('Credit card deleted successfully');
       }
     } catch (error) {

@@ -14,14 +14,6 @@ async function gotoStable(path: string): Promise<void> {
   ]);
 }
 
-async function ensureCustomerExists(): Promise<void> {
-  await gotoStable('/profile');
-  await expect(page.getByTestId('hello-greeting-main')).toContainText(
-    TEST_USER.given_name,
-    { timeout: 15_000 },
-  );
-  await expect(page.locator('#customerSince')).not.toHaveValue('', { timeout: 15_000 });
-}
 
 test.describe.serial('Full journey: auth through order history', () => {
   test.beforeAll(async ({ browser }) => {
@@ -52,9 +44,6 @@ test.describe.serial('Full journey: auth through order history', () => {
     await page.waitForURL(/\/profile$/);
     await expect(page.getByTestId('profile-title')).toBeVisible();
 
-    // Header is shared across all routes; stay on /profile and use the dropdown there.
-    // (A page.goto/goBack here would reload the page, after which the OIDC service
-    // emits `false` before the persisted auth state can re-hydrate.)
     await page.getByTestId('hello-greeting-main').hover();
 
     await page.getByTestId('your-orders-link').click();
@@ -74,8 +63,6 @@ test.describe.serial('Full journey: auth through order history', () => {
     // Member Since is set after customer creation
     await expect(page.locator('#customerSince')).not.toHaveValue('');
 
-    // Guarantee customer is created in the backend before downstream tests
-    await ensureCustomerExists();
   });
 
   test('P2.2: edits and saves profile information', async () => {
@@ -369,23 +356,11 @@ test.describe.serial('Full journey: auth through order history', () => {
   });
 
   test('P5.3: adds the first product to the cart', async () => {
-    // P5.1 hard-nav to /products (no AuthGuard) may have un-hydrated OIDC auth;
-    // re-verify the customer exists before the first add-to-cart click.
-    await ensureCustomerExists();
-
-    // Navigate to /products via the header's search bar (router nav, preserves
-    // AuthService signals). page.goto is a hard nav that un-hydrates OIDC:
-    // the library's isAuthenticated$ emits false initially, the AuthService
-    // tap clears auth_state from localStorage, and the signal stays false
-    // because /products has no AuthGuard to trigger re-validation.
-    // CartStore.ensureCart() reads authService.userData()?.email
-    // (cart.store.ts:522) — if userData is null, the customer is never loaded,
-    // the cart is created without customer_id, and the order has no
-    // customer_id downstream, causing P7.1 order history to return [].
-    // Typing in the search bar triggers onSearchInput → 300ms debounce →
-    // router.navigate(['/products']).
-    await page.getByPlaceholder('Search GoShopping').fill('ab');
+    // Use hard-nav (page.goto) — Phase 1-2 fixes ensure OIDC auth state is
+    // correctly re-hydrated on every page load, even without AuthGuard.
+    await page.goto('/products');
     await expect(page.getByTestId('product-grid')).toBeVisible({ timeout: 15_000 });
+    // Auth state should be re-hydrated by the APP_INITIALIZER checkAuth call
     await expect(page.getByTestId('hello-greeting-top')).toContainText(
       TEST_USER.given_name,
       { timeout: 15_000 },
@@ -399,8 +374,7 @@ test.describe.serial('Full journey: auth through order history', () => {
     await expectSuccessNotification(page, 'Item added to cart');
     await waitForNotificationToDismiss(page, 'Item added to cart');
 
-    // Use gotoStable for /cart to handle auth-state re-hydration after page reload
-    await gotoStable('/cart');
+    await page.goto('/cart');
     await expect(page.getByTestId('cart-title')).toBeVisible();
 
     await expect(page.getByTestId('cart-item')).toHaveCount(1);
@@ -470,21 +444,10 @@ test.describe.serial('Full journey: auth through order history', () => {
   // The shipping address city was edited to 'Bellevue' in P3.5, so the review
   // step asserts the literal 'Bellevue' instead of `TEST_USER.shippingAddress.city`.
   //
-  // Two navigation hazards must be defused before /checkout:
-  //   (1) Hard-navigating to /checkout races CartGuard against CartStore's
-  //       async `loadPersistedCart()` (the guard sees `isEmpty()` and bounces
-  //       us to /cart).
-  //   (2) /cart has no AuthGuard, so on a hard navigation OIDC's
-  //       `isAuthenticated$` re-emits `false` (the app initializer only calls
-  //       `checkAuth()` on the OIDC callback path), which clears `auth_state`
-  //       from localStorage. The header drops to "Hello, sign in" and
-  //       CheckoutComponent's `prefillForms()` runs with `userData() === null`,
-  //       leaving the contact form empty. CheckoutComponent has no
-  //       `effect(userData)` (unlike ProfileComponent) so it never re-prefills.
-  //
-  // Fix: enter via /profile (AuthGuard.checkAuth re-hydrates auth + userData),
-  // then click the header cart icon (router navigation, preserves auth state),
-  // then the "Proceed to Checkout" button (router navigation, preserves cart).
+  // Navigation hazard: Hard-navigating to /checkout races CartGuard against
+  // CartStore's async `loadPersistedCart()` (the guard sees `isEmpty()` and
+  // bounces us to /cart). Enter via /profile, then click the header cart icon,
+  // then "Proceed to Checkout".
 
   test('P6: complete 5-step checkout flow (contact, shipping, payment, review, place order)', async () => {
     // --- Step 1: Contact ---

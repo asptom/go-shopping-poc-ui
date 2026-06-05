@@ -44,3 +44,4 @@ Thumbs.db
 
 # E2E test runtime artifacts
 e2e/.runtime/
+/test-results
