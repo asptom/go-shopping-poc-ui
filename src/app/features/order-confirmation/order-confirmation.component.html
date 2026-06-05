@@ -1,4 +1,4 @@
-<div class="order-confirmation-container">
+<div class="order-confirmation-container" data-testid="order-confirmation">
   @if (order(); as orderData) {
     <div class="confirmation-card">
       <div class="success-icon">
@@ -7,13 +7,13 @@
         </svg>
       </div>
       
-      <h1>Order Confirmed!</h1>
+      <h1 data-testid="confirmation-heading">Order Confirmed!</h1>
       <p class="subtitle">Thank you for your purchase</p>
       
       <div class="order-details">
         <div class="detail-row">
           <span class="label">Order Number:</span>
-          <span class="value order-number">{{ orderData.orderNumber }}</span>
+          <span class="value order-number" data-testid="order-number">{{ orderData.orderNumber }}</span>
         </div>
         <div class="detail-row">
           <span class="label">Order ID:</span>
@@ -21,7 +21,7 @@
         </div>
         <div class="detail-row">
           <span class="label">Total:</span>
-          <span class="value total">${{ orderData.total | number:'1.2-2' }}</span>
+          <span class="value total" data-testid="order-total">${{ orderData.total | number:'1.2-2' }}</span>
         </div>
         <div class="detail-row">
           <span class="label">Date:</span>
@@ -30,10 +30,10 @@
       </div>
       
       <div class="actions">
-        <button class="btn-primary" (click)="continueShopping()">
+        <button class="btn-primary" (click)="continueShopping()" data-testid="continue-shopping-confirmation">
           Continue Shopping
         </button>
-        <button class="btn-secondary" (click)="viewOrders()">
+        <button class="btn-secondary" (click)="viewOrders()" data-testid="view-my-orders">
           View My Orders
         </button>
       </div>

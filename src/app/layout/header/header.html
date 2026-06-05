@@ -4,11 +4,11 @@
     <div class="top-nav-left">
       <div class="account-menu">
         @if (isAuthenticated()) {
-          <span class="nav-link">Hello, {{ userFirstName() }}</span>
+          <span class="nav-link" data-testid="hello-greeting-top">Hello, {{ userFirstName() }}</span>
         } @else {
-          <span class="nav-link" (click)="toggleAccountDropdown(); $event.stopPropagation()">Hello, sign in</span>
+          <span class="nav-link" (click)="toggleAccountDropdown(); $event.stopPropagation()" data-testid="signin-trigger-top">Hello, sign in</span>
           <div class="account-links" [class.show]="accountDropdownOpen()">
-            <a href="#" class="account-link" (click)="onLogin(); $event.preventDefault(); $event.stopPropagation()">Sign in</a>
+            <a href="#" class="account-link" (click)="onLogin(); $event.preventDefault(); $event.stopPropagation()" data-testid="signin-link-top">Sign in</a>
             <a href="javascript:void(0)" class="account-link" (click)="onRegister(); $event.stopPropagation()">New customer? Start here</a>
           </div>
         }
@@ -72,22 +72,22 @@
     <div class="header-actions">
       <div class="account-menu">
         @if (isAuthenticated()) {
-          <span class="account-greeting">Hello, {{ userFirstName() }}</span>
+          <span class="account-greeting" data-testid="hello-greeting-main">Hello, {{ userFirstName() }}</span>
           <div class="account-links">
-            <a href="/profile" class="account-link">Your Account</a>
-            <a class="account-link" (click)="goToOrderHistory(); $event.preventDefault()">Your Orders</a>
-            <a href="#" class="account-link" (click)="onLogout(); $event.preventDefault()">Sign Out</a>
+            <a href="/profile" class="account-link" data-testid="your-account-link">Your Account</a>
+            <a class="account-link" (click)="goToOrderHistory(); $event.preventDefault()" data-testid="your-orders-link">Your Orders</a>
+            <a href="#" class="account-link" (click)="onLogout(); $event.preventDefault()" data-testid="sign-out-link">Sign Out</a>
           </div>
         } @else {
           <span class="account-greeting" (click)="toggleAccountDropdown(); $event.stopPropagation()">Hello, sign in</span>
           <div class="account-links" [class.show]="accountDropdownOpen()">
-            <a href="#" class="account-link" (click)="onLogin(); $event.preventDefault(); $event.stopPropagation()">Sign in</a>
+            <a href="#" class="account-link" (click)="onLogin(); $event.preventDefault(); $event.stopPropagation()" data-testid="signin-link-main">Sign in</a>
             <a href="javascript:void(0)" class="account-link" (click)="onRegister(); $event.stopPropagation()">New customer? Start here</a>
           </div>
         }
       </div>
 
-      <app-cart-icon></app-cart-icon>
+      <app-cart-icon data-testid="cart-icon"></app-cart-icon>
     </div>
   </div>
 

@@ -35,7 +35,7 @@
           <!-- Right: Product Info -->
           <div class="info-section">
             <div class="product-header">
-              <h1 class="product-name">{{ product()!.name }}</h1>
+              <h1 class="product-name" data-testid="product-detail-name">{{ product()!.name }}</h1>
               <div class="meta-info">
                 <span class="brand" (click)="onBrandClick()">{{ product()!.brand }}</span>
                 <span class="separator">|</span>
@@ -91,7 +91,8 @@
               <button
                 class="btn-add-cart"
                 [disabled]="!product()!.in_stock || addingToCart()"
-                (click)="onAddToCart()">
+                (click)="onAddToCart()"
+                data-testid="add-to-cart-detail">
                 @if (!addingToCart()) {
                   <span>
                     {{ product()!.in_stock ? 'Add to Cart' : 'Out of Stock' }}

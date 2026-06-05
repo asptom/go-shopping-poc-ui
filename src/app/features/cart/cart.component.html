@@ -24,7 +24,7 @@
     <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
     <!-- Page Header -->
     <div class="page-header">
-      <h1 class="page-title">Shopping Cart</h1>
+      <h1 class="page-title" data-testid="cart-title">Shopping Cart</h1>
       @if (!isEmpty()) {
         <span class="item-count">
           {{ items().length }} item{{ items().length !== 1 ? 's' : '' }}
@@ -46,7 +46,7 @@
 
     <!-- Cart Content -->
     @if (!isEmpty()) {
-      <div class="cart-content">
+      <div class="cart-content" data-testid="cart-content">
         <!-- Validation Warnings -->
         @if (hasPendingItems() || hasBackorderItems()) {
           <div class="validation-warnings">
@@ -81,7 +81,7 @@
         }
         <div class="cart-layout">
           <!-- Cart Items Section -->
-          <div class="items-section">
+          <div class="items-section" data-testid="cart-items">
             <div class="items-header">
               <span class="header-label">Product</span>
               <span class="header-label">Quantity</span>
@@ -97,7 +97,7 @@
                 </app-cart-item>
               }
             </div>
-            <div class="cart-actions">
+            <div class="cart-actions" data-testid="cart-actions">
               <button class="btn-clear" (click)="onClearCart()">
                 Clear Cart
               </button>
@@ -107,7 +107,7 @@
             </div>
           </div>
           <!-- Order Summary Section -->
-          <div class="summary-section">
+          <div class="summary-section" data-testid="cart-summary">
             <app-cart-summary
               [subtotal]="subtotal()"
               [tax]="tax()"

@@ -32,7 +32,7 @@
       </div>
     }
 
-    <div class="summary-row total">
+    <div class="summary-row total" data-testid="cart-total">
       <span class="label">Order Total:</span>
       <span class="value">{{ total() | currency:currency() }}</span>
     </div>
@@ -42,15 +42,16 @@
     <button
       class="btn-checkout"
       [disabled]="!canCheckout()"
-      (click)="onCheckout()">
+      (click)="onCheckout()"
+      data-testid="proceed-to-checkout">
       Proceed to Checkout
     </button>
 
-    <a [routerLink]="['/products']" class="btn-continue">
+    <a [routerLink]="['/products']" class="btn-continue" data-testid="continue-shopping">
       Continue Shopping
     </a>
 
-    <button class="btn-clear" (click)="onClearCart()">
+    <button class="btn-clear" (click)="onClearCart()" data-testid="clear-cart">
       Clear Cart
     </button>
   </div>

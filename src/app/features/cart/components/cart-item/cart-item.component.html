@@ -1,5 +1,5 @@
 <!-- Cart Item Template -->
-<div class="cart-item" [class.pending]="isPendingValidation" [class.backorder]="isBackorder">
+<div class="cart-item" [class.pending]="isPendingValidation" [class.backorder]="isBackorder" data-testid="cart-item">
   <!-- Product Info -->
   <div class="product-info">
     <img 
@@ -8,12 +8,12 @@
       [alt]="item().product_name"
     />
     <div class="product-details">
-      <h3 class="product-name">{{ item().product_name }}</h3>
+      <h3 class="product-name" data-testid="cart-item-name">{{ item().product_name }}</h3>
       <span class="product-id">Item #{{ item().line_number }}</span>
 
       <!-- Status Badge -->
       @if (statusText) {
-        <span class="status-badge" [class]="statusClass">
+        <span class="status-badge" [class]="statusClass" data-testid="cart-item-status">
           @if (isPendingValidation) {
             <span class="status-icon">&#8635;</span>
           }
@@ -54,7 +54,8 @@
         class="btn-quantity"
         (click)="decrementQuantity()"
         [disabled]="item().quantity <= 1 || isQuantityControlsDisabled"
-        aria-label="Decrease quantity">
+        aria-label="Decrease quantity"
+        data-testid="cart-item-decrement">
         -
       </button>
       <input
@@ -65,12 +66,14 @@
         min="1"
         max="99"
         [disabled]="isQuantityControlsDisabled"
-        aria-label="Quantity">
+        aria-label="Quantity"
+        data-testid="cart-item-quantity">
       <button
         class="btn-quantity"
         (click)="incrementQuantity()"
         [disabled]="item().quantity >= 99 || isQuantityControlsDisabled"
-        aria-label="Increase quantity">
+        aria-label="Increase quantity"
+        data-testid="cart-item-increment">
         +
       </button>
     </div>

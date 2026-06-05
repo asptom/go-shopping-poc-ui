@@ -1,9 +1,9 @@
 <div class="order-history-container">
   <div class="container">
     <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
-    <h1>Order History</h1>
+    <h1 data-testid="order-history-title">Order History</h1>
     <div class="orders-content">
-      <h2>Your Orders</h2>
+      <h2 data-testid="order-history-subtitle">Your Orders</h2>
 
       @if (loading()) {
         <div class="loading">Loading orders...</div>
@@ -18,26 +18,26 @@
       }
 
       @for (order of orders(); track order.id) {
-        <div class="order-card">
+        <div class="order-card" data-testid="order-card">
           <div class="order-header">
-            <div class="order-id">Order #{{ order.orderNumber }}</div>
-            <div class="order-date">{{ order.orderDate }}</div>
+            <div class="order-id" data-testid="order-id">Order #{{ order.orderNumber }}</div>
+            <div class="order-date" data-testid="order-date">{{ order.orderDate }}</div>
           </div>
 
           <div class="order-details">
-            <div class="order-status">{{ order.status }}</div>
-            <div class="order-total">Total: {{ order.total | currency: 'USD' : 'symbol' : '1.2-2' }}</div>
+            <div class="order-status" data-testid="order-status">{{ order.status }}</div>
+            <div class="order-total" data-testid="order-total">Total: {{ order.total | currency: 'USD' : 'symbol' : '1.2-2' }}</div>
           </div>
 
           <div class="order-actions">
-            <button (click)="viewOrderDetails(order.id)" class="view-details-button">
+            <button (click)="viewOrderDetails(order.id)" class="view-details-button" data-testid="view-details">
               {{ expandedOrderId() === order.id ? 'Hide Details' : 'View Details' }}
             </button>
           </div>
 
           @if (expandedOrderId() === order.id) {
             @if (order.statusHistory.length > 0) {
-              <div class="order-timeline">
+              <div class="order-timeline" data-testid="order-timeline">
                 <h4>Order Timeline</h4>
                 <app-order-timeline 
                   [entries]="order.statusHistory" 
@@ -46,20 +46,20 @@
               </div>
             }
 
-            <div class="order-items">
+            <div class="order-items" data-testid="order-items">
               <div class="item-header">
                 <span>Product</span>
                 <span>Qty</span>
                 <span>Price</span>
               </div>
               @for (item of order.items; track $index) {
-                <div class="item">
-                  <div class="item-name">
+                <div class="item" data-testid="order-line-item">
+                  <div class="item-name" data-testid="order-line-item-name">
                     {{ item.product_name || item.product_id || 'Product' }}
                     {{ item.description ? ' - ' + item.description : '' }}
                   </div>
-                  <div class="item-quantity">{{ item.quantity }}</div>
-                  <div class="item-price">
+                  <div class="item-quantity" data-testid="order-line-item-quantity">{{ item.quantity }}</div>
+                  <div class="item-price" data-testid="order-line-item-price">
                     {{ (item.unit_price || item.price) | currency: 'USD' : 'symbol' : '1.2-2' }}
                   </div>
                 </div>

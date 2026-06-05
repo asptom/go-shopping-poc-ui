@@ -21,25 +21,33 @@ import { ModalComponent } from './modal.component';
   selector: 'app-confirmation-modal',
   imports: [ModalComponent],
   template: `
-    <app-modal [isOpen]="isOpen()" [title]="title()" (close)="cancelled.emit()">
+    <app-modal [isOpen]="isOpen()" [title]="title()" (close)="cancelled.emit()" data-testid="confirmation-modal">
       <p class="confirm-message">{{ message() }}</p>
       <div class="confirm-actions">
         <button
           type="button"
           class="btn-cancel"
-          (click)="cancelled.emit()">
+          (click)="cancelled.emit()"
+          data-testid="confirmation-cancel">
           {{ cancelLabel() }}
         </button>
         <button
           type="button"
           [class]="danger() ? 'btn-confirm btn-danger' : 'btn-confirm'"
-          (click)="confirmed.emit()">
+          (click)="confirmed.emit()"
+          data-testid="confirmation-confirm">
           {{ confirmLabel() }}
         </button>
       </div>
     </app-modal>
   `,
   styles: [`
+    :host {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
     .confirm-message {
       font-size: 1rem;
       color: #0f1111;

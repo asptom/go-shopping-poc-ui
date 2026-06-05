@@ -7,14 +7,14 @@
       <path d="m1 1 4 4h15l-1 7H6"></path>
     </svg>
     
-    <h2 class="empty-cart-title">Your Shopping Cart is Empty</h2>
+    <h2 class="empty-cart-title" data-testid="cart-empty-title">Your Shopping Cart is Empty</h2>
     
     <p class="empty-cart-message">
       Looks like you haven't added anything to your cart yet. 
       Browse our products and find something you'll love!
     </p>
     
-    <a [routerLink]="['/products']" class="btn-shop">
+    <a [routerLink]="['/products']" class="btn-shop" data-testid="start-shopping">
       Start Shopping
     </a>
     

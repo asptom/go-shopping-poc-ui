@@ -1,6 +1,6 @@
 <div class="product-list-page">
   <div class="page-header">
-    <h1>Products</h1>
+    <h1 data-testid="product-list-title">Products</h1>
     @if (!loading() && products().length > 0) {
       <div class="results-info">
         Showing {{ products().length }} of {{ pagination().total }} products
@@ -56,7 +56,7 @@
 
       <!-- Product Grid -->
       @if (products().length > 0) {
-        <div class="product-grid">
+        <div class="product-grid" data-testid="product-grid">
           @for (product of products(); track trackByProductId($index, product)) {
             <app-product-card
               [product]="product"

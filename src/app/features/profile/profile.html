@@ -6,7 +6,8 @@
   confirmLabel="Delete"
   [danger]="true"
   (confirmed)="confirmDeleteAddress()"
-  (cancelled)="deleteAddressConfirmOpen.set(false)">
+  (cancelled)="deleteAddressConfirmOpen.set(false)"
+  data-testid="confirm-delete-address">
 </app-confirmation-modal>
 
 <!-- Delete Credit Card Confirmation -->
@@ -17,13 +18,14 @@
   confirmLabel="Delete"
   [danger]="true"
   (confirmed)="confirmDeleteCard()"
-  (cancelled)="deleteCardConfirmOpen.set(false)">
+  (cancelled)="deleteCardConfirmOpen.set(false)"
+  data-testid="confirm-delete-credit-card">
 </app-confirmation-modal>
 
 <div class="profile-container">
   <div class="container">
     <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
-    <h1>Your Account</h1>
+    <h1 data-testid="profile-title">Your Account</h1>
 
     @if (!isAuthenticated()) {
       <div class="not-authenticated">
@@ -43,13 +45,13 @@
           </div>
         } @else if (customer(); as cust) {
           <!-- Navigation Bar -->
-          <div class="profile-nav">
+          <div class="profile-nav" data-testid="profile-nav">
             <a routerLink="/profile" class="nav-link">Profile Information</a>
             <button (click)="goToOrderHistory()" class="nav-button">Order History</button>
           </div>
           <!-- Profile Information Section -->
-          <div class="profile-section">
-            <h2>Profile Information</h2>
+          <div class="profile-section" data-testid="profile-section">
+            <h2 data-testid="profile-info-heading">Profile Information</h2>
             <form [formGroup]="customerForm()" (ngSubmit)="saveProfile()">
     <div class="form-grid">
                 <div class="form-group">
@@ -84,24 +86,24 @@
                </div>
               <div class="form-actions">
                 @if (!editingProfile()) {
-                  <button type="button" class="edit-button" (click)="editingProfile.set(true)">Edit Profile</button>
+                  <button type="button" class="edit-button" (click)="editingProfile.set(true)" data-testid="edit-profile">Edit Profile</button>
                 } @else {
-                  <button type="submit" class="save-button" [disabled]="customerForm().invalid">Save Profile</button>
-                  <button type="button" class="cancel-button" (click)="editingProfile.set(false)">Cancel</button>
+                  <button type="submit" class="save-button" [disabled]="customerForm().invalid" data-testid="save-profile">Save Profile</button>
+                  <button type="button" class="cancel-button" (click)="editingProfile.set(false)" data-testid="cancel-profile">Cancel</button>
                 }
               </div>
             </form>
           </div>
 
           <!-- Addresses Section -->
-          <div class="addresses-section">
-            <h2>Addresses</h2>
+          <div class="addresses-section" data-testid="addresses-section">
+            <h2 data-testid="addresses-heading">Addresses</h2>
             <div class="section-actions">
-              <button class="add-button" (click)="openAddressModal()">Add Address</button>
+              <button class="add-button" (click)="openAddressModal()" data-testid="add-address">Add Address</button>
             </div>
             
             @for (address of addresses(); track address.address_id) {
-              <div class="address-card">
+              <div class="address-card" data-testid="address-card">
                 <div class="address-info">
                   <h3>{{ address.address_type }}</h3>
                   <p>{{ address.first_name }} {{ address.last_name }}</p>
@@ -111,50 +113,50 @@
                   }
                   <p>{{ address.city }}, {{ address.state }} {{ address.zip }}</p>
                    @if (customer()?.default_shipping_address_id === address.address_id && address.address_type === 'shipping') {
-                     <span class="default-badge">Default Shipping</span>
+                     <span class="default-badge" data-testid="default-shipping-badge">Default Shipping</span>
                    }
                    @if (customer()?.default_billing_address_id === address.address_id && address.address_type === 'billing') {
-                     <span class="default-badge">Default Billing</span>
+                     <span class="default-badge" data-testid="default-billing-badge">Default Billing</span>
                    }
                 </div>
                  <div class="address-actions">
-                   <button class="edit-button" (click)="openAddressModal(address.address_id!)">Edit</button>
+                   <button class="edit-button" (click)="openAddressModal(address.address_id!)" data-testid="edit-address">Edit</button>
                    @if (address.address_type === 'shipping' && customer()?.default_shipping_address_id !== address.address_id) {
-                     <button class="default-button" (click)="setDefaultShippingAddress(address.address_id!)">Set as Default Shipping</button>
+                     <button class="default-button" (click)="setDefaultShippingAddress(address.address_id!)" data-testid="set-default-shipping">Set as Default Shipping</button>
                    }
                    @if (address.address_type === 'billing' && customer()?.default_billing_address_id !== address.address_id) {
-                     <button class="default-button" (click)="setDefaultBillingAddress(address.address_id!)">Set as Default Billing</button>
+                     <button class="default-button" (click)="setDefaultBillingAddress(address.address_id!)" data-testid="set-default-billing">Set as Default Billing</button>
                    }
-                   <button class="delete-button" (click)="deleteAddress(address.address_id!)">Delete</button>
+                   <button class="delete-button" (click)="deleteAddress(address.address_id!)" data-testid="delete-address">Delete</button>
                  </div>
               </div>
             }
           </div>
 
           <!-- Credit Cards Section -->
-          <div class="cards-section">
-            <h2>Credit Cards</h2>
+          <div class="cards-section" data-testid="cards-section">
+            <h2 data-testid="cards-heading">Credit Cards</h2>
             <div class="section-actions">
-              <button class="add-button" (click)="openCreditCardModal()">Add Credit Card</button>
+              <button class="add-button" (click)="openCreditCardModal()" data-testid="add-credit-card">Add Credit Card</button>
             </div>
             
             @for (card of creditCards(); track card.card_id) {
-              <div class="card-card">
+              <div class="card-card" data-testid="credit-card">
                 <div class="card-info">
                   <h3>{{ card.card_type }}</h3>
-                  <p>{{ maskCardNumber(card.card_number) }}</p>
+                  <p data-testid="credit-card-masked">{{ maskCardNumber(card.card_number) }}</p>
                   <p>{{ card.card_holder_name }}</p>
                   <p>Expires: {{ card.card_expires }}</p>
                    @if (customer()?.default_credit_card_id === card.card_id) {
-                     <span class="default-badge">Default</span>
+                     <span class="default-badge" data-testid="default-credit-card-badge">Default</span>
                    }
                 </div>
                  <div class="card-actions">
-                   <button class="edit-button" (click)="openCreditCardModal(card.card_id!)">Edit</button>
+                   <button class="edit-button" (click)="openCreditCardModal(card.card_id!)" data-testid="edit-credit-card">Edit</button>
                    @if (customer()?.default_credit_card_id !== card.card_id) {
-                     <button class="default-button" (click)="setDefaultCreditCard(card.card_id!)">Set as Default</button>
+                     <button class="default-button" (click)="setDefaultCreditCard(card.card_id!)" data-testid="set-default-credit-card">Set as Default</button>
                    }
-                   <button class="delete-button" (click)="deleteCreditCard(card.card_id!)">Delete</button>
+                   <button class="delete-button" (click)="deleteCreditCard(card.card_id!)" data-testid="delete-credit-card">Delete</button>
                  </div>
               </div>
             }
@@ -166,15 +168,15 @@
 </div>
 
  <!-- Address Modal -->
-<app-modal 
-  [isOpen]="addressModalOpen()" 
-  [title]="getAddressModalTitle()" 
+<app-modal
+  [isOpen]="addressModalOpen()"
+  [title]="getAddressModalTitle()"
   (close)="closeAddressModal()">
-  <form [formGroup]="addressForm()" (ngSubmit)="saveAddress()">
+  <form [formGroup]="addressForm()" (ngSubmit)="saveAddress()" data-testid="address-modal">
     <div class="form-grid">
       <div class="form-group">
         <label for="addressType">Address Type:</label>
-        <select id="addressType" formControlName="address_type">
+        <select id="addressType" formControlName="address_type" data-testid="address-type-select">
           <option value="shipping">Shipping</option>
           <option value="billing">Billing</option>
         </select>
@@ -234,22 +236,23 @@
 
     </div>
     <div class="form-actions">
-      <button type="submit" class="save-button" [disabled]="!addressFormState().canSave" [class.active]="addressFormState().canSave">{{ editingAddressId() ? 'Update Address' : 'Add Address' }}</button>
-      <button type="button" class="cancel-button" (click)="closeAddressModal()">Cancel</button>
+      <button type="submit" class="save-button" [disabled]="!addressFormState().canSave" [class.active]="addressFormState().canSave" data-testid="address-save">{{ editingAddressId() ? 'Update Address' : 'Add Address' }}</button>
+      <button type="button" class="cancel-button" (click)="closeAddressModal()" data-testid="address-cancel">Cancel</button>
     </div>
   </form>
 </app-modal>
 
 <!-- Credit Card Modal -->
-<app-modal 
-  [isOpen]="creditCardModalOpen()" 
-  [title]="getCreditCardModalTitle()" 
-  (close)="closeCreditCardModal()">
-  <form [formGroup]="creditCardForm()" (ngSubmit)="saveCreditCard()">
+<app-modal
+  [isOpen]="creditCardModalOpen()"
+  [title]="getCreditCardModalTitle()"
+  (close)="closeCreditCardModal()"
+  data-testid="credit-card-modal">
+  <form [formGroup]="creditCardForm()" (ngSubmit)="saveCreditCard()" data-testid="credit-card-form">
     <div class="form-grid">
       <div class="form-group">
         <label for="cardType">Card Type:</label>
-        <select id="cardType" formControlName="card_type">
+        <select id="cardType" formControlName="card_type" data-testid="card-type-select">
           <option value="visa">Visa</option>
           <option value="mastercard">Mastercard</option>
           <option value="amex">American Express</option>
@@ -290,8 +293,8 @@
 
     </div>
     <div class="form-actions">
-      <button type="submit" class="save-button" [disabled]="!creditCardFormState().canSave" [class.active]="creditCardFormState().canSave">{{ editingCardId() ? 'Update Credit Card' : 'Add Credit Card' }}</button>
-      <button type="button" class="cancel-button" (click)="closeCreditCardModal()">Cancel</button>
+      <button type="submit" class="save-button" [disabled]="!creditCardFormState().canSave" [class.active]="creditCardFormState().canSave" data-testid="credit-card-save">{{ editingCardId() ? 'Update Credit Card' : 'Add Credit Card' }}</button>
+      <button type="button" class="cancel-button" (click)="closeCreditCardModal()" data-testid="credit-card-cancel">Cancel</button>
     </div>
   </form>
 </app-modal>

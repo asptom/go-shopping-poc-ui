@@ -1,4 +1,4 @@
-<article class="product-card" (click)="onViewDetails()">
+<article class="product-card" (click)="onViewDetails()" data-testid="product-card">
   <div class="image-container">
     <img
       [src]="mainImageUrl()"
@@ -20,12 +20,12 @@
   </div>
 
   <div class="product-info">
-    <h3 class="product-name">{{ product().name }}</h3>
+    <h3 class="product-name" data-testid="product-name">{{ product().name }}</h3>
 
     <div class="brand">{{ product().brand }}</div>
 
     <div class="price-section">
-      <span class="final-price">{{ product().final_price | currency:product().currency }}</span>
+      <span class="final-price" data-testid="product-price">{{ product().final_price | currency:product().currency }}</span>
       @if (hasDiscount) {
         <span class="initial-price">
           {{ product().initial_price | currency:product().currency }}
@@ -41,7 +41,8 @@
     @if (product().in_stock) {
       <button
         class="btn-add-cart"
-        (click)="onAddToCart($event)">
+        (click)="onAddToCart($event)"
+        data-testid="add-to-cart">
         Add to Cart
       </button>
     }

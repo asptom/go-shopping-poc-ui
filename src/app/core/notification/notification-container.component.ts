@@ -6,17 +6,18 @@ import { NotificationService, Notification } from '../../core/notification/notif
   selector: 'app-notification-container',
   imports: [],
   template: `
-    <div class="notification-container">
+    <div class="notification-container" data-testid="notification-container">
       @for (notification of notifications(); track notification.id) {
-        <div 
+        <div
           class="notification notification-{{ notification.type }}"
           [class.fade-in]="true"
-          (click)="removeNotification(notification.id)">
+          (click)="removeNotification(notification.id)"
+          data-testid="notification">
           <div class="notification-content">
             @if (notification.title) {
               <div class="notification-title">{{ notification.title }}</div>
             }
-            <div class="notification-message">{{ notification.message }}</div>
+            <div class="notification-message" data-testid="notification-message">{{ notification.message }}</div>
           </div>
           <button class="notification-close" (click)="removeNotification(notification.id); $event.stopPropagation()">
             ×

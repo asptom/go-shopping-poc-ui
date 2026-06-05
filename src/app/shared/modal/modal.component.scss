@@ -1,6 +1,16 @@
 // Reusable Modal Component Styles
 // Clean architecture using CSS Custom Properties for consistent theming
 
+// Host element: covers the viewport so the host has a non-zero bounding box
+// for test selectors. pointer-events:none ensures it doesn't absorb clicks
+// when the modal is closed; the .modal-backdrop re-enables pointer events.
+:host {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+}
+
 // Main modal container
 .modal-backdrop {
   position: fixed;
@@ -14,7 +24,8 @@
   align-items: center;
   z-index: 1000;
   backdrop-filter: blur(2px);
-  
+  pointer-events: auto;
+
   // Set base font for entire modal using cascade
   font-size: var(--form-font-size);
   font-family: var(--base-font-family);

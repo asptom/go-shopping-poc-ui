@@ -20,11 +20,12 @@
     </div>
 
     <!-- Checkout Steps -->
-    <div class="checkout-steps">
+    <div class="checkout-steps" data-testid="checkout-steps">
       <div
         class="step"
         [class.active]="currentStep() === 1"
-        [class.completed]="currentStep() > 1">
+        [class.completed]="currentStep() > 1"
+        data-testid="checkout-step-1">
         <span class="step-number">1</span>
         <span class="step-label">Contact</span>
       </div>
@@ -32,7 +33,8 @@
       <div
         class="step"
         [class.active]="currentStep() === 2"
-        [class.completed]="currentStep() > 2">
+        [class.completed]="currentStep() > 2"
+        data-testid="checkout-step-2">
         <span class="step-number">2</span>
         <span class="step-label">Shipping</span>
       </div>
@@ -42,6 +44,7 @@
           class="step"
           [class.active]="currentStep() === 3"
           [class.completed]="currentStep() > 3"
+          data-testid="checkout-step-3"
           >
           <span class="step-number">3</span>
           <span class="step-label">Billing</span>
@@ -53,7 +56,8 @@
       <div
         class="step"
         [class.active]="currentStep() === 4"
-        [class.completed]="currentStep() > 4">
+        [class.completed]="currentStep() > 4"
+        data-testid="checkout-step-4">
         <span class="step-number">{{ sameAsShipping() ? '3' : '4' }}</span>
         <span class="step-label">Payment</span>
       </div>
@@ -64,7 +68,7 @@
       <div class="checkout-form">
         <!-- Step 1: Contact Information -->
         @if (currentStep() === 1) {
-          <div class="form-section">
+          <div class="form-section" data-testid="checkout-form-1">
             <h2>Contact Information</h2>
             <form [formGroup]="contactForm" (ngSubmit)="saveContact()">
               <div class="form-row">
@@ -143,7 +147,7 @@
 
         <!-- Step 2: Shipping Address -->
         @if (currentStep() === 2) {
-          <div class="form-section">
+          <div class="form-section" data-testid="checkout-form-2">
             <h2>Shipping Address</h2>
             <form [formGroup]="shippingForm" (ngSubmit)="saveShipping()">
               <div class="form-row two-col">
@@ -251,7 +255,7 @@
                 </div>
               </div>
               <div class="form-row checkbox-row">
-                <label class="checkbox-label">
+                <label class="checkbox-label" data-testid="same-as-billing-label">
                   <input
                     type="checkbox"
                     [checked]="sameAsShipping()"
@@ -276,7 +280,7 @@
 
         <!-- Step 3: Billing Address -->
         @if (currentStep() === 3 && !sameAsShipping()) {
-          <div class="form-section">
+          <div class="form-section" data-testid="checkout-form-3">
             <h2>Billing Address</h2>
             <form [formGroup]="billingForm" (ngSubmit)="saveBilling()">
               <div class="form-row two-col">
@@ -396,13 +400,13 @@
 
         <!-- Step 4: Payment Information -->
         @if (currentStep() === 4) {
-          <div class="form-section">
+          <div class="form-section" data-testid="checkout-form-4">
             <h2>Payment Information</h2>
             <form [formGroup]="paymentForm" (ngSubmit)="savePayment()">
               <div class="form-row">
                 <div class="form-group">
                   <label>Card Type</label>
-                  <div class="card-type-selector">
+                  <div class="card-type-selector" data-testid="card-type-selector">
                     <label class="card-option">
                       <input type="radio" formControlName="cardType" value="visa">
                       <span>Visa</span>
@@ -521,7 +525,7 @@
 
         <!-- Step 5: Review & Confirm -->
         @if (currentStep() === 5) {
-          <div class="form-section review-section">
+          <div class="form-section review-section" data-testid="checkout-form-5">
             <!-- Awaiting Order State -->
             @if (isAwaitingOrder()) {
               <div class="awaiting-order-state">
@@ -546,14 +550,14 @@
             @if (!isAwaitingOrder() && !orderError()) {
               <div>
                 <h2>Review Your Order</h2>
-                <div class="review-block">
+                <div class="review-block" data-testid="review-contact">
                   <h3>Contact Information</h3>
                   <p>{{ contactForm.value.firstName }} {{ contactForm.value.lastName }}</p>
                   <p>{{ contactForm.value.email }}</p>
                   <p>{{ contactForm.value.phone }}</p>
                   <button class="btn-edit" (click)="goToStep(1)">Edit</button>
                 </div>
-                <div class="review-block">
+                <div class="review-block" data-testid="review-shipping">
                   <h3>Shipping Address</h3>
                   <p>{{ shippingForm.value.firstName }} {{ shippingForm.value.lastName }}</p>
                   <p>{{ shippingForm.value.address1 }}</p>
@@ -564,7 +568,7 @@
                   <button class="btn-edit" (click)="goToStep(2)">Edit</button>
                 </div>
                 @if (!sameAsShipping()) {
-                  <div class="review-block">
+                  <div class="review-block" data-testid="review-billing">
                     <h3>Billing Address</h3>
                     <p>{{ billingForm.value.firstName }} {{ billingForm.value.lastName }}</p>
                     <p>{{ billingForm.value.address1 }}</p>
@@ -575,7 +579,7 @@
                     <button class="btn-edit" (click)="goToStep(3)">Edit</button>
                   </div>
                 }
-                <div class="review-block">
+                <div class="review-block" data-testid="review-payment">
                   <h3>Payment Method</h3>
                   <p>{{ paymentForm.value.cardType | titlecase }} ending in {{ paymentForm.value.cardNumber?.slice(-4) }}</p>
                   <p>{{ paymentForm.value.cardHolder }}</p>
@@ -590,7 +594,8 @@
                     type="button"
                     class="btn-primary btn-place-order"
                     (click)="completeCheckout()"
-                    [disabled]="isSubmitting()">
+                    [disabled]="isSubmitting()"
+                    data-testid="place-order">
                     {{ isSubmitting() ? 'Processing...' : 'Place Order' }}
                   </button>
                 </div>
@@ -601,11 +606,11 @@
       </div>
 
       <!-- Order Summary Sidebar -->
-      <div class="order-summary">
+      <div class="order-summary" data-testid="order-summary">
         <div class="summary-card">
           <h3>Order Summary</h3>
 
-          <div class="summary-items">
+          <div class="summary-items" data-testid="summary-items">
             @for (item of items(); track item) {
               <div class="summary-item">
                 <div class="item-info">
