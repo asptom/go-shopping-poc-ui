@@ -54,6 +54,6 @@ export const KEYCLOAK_ADMIN_BASE = 'https://keycloak.local/admin/realms/pocstore
 export const KEYCLOAK_ADMIN = {
   base: 'https://keycloak.local',
   username: 'admin',
-  password: 'bfb8f93ae347113e605b77db081e8872',
+  password: '7ddd66cc1d48d075e04a1790a8bf8bcc',
   realm: 'pocstore-realm',
 };

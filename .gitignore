@@ -44,4 +44,6 @@ Thumbs.db
 
 # E2E test runtime artifacts
 e2e/.runtime/
-/test-results
+playwright-report/
+test-results/
+.playwright/
