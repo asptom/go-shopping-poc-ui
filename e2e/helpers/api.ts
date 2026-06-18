@@ -1,18 +1,19 @@
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-import { KEYCLOAK_ADMIN, KEYCLOAK_ADMIN_BASE } from '../fixtures/test-data';
+import { getKeycloakAdmin, KEYCLOAK_ADMIN_BASE } from '../fixtures/test-data';
 
 let adminToken: string | null = null;
 
 export async function getKeycloakAdminToken(): Promise<string> {
   if (adminToken) return adminToken;
 
-  const tokenUrl = `${KEYCLOAK_ADMIN.base}/realms/master/protocol/openid-connect/token`;
+  const admin = getKeycloakAdmin();
+  const tokenUrl = `${admin.base}/realms/master/protocol/openid-connect/token`;
   const body = new URLSearchParams({
     grant_type: 'password',
     client_id: 'admin-cli',
-    username: KEYCLOAK_ADMIN.username,
-    password: KEYCLOAK_ADMIN.password,
+    username: admin.username,
+    password: admin.password,
   });
 
   const res = await fetch(tokenUrl, {

@@ -51,9 +51,15 @@ export const BACKEND_BASE = 'https://pocstore.local/api/v1';
 export const KEYCLOAK_ISSUER = 'https://keycloak.local/realms/pocstore-realm';
 export const KEYCLOAK_ADMIN_BASE = 'https://keycloak.local/admin/realms/pocstore-realm';
 
-export const KEYCLOAK_ADMIN = {
-  base: 'https://keycloak.local',
-  username: 'admin',
-  password: '7ddd66cc1d48d075e04a1790a8bf8bcc',
-  realm: 'pocstore-realm',
-};
+let _admin: { base: string; username: string; password: string; realm: string } | null = null;
+
+export function getKeycloakAdmin(): { base: string; username: string; password: string; realm: string } {
+  if (!_admin) {
+    const adminFile = resolve(process.cwd(), 'e2e/.runtime/keycloak-admin.json');
+    if (!existsSync(adminFile)) {
+      throw new Error('Missing Keycloak admin credentials in e2e/.runtime/keycloak-admin.json');
+    }
+    _admin = JSON.parse(readFileSync(adminFile, 'utf-8'));
+  }
+  return _admin!;
+}
